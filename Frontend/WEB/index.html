@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forma Programada - Inicio</title>
+  <link rel="stylesheet" href="index_styles.css" />
+</head>
+<body>
+  <header class="main-header">
+      <div class="container header-inner">
+          <div class="left-header">
+          <div class="logo"></div>
+          <nav class="nav">
+              <ul>
+              <li><a href="#">Set de mates</a></li>
+              <li><a href="#">Tazas</a></li>
+              <li><a href="#">Decoraciones</a></li>
+              <li><a href="#">Para la mesa</a></li>
+              <li><a href="#">Contacto</a></li>
+              </ul>
+          </nav>
+          </div>
+          <div class="right-header">
+          <a href="#" class="search-icon">🔍</a>
+          <a href="#" class="cart-icon">🛒 (0)</a>
+          </div>
+      </div>
+      <div class="alt-header mobile-header">
+    <div class="alt-header-inner">
+        <div class="logo">LOGO</div>
+        <button class="btn-search" aria-label="Buscar">🔍</button>
+        <button class="btn-cart" aria-label="Carrito">🛒</button>
+        <button class="btn-menu" aria-label="Menú">☰</button>
+      </div>
+
+      <nav class="catalog-menu">
+        <ul>
+          <li><a href="#">Categoría 1</a></li>
+          <li><a href="#">Categoría 2</a></li>
+          <li><a href="#">Categoría 3</a></li>
+          <!-- etc -->
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+
+  <section class="hero">
+    <div class="hero-container">
+      <a href="/WEB/categoria/s_categoria.html" class="hero-link">
+        <img src="/img/hero-ejemplo.png" alt="Nueva Colección STING" class="hero-img" />
+        <div class="hero-overlay"></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="mini-heroes">
+    <div class="mini-hero">
+      <a href="coleccion.html">
+        <img src="/img/hero-ejemplo.png" alt="Categoría 1" />
+        <div class="mini-overlay"></div>
+      </a>
+      <div class="mini-hero-text">Trays</div>
+    </div>
+    <div class="mini-hero">
+      <a href="coleccion.html">
+        <img src="/img/hero-ejemplo.png" alt="Categoría 2" />
+        <div class="mini-overlay"></div>
+      </a>
+      <div class="mini-hero-text">Boxes</div>
+    </div>
+    <div class="mini-hero">
+      <a href="coleccion.html">
+        <img src="/img/hero-ejemplo.png" alt="Categoría 3" />
+        <div class="mini-overlay"></div>
+      </a>
+      <div class="mini-hero-text">Decorations</div>
+    </div>
+  </section>
+
+
+
+  <section class="services-info">
+    <div class="container">
+      <div class="service-card">
+        <img src="/img/ejemplo-1.jpeg" alt="Métodos de pago">
+        <h3>Métodos de Pago</h3>
+        <p>Aceptamos tarjetas de crédito, débito y transferencias bancarias.</p>
+      </div>
+      <div class="service-card">
+        <img src="/img/ejemplo-1.jpeg" alt="Servicio al cliente">
+        <h3>Atención Personalizada</h3>
+        <p>Soporte por WhatsApp y correo para resolver tus dudas.</p>
+      </div>
+      <div class="service-card">
+        <img src="/img/ejemplo-1.jpeg" alt="Delivery">
+        <h3>Envíos a Todo el País</h3>
+        <p>Despachos rápidos y seguros desde nuestro taller en Vejle.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="featured-products">
+    <div class="container">
+      <h2>Productos Destacados</h2>
+      <div class="product-grid">
+        
+        <div class="product-card">
+          <div class="product-info" onclick="window.location.href='/producto/1'">
+            <img src="/img/ejemplo-1.jpeg" alt="Mate" />
+            <h3>Bandeja STING</h3>
+            <p class="product-desc">Mate con diseño STING grabado.</p>
+          </div>
+
+          <div class="product-controls">
+            <label for="formato1">Formato:</label>
+            <select id="formato1" class="minimal-select">
+              <option value="Archivo">Archivo</option>
+              <option value="Impresion">Impresión</option>
+            </select>
+
+            <label for="color1">Color:</label>
+            <select id="color1" class="minimal-select">
+              <option value="negro">Negro</option>
+              <option value="blanco">Blanco</option>
+            </select>
+
+            <p class="product-price">$120</p>
+
+            <div class="product-actions">
+              <input type="number" min="1" value="1" class="quantity-input" />
+              <button class="add-to-cart-btn">Agregar</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Otra tarjeta -->
+        <div class="product-card">
+          <div class="product-info" onclick="window.location.href='/producto/1'">
+            <img src="/img/ejemplo-1.jpeg" alt="Bandeja STING" />
+            <h3>Bandeja STING</h3>
+            <p class="product-desc">123456789012345678901234567890
+              1234567890
+              1234567890
+              
+              1234567890
+              1234567890</p>
+          </div>
+
+          <div class="product-controls">
+            <label for="formato1">Formato:</label>
+            <select id="formato1" class="minimal-select">
+              <option value="Archivo">Archivo</option>
+              <option value="Impresion">Impresión</option>
+            </select>
+
+            <label for="color1">Color:</label>
+            <select id="color1" class="minimal-select">
+              <option value="negro">Negro</option>
+              <option value="blanco">Blanco</option>
+            </select>
+
+            <p class="product-price">$120</p>
+
+            <div class="product-actions">
+              <input type="number" min="1" value="1" class="quantity-input" />
+              <button class="add-to-cart-btn">Agregar</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-info" onclick="window.location.href='/producto/1'">
+            <img src="/img/ejemplo-1.jpeg" alt="Bandeja STING" />
+            <h3>Bandeja STING</h3>
+            <p class="product-desc">123456789012345678901234567890
+              1234567890
+              1234567890
+              
+              1234567890
+              1234567890</p>
+          </div>
+
+          <div class="product-controls">
+            <label for="formato1">Formato:</label>
+            <select id="formato1" class="minimal-select">
+              <option value="Archivo">Archivo</option>
+              <option value="Impresion">Impresión</option>
+            </select>
+
+            <label for="color1">Color:</label>
+            <select id="color1" class="minimal-select">
+              <option value="negro">Negro</option>
+              <option value="blanco">Blanco</option>
+            </select>
+
+            <p class="product-price">$120</p>
+
+            <div class="product-actions">
+              <input type="number" min="1" value="1" class="quantity-input" />
+              <button class="add-to-cart-btn">Agregar</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <footer class="main-footer">
+    <div class="container">
+      <div class="footer-info">
+        <p>© 2025 Forma programada</p>
+        <p>Palermo, CABA</p>
+        <p>Tel: +5411890423 | Email: formaprogramada@gmail.com</p>
+      </div>
+      <div class="footer-links">
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </footer>
+  <script src="index.js"></script>
+</body>
+</html>

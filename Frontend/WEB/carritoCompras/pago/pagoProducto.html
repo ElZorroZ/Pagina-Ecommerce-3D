@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pago del Producto</title>
+  <link rel="stylesheet" href="pagoProducto_styles.css" />
+</head>
+<body>
+
+  <form id="form-pago">
+
+    <!-- 1) Dirección -->
+    <section>
+      <h2>Dirección</h2>
+
+      <div class="grid-2-cols">
+        <div>
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" name="nombre" required />
+        </div>
+        <div>
+          <label for="apellido">Apellido</label>
+          <input type="text" id="apellido" name="apellido" required />
+        </div>
+      </div>
+
+      <div>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required />
+      </div>
+
+      <div>
+        <label for="direccion">Dirección</label>
+        <input type="text" id="direccion" name="direccion" required />
+      </div>
+
+      <div class="grid-2-cols">
+        <div>
+          <label for="codigo_postal">Código Postal</label>
+          <input type="text" id="codigo_postal" name="codigo_postal" required />
+        </div>
+        <div>
+          <label for="ciudad">Ciudad</label>
+          <input type="text" id="ciudad" name="ciudad" required />
+        </div>
+      </div>
+
+      <div>
+        <label for="telefono">Teléfono</label>
+        <input type="tel" id="telefono" name="telefono" required />
+      </div>
+    </section>
+
+    <!-- 2) Pago -->
+    <section>
+      <h2>Método de Pago</h2>
+      <select id="metodo_pago" name="metodo_pago" required>
+        <option value="">Seleccionar</option>
+        <option value="tarjeta">Tarjeta de Crédito/Débito</option>
+        <option value="transferencia">Transferencia Bancaria</option>
+        <option value="mercadopago">Mercado Pago</option>
+        <option value="efectivo">Pago en Efectivo</option>
+      </select>
+    </section>
+
+    <!-- 3) Total -->
+    <section>
+      <h2>Total a Pagar</h2>
+      <div id="productos-lista">
+        <ul>
+          <li>Producto A - $1500</li>
+          <li>Producto B - $850</li>
+          <li>Producto C - $1200</li>
+        </ul>
+      </div>
+      <p><strong>Total:</strong> $3550</p>
+    </section>
+
+    <button type="submit">Confirmar Pago</button>
+  </form>
+
+</body>
+</html>

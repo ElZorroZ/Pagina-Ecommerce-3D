@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>CRUD Categorías</title>
+  <link rel="stylesheet" href="CRUDcategoria_styles.css" />
+</head>
+<body>
+    <header class="main-header">
+      <div class="container header-inner">
+          <div class="left-header">
+          <div class="logo"></div>
+          <nav class="nav">
+              <ul>
+              <li><a href="#">Set de mates</a></li>
+              <li><a href="#">Tazas</a></li>
+              <li><a href="#">Decoraciones</a></li>
+              <li><a href="#">Para la mesa</a></li>
+              <li><a href="#">Contacto</a></li>
+              </ul>
+          </nav>
+          </div>
+          <div class="right-header">
+          <a href="#" class="search-icon">🔍</a>
+          <a href="#" class="cart-icon">🛒 (0)</a>
+          </div>
+      </div>
+      <div class="alt-header mobile-header">
+    <div class="alt-header-inner">
+        <div class="logo">LOGO</div>
+        <button class="btn-search" aria-label="Buscar">🔍</button>
+        <button class="btn-cart" aria-label="Carrito">🛒</button>
+        <button class="btn-menu" aria-label="Menú">☰</button>
+      </div>
+
+      <nav class="catalog-menu">
+        <ul>
+          <li><a href="#">Categoría 1</a></li>
+          <li><a href="#">Categoría 2</a></li>
+          <li><a href="#">Categoría 3</a></li>
+          <!-- etc -->
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <div class="container">
+    <h1>Gestión de Categorías</h1>
+
+    <form id="category-form">
+      <input type="hidden" id="category-id" />
+      <input type="text" id="category-name" placeholder="Nombre de la categoría" required />
+      <button type="submit">Guardar</button>
+      <button type="button" id="cancel-btn" style="display:none;">Cancelar</button>
+    </form>
+
+    <table id="categories-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

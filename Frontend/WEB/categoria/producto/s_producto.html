@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalle del Producto</title>
+  <link rel="stylesheet" href="s_producto_styles.css" />
+</head>
+<body>
+  <header class="main-header">
+    <div class="container header-inner">
+      <div class="left-header">
+        <div class="logo"></div>
+        <nav class="nav">
+          <ul>
+            <li><a href="#">Set de mates</a></li>
+            <li><a href="#">Tazas</a></li>
+            <li><a href="#">Decoraciones</a></li>
+            <li><a href="#">Para la mesa</a></li>
+            <li><a href="#">Contacto</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="right-header">
+        <a href="#" class="search-icon">🔍</a>
+        <a href="#" class="cart-icon">🛒 (0)</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="product-detail container">
+    <div class="product-gallery">
+        <div class="product-images">
+            <img class="product-image-main" src="/img/ejemplo-1.jpeg" alt="Producto principal" />
+            <div class="product-thumbnails">
+                <img src="/img/ejemplo-1.jpeg" alt="miniatura 1" class="selected" />
+                <img src="/img/ejemplo-2.jfif" alt="miniatura 2" />
+                <img src="/img/ejemplo-1.jpeg" alt="miniatura 3" />
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <div class="product-info-detail">
+      <h1>Bandeja STING</h1>
+      <p class="description">Bandeja de diseño lacado, elegante y resistente. Ideal para decorar o servir.</p>
+
+      <div class="options">
+        <p>Formato:</p>
+        <div class="option-buttons">
+          <label><input type="radio" name="formato" value="Archivo" checked />Archivo</label>
+          <label><input type="radio" name="formato" value="Impresión" />Impresión</label>
+        </div>
+
+        <p>Color:</p>
+        <div class="option-buttons">
+          <label><input type="radio" name="color" value="Negro" checked />Negro</label>
+          <label><input type="radio" name="color" value="Blanco" />Blanco</label>
+        </div>
+      </div>
+
+      <p class="price">$120</p>
+
+      <div class="buy-section">
+        <input type="number" min="1" value="1" class="quantity-input" />
+        <button class="add-to-cart-btn-detail">Comprar</button>
+      </div>
+    </div>
+  </main>
+
+  <section class="related-products container">
+    <h2>Productos Relacionados</h2>
+    <div class="product-grid">
+      <div class="product-card">
+          <div class="product-info" onclick="window.location.href='/producto/1'">
+            <img src="/img/ejemplo-1.jpeg" alt="Mate" />
+            <h3>Bandeja STING</h3>
+            <p class="product-desc">Mate con diseño STING grabado.</p>
+          </div>
+
+          <div class="product-controls">
+            <label for="formato1">Formato:</label>
+            <select id="formato1" class="minimal-select">
+              <option value="Archivo">Archivo</option>
+              <option value="Impresion">Impresión</option>
+            </select>
+
+            <label for="color1">Color:</label>
+            <select id="color1" class="minimal-select">
+              <option value="negro">Negro</option>
+              <option value="blanco">Blanco</option>
+            </select>
+
+            <p class="product-price">$120</p>
+
+            <div class="product-actions">
+              <input type="number" min="1" value="1" class="quantity-input" />
+              <button class="add-to-cart-btn">Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-info" onclick="window.location.href='/producto/1'">
+            <img src="/img/ejemplo-1.jpeg" alt="Mate" />
+            <h3>Bandeja STING</h3>
+            <p class="product-desc">Mate con diseño STING grabado.</p>
+          </div>
+
+          <div class="product-controls">
+            <label for="formato1">Formato:</label>
+            <select id="formato1" class="minimal-select">
+              <option value="Archivo">Archivo</option>
+              <option value="Impresion">Impresión</option>
+            </select>
+
+            <label for="color1">Color:</label>
+            <select id="color1" class="minimal-select">
+              <option value="negro">Negro</option>
+              <option value="blanco">Blanco</option>
+            </select>
+
+            <p class="product-price">$120</p>
+
+            <div class="product-actions">
+              <input type="number" min="1" value="1" class="quantity-input" />
+              <button class="add-to-cart-btn">Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        
+    </div>
+  </section>
+
+  <footer class="main-footer">
+    <div class="container">
+      <div class="footer-info">
+        <p>© 2025 Forma programada</p>
+        <p>Palermo, CABA</p>
+        <p>Tel: +5411890423 | Email: formaprogramada@gmail.com</p>
+      </div>
+      <div class="footer-links">
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="s_producto.js"></script>
+</body>
+</html>
