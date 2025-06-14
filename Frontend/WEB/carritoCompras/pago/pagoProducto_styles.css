@@ -128,3 +128,9 @@ form#form-pago button[type="submit"] {
 form#form-pago button[type="submit"]:hover {
   background-color: #1e40af;
 }
+@media (max-width: 480px) {
+  form#form-pago .grid-2-cols {
+    grid-template-columns: 1fr; /* Cambia de dos columnas a una */
+    gap: 16px;
+  }
+}
