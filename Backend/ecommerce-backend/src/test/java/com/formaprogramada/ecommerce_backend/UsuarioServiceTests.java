@@ -1,53 +1,117 @@
 package com.formaprogramada.ecommerce_backend;
 
-import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
-import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.UsuarioRegistroRequest;
+import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.CustomUserDetailsService;
+import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import static org.junit.jupiter.api.Assertions.*;
-import java.util.List;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.test.web.servlet.MockMvc;
 
-import org.springframework.test.annotation.Commit;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 class UsuarioServiceTests {
 
 	@Autowired
-	private UsuarioService usuarioService;
+	private MockMvc mockMvc;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	@MockBean
+	private JwtService jwtService;
+	@MockBean
+	private AuthenticationManager authManager;
 
 	@Test
-	void listarUsuarios_muestraTodos_y_assertNoVacio() {
-		List<Usuario> usuarios = usuarioService.listarTodos();
+	void registerUsuario_retorna200YMensaje() throws Exception {
+		UsuarioRegistroRequest request = UsuarioRegistroRequest.builder()
+				.nombre("Thiago")
+				.apellido("Velazquez")
+				.gmail("testregister@example.com")
+				.password("password123")
+				.build();
 
-		usuarios.forEach(u -> System.out.println("Usuario: " + u.getGmail()));
-
-		assertFalse(usuarios.isEmpty(), "La lista de usuarios no debería estar vacía");
+		mockMvc.perform(post("/api/auth/register")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Usuario registrado correctamente")));
 	}
 
 	@Test
-	void registrarUsuario_conGmailDuplicado_lanzaExcepcion() {
-		Usuario usuario1 = Usuario.builder()
-				.nombre("User1")
-				.apellido("Test")
-				.gmail("duplicado@example.com")
-				.password("password1")
+	void login_conCredencialesValidas_devuelveTokens() throws Exception {
+		String gmail = "test@login.com";
+		String password = "password123";
+
+		// Simular UserDetails con roles
+		UserDetails userDetails = User.withUsername(gmail)
+				.password(password)
+				.roles("CLIENTE")
 				.build();
 
-		Usuario usuario2 = Usuario.builder()
-				.nombre("User2")
-				.apellido("Test")
-				.gmail("duplicado@example.com")
-				.password("password2")
-				.build();
 
-		usuarioService.registrarUsuario(usuario1);
+		// Simular Authentication que devuelve el authManager
+		Authentication authentication = Mockito.mock(Authentication.class);
+		Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
 
-		IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-			usuarioService.registrarUsuario(usuario2);
-		});
+		// Cuando authManager.authenticate se llame, devuelve la Authentication mockeada
+		Mockito.when(authManager.authenticate(Mockito.any())).thenReturn(authentication);
 
-		assertEquals("Ya existe un usuario con ese Gmail.", thrown.getMessage());
+		// Simular que jwtService genera tokens
+		Mockito.when(jwtService.generateAccessToken(Mockito.anyMap(), Mockito.eq(gmail))).thenReturn("token123");
+		Mockito.when(jwtService.generateRefreshToken(Mockito.anyMap(), Mockito.eq(gmail))).thenReturn("refreshToken123");
+
+		// Crear JSON para el body de la request
+		String jsonBody = """
+            {
+                "gmail": "%s",
+                "password": "%s"
+            }
+            """.formatted(gmail, password);
+
+		mockMvc.perform(post("/api/auth/login")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(jsonBody))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.token").value("token123"))
+				.andExpect(jsonPath("$.refreshToken").value("refreshToken123"));
+	}
+
+	@Test
+	void login_conCredencialesInvalidas_devuelveUnauthorized() throws Exception {
+		String gmail = "test@login.com";
+		String password = "wrongpassword";
+
+		// Cuando authManager.authenticate lance excepción
+		Mockito.when(authManager.authenticate(Mockito.any()))
+				.thenThrow(new BadCredentialsException("Credenciales inválidas"));
+
+		String jsonBody = """
+            {
+                "gmail": "%s",
+                "password": "%s"
+            }
+            """.formatted(gmail, password);
+
+		mockMvc.perform(post("/api/auth/login")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(jsonBody))
+				.andExpect(status().isUnauthorized())
+				.andExpect(content().string("Credenciales inválidas"));
 	}
 }
-

@@ -2,7 +2,7 @@ package com.formaprogramada.ecommerce_backend.Domain.Service.Impl;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.UsuarioRepository;
 import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Security.Hasher.PasswordHasher;
+import com.formaprogramada.ecommerce_backend.Security.Hasher.PasswordHasher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -56,4 +56,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     public List<Usuario> listarTodos() {
         return usuarioRepository.findAll();
     }
+
+    @Override
+    public boolean existePorGmail(String gmail) {
+        return usuarioRepository.buscarPorGmail(gmail).isPresent();
+    }
+
 }

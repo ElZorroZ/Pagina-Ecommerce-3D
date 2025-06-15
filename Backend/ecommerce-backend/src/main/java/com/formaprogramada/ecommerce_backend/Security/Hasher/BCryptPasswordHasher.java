@@ -1,5 +1,4 @@
-package com.formaprogramada.ecommerce_backend.Infrastructure.Security.Hasher;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Security.Hasher.PasswordHasher;
+package com.formaprogramada.ecommerce_backend.Security.Hasher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

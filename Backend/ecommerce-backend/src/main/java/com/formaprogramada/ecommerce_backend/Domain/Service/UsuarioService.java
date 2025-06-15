@@ -8,5 +8,5 @@ public interface UsuarioService {
 
     void registrarUsuario(Usuario usuario);
     List<Usuario> listarTodos();
-
+    boolean existePorGmail(String gmail);
 }
