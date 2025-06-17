@@ -29,6 +29,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         String hash = passwordHasher.hash(usuario.getPassword());
         usuario.setPassword(hash);
+        usuario.setVerificado(false);
         usuario.setPermiso(false); // Por defecto es usuario
 
         usuarioRepository.guardar(usuario);

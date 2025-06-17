@@ -28,6 +28,9 @@ public class UsuarioEntity {
     private String password;
 
     @Column(nullable = false)
+    private Boolean verificado;
+
+    @Column(nullable = false)
     private Boolean permiso;
 
 }

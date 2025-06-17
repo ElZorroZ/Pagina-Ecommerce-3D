@@ -15,4 +15,6 @@ public interface UsuarioRepository {
 
     Optional<Usuario> buscarPorId(Integer id); // Útil para ver perfil o gestión
 
+    //boolean verificarGmail(String gmail);
+
 }
