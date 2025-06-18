@@ -3,7 +3,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "usuario")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,9 +28,8 @@ public class UsuarioEntity {
     private String password;
 
     @Column(nullable = false)
-    private Boolean verificado;
-
-    @Column(nullable = false)
     private Boolean permiso;
 
+    @Column(nullable = false)
+    private boolean verificado = false;
 }

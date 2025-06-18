@@ -13,8 +13,7 @@ public class Usuario {
     private String apellido;
     private String gmail;
     private String password;
-    private Boolean verificado;
     private Boolean permiso;
-
+    private boolean verificado = false;
 }
 

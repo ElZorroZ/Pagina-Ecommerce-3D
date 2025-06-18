@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public interface UsuarioRepository {
 
-    void guardar(Usuario usuario);
+    Usuario guardar(Usuario usuario);
 
     List<Usuario> findAll();
 
@@ -14,7 +14,5 @@ public interface UsuarioRepository {
     Optional<Usuario> buscarPorGmail(String gmail); // Útil para login, validación o recuperación
 
     Optional<Usuario> buscarPorId(Integer id); // Útil para ver perfil o gestión
-
-    //boolean verificarGmail(String gmail);
 
 }

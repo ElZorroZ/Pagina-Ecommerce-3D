@@ -20,7 +20,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     @Transactional // asegura consistencia si más adelante agregás acciones adicionales
-    public void registrarUsuario(Usuario usuario) {
+    public Usuario registrarUsuario(Usuario usuario) {
         validarDatos(usuario);
 
         if (usuarioRepository.existePorGmail(usuario.getGmail())) {
@@ -29,11 +29,11 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         String hash = passwordHasher.hash(usuario.getPassword());
         usuario.setPassword(hash);
-        usuario.setVerificado(false);
-        usuario.setPermiso(false); // Por defecto es usuario
+        usuario.setPermiso(false);
 
-        usuarioRepository.guardar(usuario);
+        return usuarioRepository.guardar(usuario);  // <- ahora devuelve usuario con id
     }
+
 
     private void validarDatos(Usuario usuario) {
         if (usuario.getNombre() == null || usuario.getNombre().isBlank()) {
@@ -63,4 +63,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.buscarPorGmail(gmail).isPresent();
     }
 
+    @Override
+    public Usuario actualizarUsuario(Usuario usuario) {
+        if (usuario.getId() == null || usuarioRepository.buscarPorId(usuario.getId()).isEmpty()) {
+            throw new IllegalArgumentException("El usuario no existe para actualizar.");
+        }
+        usuarioRepository.guardar(usuario);
+        return usuario;
+    }
 }

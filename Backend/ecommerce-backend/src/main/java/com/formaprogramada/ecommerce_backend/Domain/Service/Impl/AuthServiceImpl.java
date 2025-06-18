@@ -29,7 +29,6 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(UsuarioRegistroRequest request) {
         Usuario usuario = UsuarioMapper.toDomain(request);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-        usuario.setVerificado(false);
         usuario.setPermiso(false);
         usuarioRepository.guardar(usuario);
 

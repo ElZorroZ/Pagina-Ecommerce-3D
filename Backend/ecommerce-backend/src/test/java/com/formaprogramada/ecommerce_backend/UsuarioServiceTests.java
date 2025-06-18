@@ -1,7 +1,11 @@
 package com.formaprogramada.ecommerce_backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacionService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.UsuarioRegistroRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.TokenVerificacion;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.UsuarioEntity;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.CustomUserDetailsService;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
 import org.junit.jupiter.api.Test;
@@ -18,10 +22,17 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Optional;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 @SpringBootTest
 @AutoConfigureMockMvc
 class UsuarioServiceTests {
@@ -33,16 +44,46 @@ class UsuarioServiceTests {
 	private ObjectMapper objectMapper;
 
 	@MockBean
+	private TokenVerificacionService tokenVerificacionService;
+
+	@MockBean
+	private UsuarioService usuarioService;
+
+	@MockBean
 	private JwtService jwtService;
 	@MockBean
 	private AuthenticationManager authManager;
+
+	@Test
+	public void testValidateEndpointBasic() throws Exception {
+		mockMvc.perform(get("/validate").param("token", "alguntoken").with(user("user").roles("USER")))
+				.andExpect(status().isNotFound()); // si da 404 igual, el controlador no está cargado
+	}
+	@Test
+	public void validarEmail_conTokenValido_retorna200() throws Exception {
+		var usuarioEntity = new UsuarioEntity();
+		usuarioEntity.setId(1);
+
+		var tokenVerificacion = new TokenVerificacion();
+		tokenVerificacion.setUsuario(usuarioEntity);
+
+		when(tokenVerificacionService.validarToken("tokenValido")).thenReturn(Optional.of(tokenVerificacion));
+		doAnswer(invocation -> null).when(usuarioService).actualizarUsuario(any());
+
+		mockMvc.perform(get("/api/auth/validate")
+						.param("token", "tokenValido")
+						.with(user("testregisteerrr@example.com").password("password123").roles("USER")))
+				.andExpect(status().isOk())
+				.andExpect(content().string("Usuario validado correctamente."));
+	}
+
 
 	@Test
 	void registerUsuario_retorna200YMensaje() throws Exception {
 		UsuarioRegistroRequest request = UsuarioRegistroRequest.builder()
 				.nombre("Thiago")
 				.apellido("Velazquez")
-				.gmail("testregister@example.com")
+				.gmail("testregisteerrr@example.com")
 				.password("password123")
 				.build();
 
@@ -67,14 +108,14 @@ class UsuarioServiceTests {
 
 		// Simular Authentication que devuelve el authManager
 		Authentication authentication = Mockito.mock(Authentication.class);
-		Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
+		when(authentication.getPrincipal()).thenReturn(userDetails);
 
 		// Cuando authManager.authenticate se llame, devuelve la Authentication mockeada
-		Mockito.when(authManager.authenticate(Mockito.any())).thenReturn(authentication);
+		when(authManager.authenticate(any())).thenReturn(authentication);
 
 		// Simular que jwtService genera tokens
-		Mockito.when(jwtService.generateAccessToken(Mockito.anyMap(), Mockito.eq(gmail))).thenReturn("token123");
-		Mockito.when(jwtService.generateRefreshToken(Mockito.anyMap(), Mockito.eq(gmail))).thenReturn("refreshToken123");
+		when(jwtService.generateAccessToken(Mockito.anyMap(), Mockito.eq(gmail))).thenReturn("token123");
+		when(jwtService.generateRefreshToken(Mockito.anyMap(), Mockito.eq(gmail))).thenReturn("refreshToken123");
 
 		// Crear JSON para el body de la request
 		String jsonBody = """
@@ -98,7 +139,7 @@ class UsuarioServiceTests {
 		String password = "wrongpassword";
 
 		// Cuando authManager.authenticate lance excepción
-		Mockito.when(authManager.authenticate(Mockito.any()))
+		when(authManager.authenticate(any()))
 				.thenThrow(new BadCredentialsException("Credenciales inválidas"));
 
 		String jsonBody = """

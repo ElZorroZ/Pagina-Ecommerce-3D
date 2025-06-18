@@ -6,7 +6,8 @@ import java.util.Optional;
 
 public interface UsuarioService {
 
-    void registrarUsuario(Usuario usuario);
+    Usuario registrarUsuario(Usuario usuario);
     List<Usuario> listarTodos();
     boolean existePorGmail(String gmail);
+    Usuario actualizarUsuario(Usuario usuario);
 }

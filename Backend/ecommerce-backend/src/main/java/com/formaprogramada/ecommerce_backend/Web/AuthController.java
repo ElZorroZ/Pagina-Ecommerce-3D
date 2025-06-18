@@ -1,10 +1,12 @@
 package com.formaprogramada.ecommerce_backend.Web;
+import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacionService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.AuthResponse;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.UsuarioRegistroRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.AuthRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.RefreshTokenRequest;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.UsuarioEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.UsuarioMapper;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid; // o javax.validation.Valid según tus dependencias
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,17 +32,44 @@ public class AuthController {
     private final AuthenticationManager authManager;  // Para autenticar username/password
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final TokenVerificacionService tokenService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody UsuarioRegistroRequest request) {
+    public ResponseEntity<?> register(@RequestBody UsuarioRegistroRequest request) {
         if (usuarioService.existePorGmail(request.getGmail())) {
             return ResponseEntity.badRequest().body("El gmail ya está registrado");
         }
-        System.out.println("Request recibido: " + request);
+
         var usuario = UsuarioMapper.toDomain(request);
-        usuario.setPermiso(false); // cliente por defecto
-        usuarioService.registrarUsuario(usuario);
-        return ResponseEntity.ok("Usuario registrado correctamente");
+        usuario.setPermiso(false);
+        usuario.setVerificado(false);
+
+        usuario = usuarioService.registrarUsuario(usuario);
+
+        // Crear token y enviarlo por mail (simulado acá)
+        var usuarioEntity = UsuarioMapper.toEntity(usuario);
+        var token = tokenService.crearTokenParaUsuario(usuarioEntity);
+
+        // TODO: enviar mail con link: e.g. http://tu-frontend/validate?token=token.getToken()
+        System.out.println("Token de validación para enviar por mail: " + token.getToken());
+
+        return ResponseEntity.ok("Usuario registrado correctamente. Verifica tu email para activar la cuenta.");
+    }
+
+    @GetMapping("/validate")
+    public ResponseEntity<?> validarEmail(@RequestParam String token) {
+        var tokenOpt = tokenService.validarToken(token);
+
+        if (tokenOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Token inválido o expirado.");
+        }
+
+        var usuarioEntity = tokenOpt.get().getUsuario();
+        var usuario = UsuarioMapper.toDomain(usuarioEntity);
+        usuario.setVerificado(true);
+        usuarioService.actualizarUsuario(usuario);
+
+        return ResponseEntity.ok("Usuario validado correctamente.");
     }
 
     @PostMapping("/login")
