@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bienvenido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px;
+            text-align: left;
+        }
+        .footer {
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+        }
+        h1 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>¡Bienvenido!</h1>
+        </div>
+        <div class="content">
+            <p>Hola <strong th:text="${nombre}">Usuario</strong>,</p>
+            <p>Gracias por registrarte en nuestra tienda. Estamos muy felices de tenerte con nosotros.</p>
+            <p>Esperamos que disfrutes de una excelente experiencia comprando en nuestra plataforma.</p>
+            <p style="text-align: center; margin: 30px 0;">
+                <a th:href="${urlValidacion}"
+                    style="background-color: #2c3e50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                    Verificar mi cuenta
+                </a>
+            </p>
+        </div>
+        
+        <div class="footer">
+            &copy; 2025 Forma Programada. Todos los derechos reservados.
+        </div>
+    </div>
+</body>
+</html>

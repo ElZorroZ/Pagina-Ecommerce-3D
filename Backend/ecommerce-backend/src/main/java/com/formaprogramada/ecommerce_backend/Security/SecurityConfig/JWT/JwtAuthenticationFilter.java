@@ -28,6 +28,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
+        String path = request.getRequestURI();
+
+        // Rutas públicas que no requieren token
+        if (path.startsWith("/api/auth/register") || path.startsWith("/api/auth/validate") ||
+                path.startsWith("/api/auth/login") || path.startsWith("/api/auth/refresh")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
         final String jwtToken;
         final String username;
@@ -37,8 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        jwtToken = authHeader.substring(7);
         try {
+            jwtToken = authHeader.substring(7);
             username = jwtService.extractUsername(jwtToken);
         } catch (Exception e) {
             // Token inválido, no autenticamos

@@ -1,4 +1,5 @@
 package com.formaprogramada.ecommerce_backend.Web;
+import com.formaprogramada.ecommerce_backend.Domain.Service.EmailService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacionService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.AuthResponse;
@@ -33,6 +34,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final TokenVerificacionService tokenService;
+    private final EmailService emailService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UsuarioRegistroRequest request) {
@@ -50,11 +52,26 @@ public class AuthController {
         var usuarioEntity = UsuarioMapper.toEntity(usuario);
         var token = tokenService.crearTokenParaUsuario(usuarioEntity);
 
-        // TODO: enviar mail con link: e.g. http://tu-frontend/validate?token=token.getToken()
-        System.out.println("Token de validación para enviar por mail: " + token.getToken());
+        // Construir URL de validación (ajustá el frontend según corresponda)
+        String urlValidacion = "http://localhost:5500/WEB/usuario/validacion/validar-email.html?token=" + token.getToken();
+
+        // Variables para plantilla Thymeleaf
+        Map<String, Object> variables = Map.of(
+                "nombre", usuario.getNombre(),         // si tenés nombre, sino cambia o elimina
+                "urlValidacion", urlValidacion
+        );
+
+        // Enviar email HTML con plantilla "bienvenida.html"
+        emailService.enviarEmailHtml(
+                usuario.getGmail(),
+                "Verifica tu cuenta",
+                variables,
+                "email"  // nombre del archivo de la plantilla sin extensión
+        );
 
         return ResponseEntity.ok("Usuario registrado correctamente. Verifica tu email para activar la cuenta.");
     }
+
 
     @GetMapping("/validate")
     public ResponseEntity<?> validarEmail(@RequestParam String token) {

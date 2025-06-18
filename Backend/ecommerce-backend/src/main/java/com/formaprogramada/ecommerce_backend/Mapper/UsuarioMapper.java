@@ -23,6 +23,8 @@ public class UsuarioMapper {
         usuario.setApellido(entity.getApellido());
         usuario.setGmail(entity.getGmail());
         usuario.setPassword(entity.getPassword());
+        usuario.setPermiso(entity.getPermiso());
+        usuario.setVerificado(entity.isVerificado());
         return usuario;
     }
 
@@ -33,6 +35,9 @@ public class UsuarioMapper {
         entity.setApellido(usuario.getApellido());
         entity.setGmail(usuario.getGmail());
         entity.setPassword(usuario.getPassword());
+        entity.setPermiso(usuario.getPermiso());
+        entity.setVerificado(usuario.isVerificado());
         return entity;
     }
+
 }
