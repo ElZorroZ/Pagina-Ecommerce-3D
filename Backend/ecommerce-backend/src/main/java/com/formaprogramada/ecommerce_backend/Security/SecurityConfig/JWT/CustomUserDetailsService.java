@@ -19,7 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         Usuario usuario = usuarioRepository.buscarPorGmail(gmail)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        String rol = Boolean.TRUE.equals(usuario.getPermiso()) ? "ADMIN" : "CLIENTE";
+        String rol = Boolean.TRUE.equals(usuario.getPermiso()) ? "CLIENTE" : "ADMIN";
 
 
         return User.builder()

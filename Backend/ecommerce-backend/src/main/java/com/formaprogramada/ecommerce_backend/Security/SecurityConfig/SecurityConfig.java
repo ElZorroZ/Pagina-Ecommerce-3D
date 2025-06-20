@@ -1,6 +1,9 @@
 package com.formaprogramada.ecommerce_backend.Security.SecurityConfig;
+import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtAuthenticationFilter;
@@ -27,26 +30,31 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           DaoAuthenticationProvider daoAuthenticationProvider) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Permitir login y register sin autenticación
                         .requestMatchers("/api/auth/register", "/api/auth/validate", "/api/auth/login", "/api/auth/refresh").permitAll()
-
-                        // Permitir solo GET a Cliente
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN")
-
-                        // Permitir solo Admin para POST, PUT, DELETE
                         .requestMatchers(HttpMethod.POST, "/api/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
-
                         .anyRequest().authenticated()
                 )
-                .authenticationProvider(jwtProvider)
+                .authenticationProvider(daoAuthenticationProvider) // Login clásico
+                .authenticationProvider(jwtProvider)              // JWT
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(CustomUserDetailsService userDetailsService,
+                                                               PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return authProvider;
     }
 
     @Bean

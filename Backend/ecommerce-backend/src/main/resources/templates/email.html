@@ -60,5 +60,31 @@
             &copy; 2025 Forma Programada. Todos los derechos reservados.
         </div>
     </div>
+    <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+
+      if (!token) {
+        alert('Token no proporcionado');
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/auth/validate?token=${token}`);
+
+        if (res.ok) {
+          alert('Cuenta validada correctamente. Ya podés iniciar sesión.');
+          window.location.href = '/login.html'; // o donde tengas el login
+        } else {
+          const error = await res.text();
+          alert('Error: ' + error);
+        }
+      } catch (e) {
+        alert('Error de conexión con el servidor');
+        console.error(e);
+      }
+    });
+  </script>
 </body>
 </html>
