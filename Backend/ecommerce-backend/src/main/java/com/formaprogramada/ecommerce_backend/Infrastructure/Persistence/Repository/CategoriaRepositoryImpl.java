@@ -22,7 +22,6 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
 
     @Override
     public boolean existePorNombre(String nombre) {
-
         return jpaRepository.existsByNombre(nombre);
     }
 

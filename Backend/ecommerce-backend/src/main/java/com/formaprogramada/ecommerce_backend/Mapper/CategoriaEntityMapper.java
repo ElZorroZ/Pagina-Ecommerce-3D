@@ -8,6 +8,6 @@ public interface CategoriaEntityMapper {
 
         CategoriaEntity toEntity(Categoria categoria);
 
-        Categoria toDomain(CategoriaEntity entity);
+        Categoria toDomainC(CategoriaEntity entity);
 
     }

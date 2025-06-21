@@ -1,12 +1,9 @@
 package com.formaprogramada.ecommerce_backend.Web;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria;
-import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.CategoriaCreacionRequest;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.UsuarioRegistroRequest;
 import com.formaprogramada.ecommerce_backend.Mapper.CategoriaMapper;
-import com.formaprogramada.ecommerce_backend.Mapper.UsuarioMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +24,6 @@ public class CategoriaController {
     public ResponseEntity<?> crearCategoria(@Valid @RequestBody CategoriaCreacionRequest request) {
         Categoria categoria = CategoriaMapper.toDomainCategoria1(request);
         categoriaService.registrarCategoria(categoria);
-        return ResponseEntity.ok("Usuario registrado correctamente.");
+        return ResponseEntity.ok("Categoria creada");
     }
 }
