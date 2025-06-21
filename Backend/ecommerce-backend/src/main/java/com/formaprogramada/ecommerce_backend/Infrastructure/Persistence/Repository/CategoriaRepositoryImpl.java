@@ -5,7 +5,7 @@ import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaReposito
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.CategoriaEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.CategoriaEntityMapper;
 
-public class CategoriaRepositoryImpl implements CategoriaRepository {
+public class CategoriaRepositoryImpl implements CategoriaRepository  {
     private final JpaCategoriaRepository jpaRepository;
     private final CategoriaEntityMapper mapper;
 
@@ -17,7 +17,7 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     @Override
     public boolean crearCategoria(Categoria categoria) {
 
-        return null;
+        return true;
     }
 
     @Override

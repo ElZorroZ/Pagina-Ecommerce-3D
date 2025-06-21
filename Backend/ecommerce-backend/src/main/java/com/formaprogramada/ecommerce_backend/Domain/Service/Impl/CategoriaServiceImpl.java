@@ -3,6 +3,8 @@ package com.formaprogramada.ecommerce_backend.Domain.Service.Impl;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
 import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -10,6 +12,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
 
+    @Autowired
     public CategoriaServiceImpl(CategoriaRepository categoriaRepository) {
         this.categoriaRepository = categoriaRepository;
     }
