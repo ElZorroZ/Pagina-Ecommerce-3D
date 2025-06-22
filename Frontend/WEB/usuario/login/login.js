@@ -23,9 +23,9 @@ document.getElementById("login-form").addEventListener("submit", async function 
     }
 
     const data = await response.json();
-    console.log(data)
-    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("accessToken", data.token);
     localStorage.setItem("refreshToken", data.refreshToken);
+
 
     const lastPage = localStorage.getItem("lastPage");
     if (lastPage) {
@@ -33,7 +33,6 @@ document.getElementById("login-form").addEventListener("submit", async function 
     } else {
       window.location.href = "/WEB/index.html";
     }
-    alert("Inicio")
   } catch (error) {
     console.error("Error en la solicitud:", error);
     alert("Ocurrió un error al intentar iniciar sesión.");

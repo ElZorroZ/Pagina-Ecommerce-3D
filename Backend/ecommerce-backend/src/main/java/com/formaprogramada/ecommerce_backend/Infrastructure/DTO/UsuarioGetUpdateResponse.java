@@ -1,20 +1,17 @@
-package com.formaprogramada.ecommerce_backend.Domain.Model;
-import lombok.*;
+package com.formaprogramada.ecommerce_backend.Infrastructure.DTO;
 
-@Getter
-@Setter
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Usuario {
-
-    private Integer id;
-    private Boolean permiso;
+public class UsuarioGetUpdateResponse {
     private String nombre;
     private String apellido;
     private String gmail;
     private String password;
-    private boolean verificado = false;
     private String direccion;
     private String cp;      // código postal
     private String ciudad;

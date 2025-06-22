@@ -19,7 +19,7 @@ public class JwtService {
     // Duraciones en milisegundos
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 15; // 15 minutos
     private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 días
-
+    
     // Clave de firma
     private Key getSignInKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());

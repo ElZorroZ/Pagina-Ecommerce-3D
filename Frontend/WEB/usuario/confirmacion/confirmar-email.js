@@ -10,10 +10,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const res = await fetch(`http://localhost:8080/api/auth/validate?token=${token}`);
+    // Cambié la URL para apuntar a tu endpoint de confirmación de email
+    const res = await fetch(`http://localhost:8080/api/usuario/confirmar-email?token=${encodeURIComponent(token)}`);
 
     if (res.ok) {
-      mensaje.textContent = "¡Cuenta validada correctamente! Ya podés iniciar sesión.";
+      mensaje.textContent = "¡Email cambiado correctamente! Ya podés iniciar sesión.";
       mensaje.classList.add("success");
       // Redirigir al login luego de 3 segundos
       setTimeout(() => {
@@ -30,4 +31,3 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.error(e);
   }
 });
- 

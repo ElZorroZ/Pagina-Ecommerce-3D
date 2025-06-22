@@ -18,14 +18,16 @@
               <li><a href="#">Decoraciones</a></li>
               <li><a href="#">Para la mesa</a></li>
               <li><a href="#">Contacto</a></li>
-              </ul>
+              <li id="adminPanel"><a href="#">Panel de Administración</a></li>              
+            </ul>
           </nav>
           </div>
           <div class="right-header">
           <a href="#" class="search-icon">🔍</a>
           <a href="#" class="cart-icon">🛒 (0)</a>
-          <a href="/WEB/usuario/login/login.html" class="cart-icon"> LOGIN</a>
-          </div>
+          <li id="loginLink"><a href="/WEB/usuario/login/login.html" class="cart-icon">LOGIN</a></li>
+          <li id="cuentaLink" style="display:none;"><a href="/WEB/usuario/perfil/perfil.html" class="cart-icon">CUENTA</a></li>  
+        </div>
       </div>
       <div class="alt-header mobile-header">
     <div class="alt-header-inner">
@@ -33,6 +35,7 @@
         <button class="btn-search" aria-label="Buscar">🔍</button>
         <button class="btn-cart" aria-label="Carrito">🛒</button>
         <button class="btn-menu" aria-label="Menú">☰</button>
+        <a href="/WEB/usuario/login/login.html" class="cart-icon"> LOGIN</a>
       </div>
 
       <nav class="catalog-menu">

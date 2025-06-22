@@ -2,14 +2,13 @@ package com.formaprogramada.ecommerce_backend.Web;
 import com.formaprogramada.ecommerce_backend.Domain.Service.EmailService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacionService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.AuthResponse;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.UsuarioRegistroRequest;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.AuthRequest;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.RefreshTokenRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.*;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.UsuarioEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.JpaUsuarioRepository;
 import com.formaprogramada.ecommerce_backend.Mapper.UsuarioMapper;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
+import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,6 +35,8 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final TokenVerificacionService tokenService;
     private final EmailService emailService;
+    private final JwtSpecialTokenService jwtSpecialTokenService;
+    private final JpaUsuarioRepository jpaUsuarioRepository;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UsuarioRegistroRequest request) {
@@ -48,26 +50,8 @@ public class AuthController {
 
         usuario = usuarioService.registrarUsuario(usuario);
 
-        // Crear token y enviarlo por mail (simulado acá)
-        var usuarioEntity = UsuarioMapper.toEntity(usuario);
-        var token = tokenService.crearTokenParaUsuario(usuarioEntity);
-
-        // Construir URL de validación (ajustá el frontend según corresponda)
-        String urlValidacion = "http://localhost:5500/WEB/usuario/validacion/validar-email.html?token=" + token.getToken();
-
-        // Variables para plantilla Thymeleaf
-        Map<String, Object> variables = Map.of(
-                "nombre", usuario.getNombre(),         // si tenés nombre, sino cambia o elimina
-                "urlValidacion", urlValidacion
-        );
-
-        // Enviar email HTML con plantilla "bienvenida.html"
-        emailService.enviarEmailHtml(
-                usuario.getGmail(),
-                "Verifica tu cuenta",
-                variables,
-                "email"  // nombre del archivo de la plantilla sin extensión
-        );
+        // Delegar todo el envío de email al EmailService
+        emailService.enviarEmailVerificacion(usuario);
 
         return ResponseEntity.ok("Usuario registrado correctamente. Verifica tu email para activar la cuenta.");
     }
@@ -123,4 +107,55 @@ public class AuthController {
 
         return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
     }
+
+    @PostMapping("/reset-password-request")
+    public ResponseEntity<?> solicitarRestablecerPassword(@RequestBody ResetPasswordRequest request) {
+        String email = request.getEmail();
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("El email es obligatorio");
+        }
+
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorGmail(email.trim());
+
+        // Por seguridad respondemos igual, si no existe usuario no hacemos nada
+        if (usuarioOpt.isPresent()) {
+            try {
+                emailService.solicitarRestablecerPassword(email.trim());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al enviar email");
+            }
+        }
+
+        return ResponseEntity.ok("Si el email existe, se envió un enlace para restablecer la contraseña");
+    }
+    @PostMapping("/reset-password/confirm")
+    public ResponseEntity<?> confirmarRestablecerPassword(@RequestBody ResetPasswordConfirmRequest request) {
+        String token = request.getToken();
+        String nuevaPassword = request.getNuevaPassword();
+
+        if (nuevaPassword == null || nuevaPassword.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("La nueva contraseña no puede estar vacía");
+        }
+
+        String email = jwtSpecialTokenService.getSubjectFromToken(token);
+
+        if (!jwtSpecialTokenService.validateResetPasswordToken(token, email)) {
+            return ResponseEntity.badRequest().body("Token inválido o expirado");
+        }
+
+        UsuarioEntity usuario = jpaUsuarioRepository.findByGmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        String passwordHasheada = passwordEncoder.encode(nuevaPassword);
+        usuario.setPassword(passwordHasheada);
+        jpaUsuarioRepository.save(usuario);
+
+        return ResponseEntity.ok("Contraseña actualizada correctamente");
+    }
+
+
+
+
+
 }

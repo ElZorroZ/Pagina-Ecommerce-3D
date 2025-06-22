@@ -1,17 +1,27 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Impl;
 
+import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Service.EmailService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacionService;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.UsuarioEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.JpaUsuarioRepository;
+import com.formaprogramada.ecommerce_backend.Mapper.UsuarioMapper;
+import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,15 +29,12 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
-
-    @Override
-    public void enviarEmail(String destinatario, String asunto, String cuerpo) {
-        SimpleMailMessage mensaje = new SimpleMailMessage();
-        mensaje.setTo(destinatario);
-        mensaje.setSubject(asunto);
-        mensaje.setText(cuerpo);
-        mailSender.send(mensaje);
-    }
+    private final JwtSpecialTokenService jwtSpecialTokenService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JpaUsuarioRepository jpaUsuarioRepository;
+    private final TokenVerificacionService tokenService;
 
     @Override
     public void enviarEmailHtml(String destinatario, String asunto, Map<String, Object> variables, String plantilla) {
@@ -48,4 +55,101 @@ public class EmailServiceImpl implements EmailService {
             throw new RuntimeException("Error al enviar correo", e);
         }
     }
+
+    @Override
+    public void enviarEmailVerificacion(Usuario usuario) {
+        // Generar token de verificación
+        UsuarioEntity usuarioEntity = UsuarioMapper.toEntity(usuario);
+        String token = tokenService.crearTokenParaUsuario(usuarioEntity).getToken();
+
+        // URL del frontend
+        String frontendUrl = "http://localhost:5500";
+        String link = frontendUrl + "/WEB/usuario/validacion/validar-email.html?token=" + token;
+
+        // Variables para la plantilla
+        Map<String, Object> variables = Map.of(
+                "nombre", usuario.getNombre(),
+                "urlValidacion", link
+        );
+
+        // Asunto y plantilla
+        String asunto = "Verifica tu cuenta";
+        String plantilla = "email-verificacion";
+
+        //Enviar el email
+        enviarEmailHtml(usuario.getGmail(), asunto, variables, plantilla);
+    }
+
+
+
+    @Override
+    public void solicitarRestablecerPassword(String gmail) throws IllegalArgumentException {
+        UsuarioEntity usuario = jpaUsuarioRepository.findByGmail(gmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        String token = jwtSpecialTokenService.generateResetPasswordToken(gmail);
+
+        String frontendUrl = "http://localhost:5500";
+        String link = frontendUrl + "/WEB/usuario/confirmacion-password/confirmar-password.html?token=" + token;
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("link", link);
+
+        String asunto = "Restablecimiento de contraseña";
+
+        enviarEmailHtml(gmail, asunto, variables, "reset-password");
+    }
+
+    @Override
+    public void solicitarCambioEmail(String gmailActual, String nuevoEmail) throws IllegalArgumentException {
+        UsuarioEntity usuario = jpaUsuarioRepository.findByGmail(gmailActual)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        // Validar que el nuevo email no esté en uso
+        boolean existeNuevoEmail = jpaUsuarioRepository.existsByGmail(nuevoEmail);
+        if (existeNuevoEmail) {
+            throw new IllegalArgumentException("El nuevo email ya está en uso");
+        }
+
+        String token = jwtSpecialTokenService.generateConfirmEmailToken(nuevoEmail, gmailActual);
+
+        String frontendUrl = "http://localhost:5500"; // o el puerto donde tengas tu frontend
+        String link = frontendUrl + "/WEB/usuario/confirmacion/confirmar-email.html?token=" + token;
+
+        String asunto = "Confirmación de cambio de email";
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("link", link);
+
+        enviarEmailHtml(nuevoEmail, asunto, variables, "confirmar-email");
+    }
+
+    public void confirmarCambioEmail(String token) {
+        // Extraer datos del token
+        String nuevoEmail = jwtSpecialTokenService.getSubjectFromToken(token);
+        String gmailActual = jwtSpecialTokenService.getClaimFromToken(token, "gmailActual", String.class);
+
+        if (nuevoEmail == null || gmailActual == null) {
+            throw new IllegalArgumentException("Token inválido o mal formado");
+        }
+
+        // Validar token con los datos extraídos
+        if (!jwtSpecialTokenService.validateConfirmEmailToken(token, nuevoEmail)) {
+            throw new IllegalArgumentException("Token inválido o expirado");
+        }
+
+        // Buscar usuario por email actual
+        UsuarioEntity usuario = jpaUsuarioRepository.findByGmail(gmailActual)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        // Validar que el nuevo email no esté en uso
+        if (jpaUsuarioRepository.existsByGmail(nuevoEmail)) {
+            throw new IllegalArgumentException("El nuevo email ya está en uso");
+        }
+
+        // Actualizar email
+        usuario.setGmail(nuevoEmail);
+        jpaUsuarioRepository.save(usuario);
+    }
+
 }

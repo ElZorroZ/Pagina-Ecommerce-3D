@@ -1,25 +1,34 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Impl;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.UsuarioRepository;
+import com.formaprogramada.ecommerce_backend.Domain.Service.EmailService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.CambioPasswordRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.UsuarioUpdate;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.UsuarioEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.JpaUsuarioRepository;
+import com.formaprogramada.ecommerce_backend.Mapper.UsuarioMapper;
 import com.formaprogramada.ecommerce_backend.Security.Hasher.PasswordHasher;
-import org.springframework.stereotype.Service;
+import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
 
+    @Autowired
+    private JpaUsuarioRepository jpaUsuarioRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasswordHasher passwordHasher;
 
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, PasswordHasher passwordHasher) {
-        this.usuarioRepository = usuarioRepository;
-        this.passwordHasher = passwordHasher;
-    }
-
     @Override
-    @Transactional // asegura consistencia si más adelante agregás acciones adicionales
+    @Transactional
     public Usuario registrarUsuario(Usuario usuario) {
         validarDatos(usuario);
 
@@ -31,19 +40,16 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setPassword(hash);
         usuario.setPermiso(false);
 
-        return usuarioRepository.guardar(usuario);  // <- ahora devuelve usuario con id
+        return usuarioRepository.guardar(usuario);
     }
-
 
     private void validarDatos(Usuario usuario) {
         if (usuario.getNombre() == null || usuario.getNombre().isBlank()) {
             throw new IllegalArgumentException("El nombre es obligatorio.");
         }
-
         if (usuario.getApellido() == null || usuario.getApellido().isBlank()) {
             throw new IllegalArgumentException("El apellido es obligatorio.");
         }
-
         if (usuario.getGmail() == null || usuario.getGmail().isBlank()) {
             throw new IllegalArgumentException("El Gmail es obligatorio.");
         }
@@ -53,6 +59,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new IllegalArgumentException("La contraseña debe tener entre 8 y 16 caracteres.");
         }
     }
+
     @Override
     public List<Usuario> listarTodos() {
         return usuarioRepository.findAll();
@@ -65,10 +72,52 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario actualizarUsuario(Usuario usuario) {
-        if (usuario.getId() == null || usuarioRepository.buscarPorId(usuario.getId()).isEmpty()) {
+        if (usuario.getId() == 0 || usuarioRepository.buscarPorId(usuario.getId()).isEmpty()) {
             throw new IllegalArgumentException("El usuario no existe para actualizar.");
         }
         usuarioRepository.guardar(usuario);
         return usuario;
+    }
+
+    @Override
+    public Usuario actualizarUsuarioPorGmail(String gmail, UsuarioUpdate usuarioUpdate) {
+        Usuario usuario = usuarioRepository.buscarPorGmail(gmail)
+                .orElseThrow(() -> new IllegalArgumentException("El usuario a actualizar no existe"));
+
+        jpaUsuarioRepository.actualizarUsuario(
+                gmail,
+                usuarioUpdate.getNombre(),
+                usuarioUpdate.getApellido(),
+                usuarioUpdate.getDireccion(),
+                usuarioUpdate.getCp(),
+                usuarioUpdate.getCiudad(),
+                usuarioUpdate.getTelefono()
+        );
+
+        return usuarioRepository.buscarPorGmail(gmail)
+                .orElseThrow(() -> new RuntimeException("Error al obtener el usuario actualizado"));
+    }
+
+    @Override
+    public Optional<Usuario> buscarPorGmail(String gmail) {
+        return jpaUsuarioRepository.findByGmail(gmail)
+                .map(UsuarioMapper::toDomain);
+    }
+
+    @Override
+    public void cambiarPassword(String gmail, CambioPasswordRequest request) {
+        Usuario usuario = usuarioRepository.buscarPorGmail(gmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        if (!passwordHasher.matches(request.getPasswordActual(), usuario.getPassword())) {
+            throw new IllegalArgumentException("La contraseña actual es incorrecta.");
+        }
+
+        if (request.getNuevaPassword() == null || request.getNuevaPassword().length() < 6) {
+            throw new IllegalArgumentException("La nueva contraseña debe tener al menos 6 caracteres.");
+        }
+
+        usuario.setPassword(passwordHasher.hash(request.getNuevaPassword()));
+        usuarioRepository.guardar(usuario);
     }
 }

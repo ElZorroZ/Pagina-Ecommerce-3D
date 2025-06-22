@@ -30,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
         Usuario usuario = UsuarioMapper.toDomain(request);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         usuario.setPermiso(false);
+        usuario.setId(null);
         usuarioRepository.guardar(usuario);
 
         // Pasamos los claims y username explícitamente

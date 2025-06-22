@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Editar Perfil</title>
+  <link rel="stylesheet" href="perfil_styles.css" />
+</head>
+<body>
+    <header class="main-header">
+      <div class="container header-inner">
+          <div class="left-header">
+          <div class="logo"></div>
+          <nav class="nav">
+              <ul>
+              <li><a href="#">Set de mates</a></li>
+              <li><a href="#">Tazas</a></li>
+              <li><a href="#">Decoraciones</a></li>
+              <li><a href="#">Para la mesa</a></li>
+              <li><a href="#">Contacto</a></li>
+              <li id="adminPanel"><a href="#">Panel de Administración</a></li>              
+            </ul>
+          </nav>
+          </div>
+          <div class="right-header">
+          <a href="#" class="search-icon">🔍</a>
+          <a href="#" class="cart-icon">🛒 (0)</a>
+          <li id="loginLink"><a href="/WEB/usuario/login/login.html" class="cart-icon">LOGIN</a></li>
+          <li id="cuentaLink" style="display:none;"><a href="/WEB/usuario/login/login.html" class="cart-icon">CUENTA</a></li>  
+        </div>
+      </div>
+      <div class="alt-header mobile-header">
+    <div class="alt-header-inner">
+        <div class="logo">LOGO</div>
+        <button class="btn-search" aria-label="Buscar">🔍</button>
+        <button class="btn-cart" aria-label="Carrito">🛒</button>
+        <button class="btn-menu" aria-label="Menú">☰</button>
+        <a href="/WEB/usuario/login/login.html" class="cart-icon"> LOGIN</a>
+      </div>
+
+      <nav class="catalog-menu">
+        <ul>
+          <li><a href="#">Categoría 1</a></li>
+          <li><a href="#">Categoría 2</a></li>
+          <li><a href="#">Categoría 3</a></li>
+          <!-- etc -->
+        </ul>
+      </nav>
+    </div>
+  </header>
+ <main class="main">
+    <h1>Editar Perfil</h1>
+
+   <!-- SECCIÓN 1: Email -->
+    <section class="perfil-seccion" id="email-section">
+      <h2>Email</h2>
+      <div class="input-row">
+        <input type="email" id="email" name="email" readonly />
+        <button id="btnCambiarEmail" title="Cambiar email">Cambiar</button>
+      </div>
+      <p id="email-verificado-msg">Email verificado</p>
+    </section>
+
+    <!-- Modal para cambiar email -->
+    <div id="modalCambiarEmail" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" id="cerrarModalEmail">&times;</span>
+        <h3>Cambiar Email</h3>
+        <input type="email" id="nuevoEmail" placeholder="Nuevo email" />
+        <button id="btnEnviarCambioEmail">Enviar cambio</button>
+      </div>
+    </div>
+
+    <section class="perfil-seccion" id="password-section">
+      <h2>Contraseña</h2>
+      <div class="input-row">
+        <input type="password" id="passwordActualOculto" value="********" readonly />
+        <button id="btnEditarPassword" title="Editar contraseña">Editar</button>
+      </div>
+    </section>
+
+    <!-- Modal para cambiar contraseña -->
+    <div id="modalCambiarPassword" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" id="cerrarModalPassword">&times;</span>
+        <h3>Cambiar Contraseña</h3>
+        <form id="formCambiarPassword">
+          <div class="form-group">
+            <label for="passwordActual">Contraseña actual</label>
+            <input
+              type="password"
+              id="passwordActual"
+              name="passwordActual"
+              placeholder="********"
+              readonly
+              class="input-placeholder"
+              onclick="this.removeAttribute('readonly'); this.value='';"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="nuevaPassword">Nueva contraseña</label>
+            <input type="password" id="nuevaPassword" name="nuevaPassword" required />
+          </div>
+          <div class="form-group">
+            <label for="repetirNuevaPassword">Repetir nueva contraseña</label>
+            <input type="password" id="repetirNuevaPassword" name="repetirNuevaPassword" required />
+          </div>
+          <button type="submit" class="btn-submit">Guardar nueva contraseña</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 3: Datos personales -->
+    <section class="perfil-seccion" id="datos-personales">
+      <h2>Datos Personales</h2>
+      <form id="perfil-form" class="perfil-form">
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" />
+        </div>
+
+        <div class="form-group">
+          <label for="apellido">Apellido</label>
+          <input type="text" id="apellido" name="apellido" placeholder="Tu apellido" />
+        </div>
+
+        <div class="form-group">
+          <label for="direccion">Dirección</label>
+          <input type="text" id="direccion" name="direccion" placeholder="Tu dirección" />
+        </div>
+
+        <div class="form-group">
+          <label for="codigoPostal">Código Postal</label>
+          <input type="text" id="codigoPostal" name="codigoPostal" placeholder="Código postal" />
+        </div>
+
+        <div class="form-group">
+          <label for="ciudad">Ciudad</label>
+          <input type="text" id="ciudad" name="ciudad" placeholder="Ciudad" />
+        </div>
+
+        <div class="form-group">
+          <label for="telefono">Teléfono</label>
+          <input type="tel" id="telefono" name="telefono" placeholder="Número de teléfono" />
+        </div>
+
+        <button type="submit" class="btn-submit">Guardar Cambios</button>
+      </form>
+    </section>
+  </main>
+
+
+  <script src="perfil.js"></script>
+  <script src="/WEB/auth-utils.js"></script>
+</body>
+</html>
