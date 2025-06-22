@@ -2,6 +2,8 @@ package com.formaprogramada.ecommerce_backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
+import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Impl.CategoriaServiceImpl;
 import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacionService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.UsuarioRegistroRequest;
@@ -50,6 +52,11 @@ class UsuarioControllerTests {
 	@MockBean
 	private UsuarioService usuarioService;
 
+	@MockBean
+	private CategoriaRepository categoriaRepository;
+
+	@Autowired
+	private CategoriaServiceImpl categoriaService;
 	@WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"CLIENTE"})
 	@Test
 	void testObtenerUsuario_Exitoso() throws Exception {
