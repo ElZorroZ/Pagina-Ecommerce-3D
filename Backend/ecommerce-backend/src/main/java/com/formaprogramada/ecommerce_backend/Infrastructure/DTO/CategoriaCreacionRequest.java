@@ -14,5 +14,5 @@ public class CategoriaCreacionRequest {
 
     @NotBlank(message = "La descripción es obligatoria")
     @Size(max = 300, message = "La descripcion puede tener hasta 300 caracteres")
-    private String descripción;
+    private String descripcion;
 }

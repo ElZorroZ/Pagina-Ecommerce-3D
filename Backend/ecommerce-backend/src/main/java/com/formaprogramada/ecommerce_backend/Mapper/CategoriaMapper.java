@@ -19,7 +19,7 @@ public class CategoriaMapper {
         categoria.setId(entity.getId());
         categoria.setNombre(entity.getNombre());
         categoria.setDescripcion(entity.getDescripcion());
-        return usuario;
+        return categoria;
     }
 
     public static CategoriaEntity toEntity(Categoria categoria) {

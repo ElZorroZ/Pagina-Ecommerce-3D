@@ -1,8 +1,10 @@
 package com.formaprogramada.ecommerce_backend.Domain.Repository;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria;
+import org.springframework.stereotype.Repository;
 
-public interface CategoriaRepository {
+@Repository
+public interface CategoriaRepository{
     boolean crearCategoria(Categoria categoria);
     boolean existePorNombre(String nombre);
     boolean guardar(Categoria categoria);

@@ -19,5 +19,6 @@ public class CategoriaEntity {
     private String nombre;
 
     @Column(nullable = false, length = 300)
-    private String categoria;
+    private String descripcion;
+
 }
