@@ -5,6 +5,7 @@ import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.CategoriaCreacionRequest;
 import com.formaprogramada.ecommerce_backend.Mapper.CategoriaMapper;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,17 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/categoria")
+@RequiredArgsConstructor
 public class CategoriaController {
-    private final CategoriaService categoriaService;
 
-    public CategoriaController(CategoriaService categoriaService) {
-        this.categoriaService = categoriaService;
-    }
+    private final CategoriaService categoriaService;
 
     @PostMapping("/crear")
     public ResponseEntity<?> crearCategoria(@Valid @RequestBody CategoriaCreacionRequest request) {
         Categoria categoria = CategoriaMapper.toDomainCategoria1(request);
         categoriaService.registrarCategoria(categoria);
-        return ResponseEntity.ok("Categoria creada");
+        return ResponseEntity.ok("categoria creada correctamente");
     }
 }

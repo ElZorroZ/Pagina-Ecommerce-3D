@@ -1,6 +1,8 @@
 package com.formaprogramada.ecommerce_backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Impl.CategoriaServiceImpl;
 import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacionService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.CategoriaCreacionRequest;
@@ -13,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -30,21 +33,17 @@ public class CategoriaServiceTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private TokenVerificacionService tokenVerificacionService;
+    private CategoriaRepository categoriaRepository;
 
-    @MockBean
-    private UsuarioService usuarioService;
+    @Autowired
+    private CategoriaServiceImpl categoriaService;
 
-    @MockBean
-    private JwtService jwtService;
-    @MockBean
-    private AuthenticationManager authManager;
-
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
     @Test
     void crearUnaCategoria() throws Exception {
         CategoriaCreacionRequest request = CategoriaCreacionRequest.builder()
                 .nombre("Categoria1")
-                .descripcion("hOLA GOLA que tal")
+                .descripcion("hOLA GOLA que tal2")
                 .build();
 
         mockMvc.perform(post("/api/categoria/crear")
