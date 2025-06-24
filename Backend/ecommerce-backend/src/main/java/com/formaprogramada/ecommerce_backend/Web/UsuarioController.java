@@ -1,16 +1,17 @@
 package com.formaprogramada.ecommerce_backend.Web;
-import com.formaprogramada.ecommerce_backend.Domain.Service.EmailService;
-import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.*;
-import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
-import com.formaprogramada.ecommerce_backend.Mapper.UsuarioMapper;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Email.EmailService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Usuario.UsuarioService;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.CambioEmail.CambioEmailRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.CambioPassword.CambioPasswordRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioGetUpdateResponse;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
+import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioMapper;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuario")

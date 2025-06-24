@@ -1,12 +1,18 @@
 package com.formaprogramada.ecommerce_backend.Web;
-import com.formaprogramada.ecommerce_backend.Domain.Service.EmailService;
-import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacionService;
-import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.*;
-import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.UsuarioEntity;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.JpaUsuarioRepository;
-import com.formaprogramada.ecommerce_backend.Mapper.UsuarioMapper;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Email.EmailService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacion.TokenVerificacionService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Usuario.UsuarioService;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Auth.AuthRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Auth.AuthResponse;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Auth.RefreshTokenRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ResetPassword.ResetPasswordConfirmRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ResetPassword.ResetPasswordRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioRegistroRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario.JpaUsuarioRepository;
+import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioMapper;
+import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioRegistroMapper;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +23,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import jakarta.validation.Valid; // o javax.validation.Valid según tus dependencias
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.HashMap;
@@ -37,6 +42,7 @@ public class AuthController {
     private final EmailService emailService;
     private final JwtSpecialTokenService jwtSpecialTokenService;
     private final JpaUsuarioRepository jpaUsuarioRepository;
+    UsuarioMapper mapper = new UsuarioMapper();
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UsuarioRegistroRequest request) {
@@ -44,7 +50,8 @@ public class AuthController {
             return ResponseEntity.badRequest().body("El gmail ya está registrado");
         }
 
-        var usuario = UsuarioMapper.toDomain(request);
+        var usuario = UsuarioRegistroMapper.toDomain(request);
+
         usuario.setPermiso(false);
         usuario.setVerificado(false);
 
@@ -66,7 +73,7 @@ public class AuthController {
         }
 
         var usuarioEntity = tokenOpt.get().getUsuario();
-        var usuario = UsuarioMapper.toDomain(usuarioEntity);
+        var usuario = mapper.toDomain(usuarioEntity);
         usuario.setVerificado(true);
         usuarioService.actualizarUsuario(usuario);
 

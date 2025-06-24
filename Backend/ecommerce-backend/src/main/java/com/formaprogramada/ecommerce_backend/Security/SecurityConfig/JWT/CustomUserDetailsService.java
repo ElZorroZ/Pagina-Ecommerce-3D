@@ -1,7 +1,7 @@
 package com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT;
 
-import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
-import com.formaprogramada.ecommerce_backend.Domain.Repository.UsuarioRepository;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
+import com.formaprogramada.ecommerce_backend.Domain.Repository.Usuario.UsuarioRepository;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
