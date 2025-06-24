@@ -1,8 +1,7 @@
-package com.formaprogramada.ecommerce_backend.Domain.Service.Impl.Auth;
+package com.formaprogramada.ecommerce_backend.Domain.Service.Auth;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Usuario.UsuarioRepository;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Auth.AuthService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Auth.AuthRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Auth.AuthResponse;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioRegistroRequest;

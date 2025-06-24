@@ -1,0 +1,36 @@
+package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto;
+
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
+
+@Entity
+@Table(name = "producto")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ProductoEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(length = 20, nullable = false)
+    private String nombre;
+
+    @Column(length = 80)
+    private String descripcion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id")  // el nombre de la columna FK en la tabla producto
+    private CategoriaEntity categoria;
+
+    private float precio;
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductoArchivoEntity> archivos;
+}
+

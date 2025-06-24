@@ -1,7 +1,6 @@
-package com.formaprogramada.ecommerce_backend.Domain.Service.Impl.Email;
+package com.formaprogramada.ecommerce_backend.Domain.Service.Email;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Email.EmailService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacion.TokenVerificacionService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario.JpaUsuarioRepository;

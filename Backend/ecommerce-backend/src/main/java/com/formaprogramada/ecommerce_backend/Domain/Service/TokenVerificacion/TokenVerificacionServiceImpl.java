@@ -1,6 +1,5 @@
-package com.formaprogramada.ecommerce_backend.Domain.Service.Impl.TokenVerificacion;
+package com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacion;
 
-import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacion.TokenVerificacionService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.TokenVerificacion.TokenVerificacion;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.TokenVerificacion.TokenVerificacionRepository;

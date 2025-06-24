@@ -1,8 +1,7 @@
-package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Impl.Usuario;
+package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Usuario.UsuarioRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario.JpaUsuarioRepository;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioMapper;
 import org.springframework.stereotype.Repository;
 

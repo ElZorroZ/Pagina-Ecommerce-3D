@@ -1,7 +1,6 @@
-package com.formaprogramada.ecommerce_backend.Domain.Service.Impl.Usuario;
+package com.formaprogramada.ecommerce_backend.Domain.Service.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Usuario.UsuarioRepository;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Usuario.UsuarioService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.CambioPassword.CambioPasswordRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario.JpaUsuarioRepository;
