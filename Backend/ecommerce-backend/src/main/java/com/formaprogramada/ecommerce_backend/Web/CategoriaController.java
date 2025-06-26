@@ -2,15 +2,12 @@ package com.formaprogramada.ecommerce_backend.Web;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.CategoriaCreacionRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.*;
 import com.formaprogramada.ecommerce_backend.Mapper.CategoriaMapper;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/categoria")
@@ -19,10 +16,15 @@ public class CategoriaController {
 
     private final CategoriaService categoriaService;
 
-    @PostMapping("/crear")
-    public ResponseEntity<?> crearCategoria(@Valid @RequestBody CategoriaCreacionRequest request) {
-        Categoria categoria = CategoriaMapper.toDomainCategoria1(request);
-        categoriaService.registrarCategoria(categoria);
-        return ResponseEntity.ok("categoria creada correctamente");
+    @PutMapping("/crear_categoria")
+    public ResponseEntity<?> crearCategoria(@Valid @RequestBody CategoriaCrearRequest categoriaCrearRequest) {
+        try {
+            var categoria = CategoriaMapper.toDomain(categoriaCrearRequest);
+
+            categoria = categoriaService.CrearCategoria(categoria);
+            return ResponseEntity.ok("Se hizo bien");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

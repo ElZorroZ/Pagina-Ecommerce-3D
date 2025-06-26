@@ -1,39 +1,26 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Impl;
 
+
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
 import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @RequiredArgsConstructor
 public class CategoriaServiceImpl implements CategoriaService {
 
+
     private final CategoriaRepository categoriaRepository;
 
-
     @Override
-    @Transactional
-    public boolean registrarCategoria(Categoria categoria){
-        validarDatos(categoria);
-        if (categoriaRepository.existePorNombre(categoria.getNombre())){
-            throw new IllegalArgumentException("Ya existe una categoria con ese nombre.");
-        }
+    public Categoria CrearCategoria(Categoria categoria) {
+
 
         return categoriaRepository.guardar(categoria);
-    }
-
-    private void validarDatos(Categoria categoria) {
-        if (categoria.getNombre() == null || categoria.getNombre().isBlank()) {
-            throw new IllegalArgumentException("El nombre es obligatorio.");
-        }
-
-        if (categoria.getDescripcion() == null || categoria.getDescripcion().isBlank()) {
-            throw new IllegalArgumentException("La Descripcion es obligatoria.");
-        }
     }
 
 }

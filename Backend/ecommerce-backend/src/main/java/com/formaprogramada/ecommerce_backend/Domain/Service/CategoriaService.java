@@ -1,7 +1,11 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service;
 
+
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.CategoriaCrearRequest;
 
 public interface CategoriaService {
-    boolean registrarCategoria(Categoria categoria);
+
+    Categoria CrearCategoria(Categoria categoria);
+
 }

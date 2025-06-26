@@ -1,13 +1,11 @@
 package com.formaprogramada.ecommerce_backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario;
-import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacionService;
-import com.formaprogramada.ecommerce_backend.Domain.Service.UsuarioService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.UsuarioRegistroRequest;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.UsuarioUpdate;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.TokenVerificacion;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.UsuarioEntity;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
+import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Impl.CategoriaServiceImpl;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Usuario.UsuarioService;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 
 import org.springframework.http.MediaType;
 
