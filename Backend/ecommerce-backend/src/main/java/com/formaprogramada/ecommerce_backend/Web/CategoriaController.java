@@ -2,9 +2,10 @@ package com.formaprogramada.ecommerce_backend.Web;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.*;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaCrearRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
-import com.formaprogramada.ecommerce_backend.Mapper.CategoriaMapper;
+import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -63,4 +64,21 @@ public class CategoriaController {
             return Optional.empty();
         }
     }
+
+
+
+    @PutMapping("/modificar_categoria/{id}")
+    public ResponseEntity<?> modificarCategoria(
+            @PathVariable int id,
+            @Valid @RequestBody CategoriaUpdateRequest categoriaUpdateRequest) {
+        try {
+            Categoria categoria=CategoriaMapper.toDomain2(categoriaUpdateRequest);
+            categoria = categoriaService.ModificarCategoria(categoria, id);
+            return ResponseEntity.ok("Se hizo bien");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
 }

@@ -1,4 +1,4 @@
-package com.formaprogramada.ecommerce_backend.Infrastructure.DTO;
+package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria;
 import jakarta.validation.constraints.*;
 import lombok.*;
 @Data

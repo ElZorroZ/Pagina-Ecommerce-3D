@@ -1,4 +1,4 @@
-package com.formaprogramada.ecommerce_backend.Mapper;
+package com.formaprogramada.ecommerce_backend.Mapper.Categoria;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;

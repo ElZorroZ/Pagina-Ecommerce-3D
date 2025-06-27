@@ -4,6 +4,7 @@ package com.formaprogramada.ecommerce_backend.Domain.Service.Impl;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
 import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,13 @@ public class CategoriaServiceImpl implements CategoriaService {
 
 
         return categoriaRepository.LeerUno(categoria);
+    }
+
+    @Override
+    public Categoria ModificarCategoria(Categoria categoria, int id) {
+
+
+        return categoriaRepository.modificar(categoria,id);
     }
 
 

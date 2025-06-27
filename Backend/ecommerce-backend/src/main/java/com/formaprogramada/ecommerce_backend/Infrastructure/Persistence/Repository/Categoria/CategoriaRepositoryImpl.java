@@ -1,9 +1,10 @@
-package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository;
+package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Categoria;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
-import com.formaprogramada.ecommerce_backend.Mapper.CategoriaEntityMapper;
+import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaEntityMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -41,5 +42,18 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     public Optional<CategoriaEntity> LeerUno(Categoria categoria) {
         Optional<CategoriaEntity> categoria1 = jpaRepository.findById(categoria.getId());
         return categoria1;
+    }
+
+    @Override
+    public Categoria modificar(Categoria categoria, int id) {
+        CategoriaEntity entity = mapper.toEntity(categoria);
+
+        CategoriaEntity updateEntity=jpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+        updateEntity.setNombre(categoria.getNombre());
+        updateEntity.setDescripcion(categoria.getDescripcion());
+
+        jpaRepository.save(updateEntity);
+        return categoria;
     }
 }
