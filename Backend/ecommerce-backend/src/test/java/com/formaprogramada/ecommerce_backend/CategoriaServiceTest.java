@@ -44,4 +44,26 @@ class CategoriaServiceTests {
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.containsString("Se hizo bien")));
     }
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testLeerCategoriaTodas() throws Exception {
+
+        mockMvc.perform(get("/api/categoria/leer_categoria_todas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(2));
+
     }
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testLeerCategoriaUna() throws Exception {
+
+        mockMvc.perform(get("/api/categoria//leer_categoria_/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.nombre").value("Hola1"));
+    }
+
+    }
+

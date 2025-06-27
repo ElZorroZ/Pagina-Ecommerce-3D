@@ -1,12 +1,15 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Impl;
 
 
-import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
 import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -22,5 +25,20 @@ public class CategoriaServiceImpl implements CategoriaService {
 
         return categoriaRepository.guardar(categoria);
     }
+
+    @Override
+    public List<CategoriaEntity> LeerCategorias(List<CategoriaEntity> lista) {
+
+        lista=categoriaRepository.LeerTodo(lista);
+        return lista;
+    }
+
+    @Override
+    public Optional<CategoriaEntity> LeerCategoria(Categoria categoria) {
+
+
+        return categoriaRepository.LeerUno(categoria);
+    }
+
 
 }
