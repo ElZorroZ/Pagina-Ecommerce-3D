@@ -80,5 +80,16 @@ public class CategoriaController {
         }
     }
 
+    @DeleteMapping("/borrar_categoria/{id}")
+    public ResponseEntity<Void> borrarCategoria(
+            @PathVariable int id) {
+        try {
+            categoriaService.BorrarCategoria(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }

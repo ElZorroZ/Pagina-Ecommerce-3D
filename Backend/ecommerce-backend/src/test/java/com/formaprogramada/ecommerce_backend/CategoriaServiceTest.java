@@ -12,8 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -49,7 +48,7 @@ class CategoriaServiceTests {
 
         mockMvc.perform(get("/api/categoria/leer_categoria_todas"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2));
+                .andExpect(jsonPath("$.size()").value(1));
 
     }
 
@@ -57,7 +56,7 @@ class CategoriaServiceTests {
     @Test
     void testLeerCategoriaUna() throws Exception {
 
-        mockMvc.perform(get("/api/categoria/leer_categoria_/5"))
+        mockMvc.perform(get("/api/categoria/leer_categoria_/2"))
                 .andExpect(status().isOk());
     }
 
@@ -70,11 +69,21 @@ class CategoriaServiceTests {
         request.setNombre("Hola67");
         request.setDescripcion("La lenta sinfonia que nos da la vida a todos");
 
-        mockMvc.perform(put("/api/categoria/modificar_categoria/5")
+        mockMvc.perform(put("/api/categoria/modificar_categoria/2")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.containsString("Se hizo bien")));
+    }
+
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testBorrarCategoriaUna() throws Exception {
+
+
+        mockMvc.perform(delete("/api/categoria/borrar_categoria/2"))
+                .andExpect(status().isNoContent());
     }
 
     }

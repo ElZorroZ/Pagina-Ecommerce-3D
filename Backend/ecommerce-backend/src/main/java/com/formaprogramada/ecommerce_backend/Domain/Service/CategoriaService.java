@@ -14,5 +14,6 @@ public interface CategoriaService {
     List<CategoriaEntity> LeerCategorias(List<CategoriaEntity> lista);
     Optional<CategoriaEntity> LeerCategoria(Categoria categoria);
     Categoria ModificarCategoria(Categoria categoria, int id);
+    void BorrarCategoria(int id);
 
 }

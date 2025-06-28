@@ -13,4 +13,5 @@ public interface CategoriaRepository {
     List<CategoriaEntity> LeerTodo(List<CategoriaEntity> lista);
     Optional<CategoriaEntity> LeerUno(Categoria categoria);
     Categoria modificar(Categoria categoria, int id);
+    void borrar(int id);
 }

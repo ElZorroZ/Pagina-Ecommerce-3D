@@ -56,4 +56,9 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
         jpaRepository.save(updateEntity);
         return categoria;
     }
+
+    @Override
+    public void borrar(int id) {
+        jpaRepository.deleteById(id);
+    }
 }
