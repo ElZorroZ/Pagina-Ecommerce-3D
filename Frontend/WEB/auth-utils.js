@@ -95,15 +95,18 @@ function obtenerRolesDesdeToken() {
     const payload = JSON.parse(payloadJson);
     const roles = payload.roles || [];
 
-    return roles.map(r => r.authority);
+    // roles ya son strings, devolverlos tal cual
+    return roles;
   } catch (e) {
     console.error("Error al decodificar el token:", e);
     return [];
   }
 }
+
 window.addEventListener("load", () => {
   // Obtener roles del token (asumiendo que la función obtenerRolesDesdeToken() está definida)
   const roles = obtenerRolesDesdeToken();
+  console.log("Roles en token:", roles);
 
   // Obtener elementos del DOM
   const adminPanel = document.getElementById("adminPanel");
@@ -111,7 +114,7 @@ window.addEventListener("load", () => {
 
   // Mostrar/ocultar Panel de Administración según rol ADMIN
   if (adminPanel) {
-    if (roles.includes("ADMIN")) {
+    if (roles.includes("ROLE_ADMIN")) {
       adminPanel.style.display = ""; // Mostrar
     } else {
       adminPanel.style.display = "none"; // Ocultar

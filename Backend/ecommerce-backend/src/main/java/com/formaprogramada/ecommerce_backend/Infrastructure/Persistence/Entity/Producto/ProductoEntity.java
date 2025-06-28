@@ -4,6 +4,7 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.C
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,12 +26,15 @@ public class ProductoEntity {
     private String descripcion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoria_id")  // el nombre de la columna FK en la tabla producto
-    private CategoriaEntity categoria;
+    @JoinColumn(name = "categoriaId")  // el nombre de la columna FK en la tabla producto
+    private CategoriaEntity categoriaId;
 
     private float precio;
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductoArchivoEntity> archivos;
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductoColorEntity> colores = new ArrayList<>();
 }
 

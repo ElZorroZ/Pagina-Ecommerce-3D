@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface JpaProductoArchivoRepository extends JpaRepository<ProductoArchivoEntity, Integer> {
     List<ProductoArchivoEntity> findByProductoIdOrderByOrdenAsc(Integer productoId);
+
 }
 

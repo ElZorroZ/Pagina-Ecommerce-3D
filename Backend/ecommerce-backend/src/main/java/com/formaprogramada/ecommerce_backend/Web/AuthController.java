@@ -1,5 +1,7 @@
 package com.formaprogramada.ecommerce_backend.Web;
+import com.formaprogramada.ecommerce_backend.Domain.Repository.Usuario.UsuarioRepository;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Email.EmailService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Jwt.JwtTokenService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacion.TokenVerificacionService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Usuario.UsuarioService;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
@@ -11,23 +13,28 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ResetPassword.Re
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioRegistroRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario.JpaUsuarioRepository;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario.UsuarioRepositoryImpl;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioRegistroMapper;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -42,6 +49,9 @@ public class AuthController {
     private final EmailService emailService;
     private final JwtSpecialTokenService jwtSpecialTokenService;
     private final JpaUsuarioRepository jpaUsuarioRepository;
+    private final JwtTokenService jwtTokenService;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
     UsuarioMapper mapper = new UsuarioMapper();
 
     @PostMapping("/register")
@@ -85,16 +95,10 @@ public class AuthController {
         try {
             var authToken = new UsernamePasswordAuthenticationToken(request.getGmail(), request.getPassword());
             var auth = authManager.authenticate(authToken);
-
             var userDetails = (UserDetails) auth.getPrincipal();
 
-            Map<String, Object> claims = new HashMap<>();
-            claims.put("roles", userDetails.getAuthorities());
-
-            String accessToken = jwtService.generateAccessToken(claims, userDetails.getUsername());
-            String refreshToken = jwtService.generateRefreshToken(Map.of(), userDetails.getUsername());
-
-            return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
+            AuthResponse tokens = jwtTokenService.generarTokens(userDetails);
+            return ResponseEntity.ok(tokens);
 
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
@@ -103,17 +107,18 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
-        String refreshToken = request.getRefreshToken();
-
-        if (jwtService.isTokenExpired(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token expirado");
+        try {
+            AuthResponse tokens = jwtTokenService.refrescarTokens(request.getRefreshToken());
+            return ResponseEntity.ok(tokens);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
-
-        String username = jwtService.extractUsername(refreshToken);
-        String accessToken = jwtService.generateAccessToken(Map.of(), username);
-
-        return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
     }
+
+
+
+
+
 
     @PostMapping("/reset-password-request")
     public ResponseEntity<?> solicitarRestablecerPassword(@RequestBody ResetPasswordRequest request) {

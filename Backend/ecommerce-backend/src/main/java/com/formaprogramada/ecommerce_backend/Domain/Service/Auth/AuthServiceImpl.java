@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -58,9 +59,11 @@ public class AuthServiceImpl implements AuthService {
                 .buscarPorGmail(request.getGmail())
                 .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
 
-        Map<String, Object> claims = Map.of("permiso", usuario.getPermiso());
+        String rol = usuario.getPermiso() ? "ADMIN" : "CLIENTE";
+        Map<String, Object> claims = Map.of("roles", List.of("ROLE_" + rol));
+
         String token = jwtService.generateAccessToken(claims, usuario.getGmail());
-        String refreshToken = jwtService.generateRefreshToken(Map.of(), usuario.getGmail());
+        String refreshToken = jwtService.generateRefreshToken(claims, usuario.getGmail());
 
         return AuthResponse.builder()
                 .token(token)
@@ -79,14 +82,18 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Refresh token inválido o expirado");
         }
 
-        Map<String, Object> claims = Map.of("permiso", usuario.getPermiso());
+        String rol = usuario.getPermiso() ? "ADMIN" : "CLIENTE";
+        Map<String, Object> claims = Map.of("roles", List.of("ROLE_" + rol));
+
         String newToken = jwtService.generateAccessToken(claims, usuario.getGmail());
+        String newRefreshToken = jwtService.generateRefreshToken(claims, usuario.getGmail());
 
         return AuthResponse.builder()
                 .token(newToken)
-                .refreshToken(refreshToken)
+                .refreshToken(newRefreshToken)
                 .build();
     }
+
 
 
 }
