@@ -2,13 +2,11 @@ package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Reposit
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaEntityMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @Repository
@@ -39,10 +37,11 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     }
 
     @Override
-    public Optional<CategoriaEntity> LeerUno(Categoria categoria) {
-        Optional<CategoriaEntity> categoria1 = jpaRepository.findById(categoria.getId());
-        return categoria1;
+    public CategoriaEntity LeerUno(Categoria categoria) {
+        return jpaRepository.findById(categoria.getId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
     }
+
 
     @Override
     public Categoria modificar(Categoria categoria, int id) {

@@ -2,15 +2,20 @@ package com.formaprogramada.ecommerce_backend.Web;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaCrearRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,8 +26,10 @@ import java.util.Optional;
 public class CategoriaController {
 
     private final CategoriaService categoriaService;
+    @Autowired
+    private ImgBBUploaderService imgBBUploaderService;
 
-    @PutMapping("/crear_categoria")
+    @PutMapping("/crearCategoria")
     public ResponseEntity<?> crearCategoria(@Valid @RequestBody CategoriaCrearRequest categoriaCrearRequest) {
         try {
             var categoria = CategoriaMapper.toDomain(categoriaCrearRequest);
@@ -34,8 +41,23 @@ public class CategoriaController {
         }
     }
 
+    @PostMapping(value = "/crearCategoriaConImagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> crearCategoriaConImagen(
+            @RequestPart("categoria") CategoriaCrearRequest categoriaCrearRequest,
+            @RequestPart("file") MultipartFile file) {
+        try {
+            var categoria = CategoriaMapper.toDomain(categoriaCrearRequest);
+            categoria = categoriaService.CrearCategoriaConImagen(categoria, file);
+            return ResponseEntity.ok("Se hizo bien");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    @GetMapping("/leer_categoria_todas")
+
+
+
+    @GetMapping("/leerCategoriaTodas")
     public List<CategoriaEntity> leerCategoriaTodas() {
         try {
             List<CategoriaEntity> lista = new ArrayList<>();
@@ -51,23 +73,23 @@ public class CategoriaController {
         }
     }
 
-    @GetMapping("/leer_categoria_/{id}")
-    public Optional<CategoriaEntity> leerCategoriaUna(@PathVariable int id) {
+    @GetMapping("/leerCategoria/{id}")
+    public CategoriaEntity leerCategoriaUna(@PathVariable int id) {
         try {
 
             Categoria categoria= new Categoria();
             categoria.setId(id);
-            Optional<CategoriaEntity> cate=categoriaService.LeerCategoria(categoria);
+            CategoriaEntity cate=categoriaService.LeerCategoria(categoria);
             System.out.println(cate);
             return cate;
         } catch (IllegalArgumentException e) {
-            return Optional.empty();
+            return null;
         }
     }
 
 
 
-    @PutMapping("/modificar_categoria/{id}")
+    @PutMapping("/modificarCategoria/{id}")
     public ResponseEntity<?> modificarCategoria(
             @PathVariable int id,
             @Valid @RequestBody CategoriaUpdateRequest categoriaUpdateRequest) {
@@ -80,7 +102,7 @@ public class CategoriaController {
         }
     }
 
-    @DeleteMapping("/borrar_categoria/{id}")
+    @DeleteMapping("/borrarCategoria/{id}")
     public ResponseEntity<Void> borrarCategoria(
             @PathVariable int id) {
         try {
