@@ -26,4 +26,7 @@ public class CategoriaArchivoEntity {
     @Column(length = 500, nullable = false)
     private String linkArchivo;
 
+    @Column(length = 500)
+    private String deleteUrl;
+
 }

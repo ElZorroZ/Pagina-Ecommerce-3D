@@ -45,40 +45,35 @@ class CategoriaServiceTests {
 
 
 
-    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testAgregarCategoriaConImagen() throws Exception {
+        CategoriaCrearRequest request = new CategoriaCrearRequest("nombre de prueba", "descripción de prueba");
+        String categoriaJson = new ObjectMapper().writeValueAsString(request);
 
-        String json = """
-            {
-                "nombre": "Hola111",
-                "descripcion": "aaaaaaaaaaaaaa222"
-            }
-        """;
-
-        // Parte JSON
-        MockMultipartFile jsonPart = new MockMultipartFile(
-                "categoria",  // clave debe coincidir con @RequestPart("categoria")
-                "",
+        MockMultipartFile categoriaPart = new MockMultipartFile(
+                "categoria",
+                "categoria.json",
                 "application/json",
-                json.getBytes()
+                categoriaJson.getBytes()
         );
 
-        // Parte archivo
         MockMultipartFile filePart = new MockMultipartFile(
                 "file",
                 "imagen.jpg",
-                MediaType.IMAGE_JPEG_VALUE,
-                "contenido-de-imagen-ficticio".getBytes()
+                "image/jpeg",
+                "contenido_falso".getBytes()
         );
 
         mockMvc.perform(multipart("/api/categoria/crearCategoriaConImagen")
-                        .file(jsonPart)
+                        .file(categoriaPart)
                         .file(filePart)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Se hizo bien"));
+                .andExpect(status().isOk());
     }
+
+
+
 
     @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
     @Test

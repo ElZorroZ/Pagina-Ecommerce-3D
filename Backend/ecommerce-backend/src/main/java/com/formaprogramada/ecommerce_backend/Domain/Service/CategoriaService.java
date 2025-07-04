@@ -17,4 +17,5 @@ public interface CategoriaService {
     Categoria ModificarCategoria(Categoria categoria, int id);
     void BorrarCategoria(int id);
 
+
 }

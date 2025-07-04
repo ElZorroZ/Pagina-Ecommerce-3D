@@ -1,5 +1,6 @@
 package com.formaprogramada.ecommerce_backend.Web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
@@ -28,6 +29,8 @@ public class CategoriaController {
     private final CategoriaService categoriaService;
     @Autowired
     private ImgBBUploaderService imgBBUploaderService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @PutMapping("/crearCategoria")
     public ResponseEntity<?> crearCategoria(@Valid @RequestBody CategoriaCrearRequest categoriaCrearRequest) {

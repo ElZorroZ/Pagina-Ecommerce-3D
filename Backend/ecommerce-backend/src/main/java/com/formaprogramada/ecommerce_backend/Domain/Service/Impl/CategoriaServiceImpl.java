@@ -44,6 +44,7 @@ public class CategoriaServiceImpl implements CategoriaService {
         ImgBBData data = imgBBUploaderService.subirImagen(file);
 
 
+
         CategoriaEntity idCategoria=categoriaRepository.LeerUno(categoria);
         if(idCategoria==null) {
             throw new RuntimeException("Producto no encontrado");
@@ -80,6 +81,8 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     public void BorrarCategoria(int id) {
+        String url=categoriaRepository.borrarImagen(id);
+        imgBBUploaderService.borrarImagenDeImgBB(url);
         categoriaRepository.borrar(id);
     }
 
