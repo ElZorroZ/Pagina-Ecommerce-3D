@@ -8,7 +8,6 @@ import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaEntityMap
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @Repository
@@ -67,8 +66,12 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
 
     @Override
     public String borrarImagen(int id) {
-        CategoriaArchivoEntity imagen = jpaCategoriaArchivoRepository.findById(id).orElseThrow(() -> new RuntimeException("Imagen no encontrado"));
-        return imagen.getDeleteUrl();
+        CategoriaArchivoEntity imagen = jpaCategoriaArchivoRepository.findById(id).orElseThrow(null);
+        if (imagen!=null) {
+            return imagen.getDeleteUrl();
+        }else{
+            return null;
+        }
 
 
     }

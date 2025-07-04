@@ -82,8 +82,12 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Override
     public void BorrarCategoria(int id) {
         String url=categoriaRepository.borrarImagen(id);
-        imgBBUploaderService.borrarImagenDeImgBB(url);
-        categoriaRepository.borrar(id);
+        if (url!=null) {
+            imgBBUploaderService.borrarImagenDeImgBB(url);
+        }else{
+            categoriaRepository.borrar(id);
+        }
+
     }
 
 
