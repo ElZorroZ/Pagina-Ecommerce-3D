@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -45,7 +46,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
 
 
-        CategoriaEntity idCategoria=categoriaRepository.LeerUno(categoria);
+        CategoriaEntity idCategoria=categoriaRepository.LeerUnoSinImagen(categoria);
         if(idCategoria==null) {
             throw new RuntimeException("Producto no encontrado");
         }
@@ -53,20 +54,21 @@ public class CategoriaServiceImpl implements CategoriaService {
 
         archivo.setCategoriaId(idCategoria);
         archivo.setLinkArchivo(data.getUrl());
+        archivo.setDeleteUrl(data.getDelete_url());
         jpaCategoriaArchivoRepository.save(archivo);
 
         return categoria1;
     }
 
     @Override
-    public List<CategoriaEntity> LeerCategorias(List<CategoriaEntity> lista) {
+    public Map<CategoriaEntity,String> LeerCategorias( Map<CategoriaEntity,String> lista) {
 
         lista=categoriaRepository.LeerTodo(lista);
         return lista;
     }
 
     @Override
-    public CategoriaEntity LeerCategoria(Categoria categoria) {
+    public Map<CategoriaEntity,String> LeerCategoria(Categoria categoria) {
 
 
         return categoriaRepository.LeerUno(categoria);
@@ -77,6 +79,32 @@ public class CategoriaServiceImpl implements CategoriaService {
 
 
         return categoriaRepository.modificar(categoria,id);
+    }
+
+    @Override
+    public boolean ModificarCategoriaImagen(MultipartFile file, int id) {
+        CategoriaArchivoEntity imagen=jpaCategoriaArchivoRepository.findBycategoriaId(id) .orElseThrow(() -> new RuntimeException("No se encontró la imagen"));
+        imgBBUploaderService.borrarImagenDeImgBB(imagen.getDeleteUrl());
+        jpaCategoriaArchivoRepository.delete(imagen);
+        try {
+            CategoriaEntity caId= new CategoriaEntity();
+            caId.setId(id);
+            ImgBBData data = imgBBUploaderService.subirImagen(file);
+            CategoriaArchivoEntity archivo= new CategoriaArchivoEntity();
+
+            archivo.setCategoriaId(caId);
+            archivo.setLinkArchivo(data.getUrl());
+            archivo.setDeleteUrl(data.getDelete_url());
+
+            jpaCategoriaArchivoRepository.save(archivo);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+
+
+
+
     }
 
     @Override

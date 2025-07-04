@@ -7,14 +7,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public interface CategoriaService {
 
     Categoria CrearCategoria(Categoria categoria);
     Categoria CrearCategoriaConImagen(Categoria categoria, MultipartFile file)throws IOException;
-    List<CategoriaEntity> LeerCategorias(List<CategoriaEntity> lista);
-    CategoriaEntity LeerCategoria(Categoria categoria);
+    Map<CategoriaEntity,String> LeerCategorias( Map<CategoriaEntity,String> lista);
+    Map<CategoriaEntity,String> LeerCategoria(Categoria categoria);
     Categoria ModificarCategoria(Categoria categoria, int id);
+    boolean ModificarCategoriaImagen(MultipartFile file , int id);
     void BorrarCategoria(int id);
 
 

@@ -7,7 +7,7 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.C
 import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaEntityMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.*;
 
 
 @Repository
@@ -33,17 +33,38 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     }
 
     @Override
-    public List<CategoriaEntity> LeerTodo(List<CategoriaEntity> lista) {
-        Categoria categoria= new Categoria();
-        lista=jpaRepository2.findAll();
+    public Map<CategoriaEntity,String> LeerTodo(Map<CategoriaEntity,String> lista) {
+        List<CategoriaEntity> totalCategoria=jpaRepository2.findAll();
+        List<CategoriaArchivoEntity>totalImagen=jpaCategoriaArchivoRepository.findAll();
+        for (CategoriaEntity categoriaEntity : totalCategoria) {
+            for(CategoriaArchivoEntity categoriaArchivo: totalImagen){
+                if (categoriaArchivo.getId().equals(categoriaEntity.getId())){
+                    lista.put(categoriaEntity,categoriaArchivo.getLinkArchivo());
+                }
+            }
+        }
+
         return lista;
     }
 
     @Override
-    public CategoriaEntity LeerUno(Categoria categoria) {
+    public Map<CategoriaEntity,String> LeerUno(Categoria categoria) {
+        CategoriaEntity categoriaEntity = jpaRepository.findById(categoria.getId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        CategoriaArchivoEntity imagen = jpaCategoriaArchivoRepository.findById(categoria.getId()).orElseThrow(null);
+        Map<CategoriaEntity, String> lista = new HashMap<CategoriaEntity, String>();
+        String link=imagen.getLinkArchivo();
+        lista.put(categoriaEntity,link);
+        return lista;
+
+    }
+
+    public CategoriaEntity LeerUnoSinImagen(Categoria categoria) {
         return jpaRepository.findById(categoria.getId())
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
     }
+
+
 
 
     @Override
@@ -72,7 +93,5 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
         }else{
             return null;
         }
-
-
     }
 }

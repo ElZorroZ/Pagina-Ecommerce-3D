@@ -99,10 +99,10 @@ class CategoriaServiceTests {
     void testModificarCategoriaUna() throws Exception {
 
         CategoriaUpdateRequest request = new CategoriaUpdateRequest();
-        request.setNombre("Hola67");
+        request.setNombre("Hola99999");
         request.setDescripcion("La lenta sinfonia que nos da la vida a todos");
 
-        mockMvc.perform(put("/api/categoria/modificarCategoria/2")
+        mockMvc.perform(put("/api/categoria/modificarCategoria/16")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())

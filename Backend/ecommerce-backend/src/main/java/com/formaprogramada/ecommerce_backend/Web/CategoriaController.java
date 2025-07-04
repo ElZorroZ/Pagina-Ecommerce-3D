@@ -15,11 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/categoria")
@@ -58,17 +57,16 @@ public class CategoriaController {
     }
 
 
-
-
     @GetMapping("/leerCategoriaTodas")
-    public List<CategoriaEntity> leerCategoriaTodas() {
+    public Map<CategoriaEntity,String> leerCategoriaTodas() {
         try {
-            List<CategoriaEntity> lista = new ArrayList<>();
+            Map<CategoriaEntity,String> lista= new HashMap<CategoriaEntity, String>();
+
 
             lista=categoriaService.LeerCategorias(lista);
             System.out.println("Se logro conseguir las categorias");
-            for (CategoriaEntity categoria : lista) {
-                System.out.println(categoria);
+            for (Map.Entry<CategoriaEntity,String> lista2: lista.entrySet()) {
+                System.out.println(lista2);
             }
             return lista;
         } catch (IllegalArgumentException e) {
@@ -77,12 +75,12 @@ public class CategoriaController {
     }
 
     @GetMapping("/leerCategoria/{id}")
-    public CategoriaEntity leerCategoriaUna(@PathVariable int id) {
+    public Map<CategoriaEntity,String> leerCategoriaUna(@PathVariable int id) {
         try {
 
             Categoria categoria= new Categoria();
             categoria.setId(id);
-            CategoriaEntity cate=categoriaService.LeerCategoria(categoria);
+            Map<CategoriaEntity,String> cate=categoriaService.LeerCategoria(categoria);
             System.out.println(cate);
             return cate;
         } catch (IllegalArgumentException e) {
@@ -100,6 +98,21 @@ public class CategoriaController {
             Categoria categoria=CategoriaMapper.toDomain2(categoriaUpdateRequest);
             categoria = categoriaService.ModificarCategoria(categoria, id);
             return ResponseEntity.ok("Se hizo bien");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/modificarCategoriaImagen/{id}")
+    public ResponseEntity<?> modificarCategoriaImagen(
+            @PathVariable int id,
+            @RequestPart("file") MultipartFile file) {
+        try {
+            if(categoriaService.ModificarCategoriaImagen(file, id)) {
+                return ResponseEntity.ok("Se hizo bien");
+            }else{
+                return ResponseEntity.ok("Se hizo mal");
+            }
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
