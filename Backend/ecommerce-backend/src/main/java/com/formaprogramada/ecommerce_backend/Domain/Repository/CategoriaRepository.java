@@ -15,5 +15,6 @@ public interface CategoriaRepository {
     Categoria modificar(Categoria categoria, int id);
     void borrar(int id);
     String borrarImagen(int id);
+    boolean AgregarDestacado(CategoriaEntity id);
 
 }

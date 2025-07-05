@@ -24,12 +24,14 @@ import java.util.*;
 @RequestMapping("/api/categoria")
 @RequiredArgsConstructor
 public class CategoriaController {
-
     private final CategoriaService categoriaService;
     @Autowired
     private ImgBBUploaderService imgBBUploaderService;
     @Autowired
     private ObjectMapper objectMapper;
+
+
+
 
     @PutMapping("/crearCategoria")
     public ResponseEntity<?> crearCategoria(@Valid @RequestBody CategoriaCrearRequest categoriaCrearRequest) {
@@ -128,6 +130,18 @@ public class CategoriaController {
             throw new RuntimeException(e);
         }
     }
+
+    @PostMapping("/AgregarCategoriaDestacada/{id}")
+    public ResponseEntity<?> AgregarCategoriaDestacada(
+            @PathVariable int id) {
+            if(categoriaService.AgregarCategoriaDestacada(id)) {
+                return ResponseEntity.ok("Se hizo bien");
+            }else{
+                return ResponseEntity.ok("Se hizo mal");
+            }
+    }
+
+
 
 
 }

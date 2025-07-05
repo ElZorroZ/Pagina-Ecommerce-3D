@@ -1,10 +1,12 @@
 package com.formaprogramada.ecommerce_backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaCrearRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +27,8 @@ class CategoriaServiceTests {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+
 
     @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
     @Test
@@ -118,5 +122,21 @@ class CategoriaServiceTests {
                 .andExpect(status().isNoContent());
     }
 
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testAgregarCategoriaDestacada() throws Exception {
+        int categoriaId = 3;
+        mockMvc.perform(post("/api/categoria/AgregarCategoriaDestacada/{id}", categoriaId))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Se hizo bien"));
+
     }
+
+
+
+
+
+
+}
 

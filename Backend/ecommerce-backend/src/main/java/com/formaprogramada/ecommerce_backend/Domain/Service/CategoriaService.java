@@ -18,6 +18,7 @@ public interface CategoriaService {
     Categoria ModificarCategoria(Categoria categoria, int id);
     boolean ModificarCategoriaImagen(MultipartFile file , int id);
     void BorrarCategoria(int id);
+    boolean AgregarCategoriaDestacada(int id);
 
 
 }

@@ -3,6 +3,7 @@ package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Reposit
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaArchivoEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaDestacadoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaEntityMapper;
 import org.springframework.stereotype.Repository;
@@ -16,13 +17,15 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     private final CategoriaEntityMapper mapper;
     private final JpaCategoriaBuscarRepository jpaRepository2;
     private final JpaCategoriaArchivoRepository jpaCategoriaArchivoRepository;
+    private final JpaCategoriaDestacadoRepository jpaCategoriaDestacadoRepository;
 
 
-    public CategoriaRepositoryImpl(JpaCategoriaRepository jpaRepository, CategoriaEntityMapper mapper, JpaCategoriaBuscarRepository jpaRepository2, JpaCategoriaArchivoRepository jpaCategoriaArchivoRepository) {
+    public CategoriaRepositoryImpl(JpaCategoriaRepository jpaRepository, CategoriaEntityMapper mapper, JpaCategoriaBuscarRepository jpaRepository2, JpaCategoriaArchivoRepository jpaCategoriaArchivoRepository, JpaCategoriaDestacadoRepository jpaCategoriaDestacadoRepository) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
         this.jpaRepository2 = jpaRepository2;
         this.jpaCategoriaArchivoRepository = jpaCategoriaArchivoRepository;
+        this.jpaCategoriaDestacadoRepository = jpaCategoriaDestacadoRepository;
     }
 
     @Override
@@ -93,5 +96,16 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
         }else{
             return null;
         }
+    }
+
+    @Override
+    public boolean AgregarDestacado(CategoriaEntity cat2) {
+
+
+        CategoriaDestacadoEntity caId = new CategoriaDestacadoEntity();
+        caId.setCategoria(cat2);
+        jpaCategoriaDestacadoRepository.save(caId);
+
+        return true;
     }
 }

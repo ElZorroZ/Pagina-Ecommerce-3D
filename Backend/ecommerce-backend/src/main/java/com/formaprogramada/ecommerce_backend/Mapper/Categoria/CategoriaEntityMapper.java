@@ -11,4 +11,6 @@ public interface CategoriaEntityMapper {
     Categoria toDomain(CategoriaEntity categoriaEntity);
 
 
+
+
 }
