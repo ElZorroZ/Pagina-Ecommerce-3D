@@ -81,80 +81,41 @@ async function fetchConRefresh(url, options = {}) {
   const preview = document.getElementById('preview-imagenes'); // ✅ agregado
 
   // Estado global
-  window.productoState = window.productoState || {};
-  window.productoState.coloresSeleccionados = window.productoState.coloresSeleccionados || [];
-  window.productoState.archivosSeleccionados = window.productoState.archivosSeleccionados || [];
+  window.categoriaState = window.categoriaState || {};
+  window.categoriaState.archivosSeleccionados = window.categoriaState.archivosSeleccionados || [];
 
   inputImagenes.addEventListener('change', () => {
     const files = Array.from(inputImagenes.files);
 
+    // Si ya hay una imagen o se intenta cargar más de una
+    if (
+      window.categoriaState.archivosSeleccionados.length >= 1 ||
+      files.length > 1
+    ) {
+      alert("Solo se permite subir una imagen. Primero eliminá la actual para agregar otra.");
+      inputImagenes.value = ""; // Limpio el input
+      return;
+    }
+
     files.forEach(file => {
-      if (window.productoState.archivosSeleccionados.length < 5) {
-        const existe = window.productoState.archivosSeleccionados.some(f => f.name === file.name && f.size === file.size);
-        if (!existe) window.productoState.archivosSeleccionados.push(file);
-      }
+      const existe = window.categoriaState.archivosSeleccionados.some(
+        f => f.name === file.name && f.size === file.size
+      );
+      if (!existe) window.categoriaState.archivosSeleccionados.push(file);
     });
 
     actualizarPreview();
     inputImagenes.value = "";
   });
 
-  async function subirArchivoBackend(productoId, file, orden) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("orden", orden);
-
-    const res = await fetchConRefresh(`http://localhost:8080/api/productos/${productoId}/archivos`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || "Error subiendo archivo al backend");
-    }
-    return await res.json();
-  }
-
   const form = document.getElementById("form-producto");
-  const inputColor = document.getElementById("input-color");
   const btnAgregarColor = document.getElementById("btn-agregar-color");
-  const listaColores = document.getElementById("lista-colores");
-
-  btnAgregarColor.addEventListener("click", () => {
-    const color = inputColor.value.trim();
-    if (color && !window.productoState.coloresSeleccionados.includes(color)) {
-      window.productoState.coloresSeleccionados.push(color);
-      actualizarListaColores();
-      inputColor.value = "";
-      inputColor.focus();
-    }
-  });
-
-  function actualizarListaColores() {
-    listaColores.innerHTML = "";
-    window.productoState.coloresSeleccionados.forEach((color, index) => {
-      const li = document.createElement("li");
-      li.textContent = color + " ";
-
-      const btnBorrar = document.createElement("button");
-      btnBorrar.textContent = "x";
-      btnBorrar.style.marginLeft = "8px";
-      btnBorrar.addEventListener("click", () => {
-        window.productoState.coloresSeleccionados.splice(index, 1);
-        actualizarListaColores();
-      });
-
-      li.appendChild(btnBorrar);
-      listaColores.appendChild(li);
-    });
-  }
 
   function actualizarPreview() {
     preview.innerHTML = "";
-    if (!window.productoState.archivosSeleccionados || window.productoState.archivosSeleccionados.length === 0) return;
+    if (!window.categoriaState.archivosSeleccionados || window.categoriaState.archivosSeleccionados.length === 0) return;
 
-    window.productoState.archivosSeleccionados.forEach((archivo, idx) => {
+    window.categoriaState.archivosSeleccionados.forEach((archivo, idx) => {
       const div = document.createElement("div");
       div.style.position = "relative";
       div.style.display = "inline-block";
@@ -190,7 +151,7 @@ async function fetchConRefresh(url, options = {}) {
       btnEliminar.style.padding = "0 4px";
       btnEliminar.title = "Eliminar imagen";
       btnEliminar.addEventListener("click", () => {
-        window.productoState.archivosSeleccionados.splice(idx, 1);
+        window.categoriaState.archivosSeleccionados.splice(idx, 1);
         actualizarPreview();
       });
 
@@ -201,68 +162,73 @@ async function fetchConRefresh(url, options = {}) {
   }
 
   form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const nombre = document.getElementById("nombre").value.trim();
-    const descripcion = document.getElementById("descripcion").value.trim();
-    const precio = parseFloat(document.getElementById("precio").value);
+  const nombre = document.getElementById("nombre").value.trim();
+  const descripcion = document.getElementById("descripcion").value.trim();
 
-    if (!nombre || isNaN(precio)) {
-      alert("Por favor completa todos los campos obligatorios.");
-      return;
-    }
-    const tieneArchivosDeOtroProducto = window.productoState.archivosSeleccionados.some(a => !(a instanceof File));
+  if (!nombre || !descripcion) {
+    alert("Por favor completa todos los campos obligatorios.");
+    return;
+  }
 
-    if (tieneArchivosDeOtroProducto) {
-      alert("Estás usando imágenes que pertenecen a otro producto. Por favor eliminá esas imágenes antes de guardar uno nuevo.");
-      return;
-    }
+  const tieneArchivos = window.categoriaState.archivosSeleccionados.length > 0;
+  const backendBaseSinImagen = "http://localhost:8080/api/categoria"; // Cambié el path a /categorias
+  const backendBaseConImagen = "http://localhost:8080/api/categoria/crearCategoriaConImagen";
 
-    try {
-      const productoPayload = {
-        nombre,
-        descripcion,
-        precio,
-        categoriaId: 1,
-        colores: window.productoState.coloresSeleccionados // ✅ corregido
-      };
+  try {
+    if (!tieneArchivos) {
+      // Sin imagen: enviamos JSON normal al primer endpoint
+      const categoriaPayload = { nombre, descripcion };
 
-      const backendBase = "http://localhost:8080/api/productos";
-
-      const resProducto = await fetchConRefresh(backendBase, {
+      const res = await fetchConRefresh(backendBaseSinImagen, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(productoPayload),
+        body: JSON.stringify(categoriaPayload),
       });
 
-      if (!resProducto.ok) {
-        let errorText = await resProducto.text();
-        try {
-          const json = JSON.parse(errorText);
-          errorText = json.message || JSON.stringify(json);
-        } catch {}
-        throw new Error(errorText || "Error al guardar el producto");
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Error al guardar la categoría");
       }
 
-      const productoCreado = await resProducto.json();
-
-      if (window.productoState.archivosSeleccionados.length > 0) {
-        for (let i = 0; i < Math.min(window.productoState.archivosSeleccionados.length, 5); i++) {
-          await subirArchivoBackend(productoCreado.id, window.productoState.archivosSeleccionados[i], i);
-        }
-      }
-
-      alert("Producto, colores y archivos guardados con éxito!");
+      alert("Categoría guardada con éxito!");
       form.reset();
-      window.productoState.coloresSeleccionados = [];
-      window.productoState.archivosSeleccionados = [];
-      actualizarListaColores();
+      window.categoriaState.archivosSeleccionados = [];
       actualizarPreview();
-      cargarProductos();
-    } catch (error) {
-      alert("Error: " + error.message);
+      // Aquí podés actualizar la lista de categorías si querés
+    } else {
+      // Con imagen: enviamos multipart/form-data al segundo endpoint
+      const formData = new FormData();
+
+      // El backend espera la categoría como JSON en la parte "categoria"
+      // Entonces transformamos el objeto a JSON string
+      const categoriaObj = { nombre, descripcion };
+      formData.append("categoria", new Blob([JSON.stringify(categoriaObj)], { type: "application/json" }));
+
+      // Solo envío la primer imagen (o la que tengas)
+      formData.append("file", window.categoriaState.archivosSeleccionados[0]);
+
+      const res = await fetchConRefresh(backendBaseConImagen, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Error al guardar la categoría con imagen");
+      }
+
+      alert("Categoría con imagen guardada con éxito!");
+      form.reset();
+      window.categoriaState.archivosSeleccionados = [];
+      actualizarPreview();
+      cargarCategorias();
     }
-  });
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+});
 })();
 
 });

@@ -1,11 +1,13 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Categoria;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
-import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
+import com.formaprogramada.ecommerce_backend.Domain.Repository.Categoria.CategoriaRepository;
+import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderServiceImpl;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaArchivoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaDestacadoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaEntityMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
@@ -18,14 +20,25 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     private final JpaCategoriaBuscarRepository jpaRepository2;
     private final JpaCategoriaArchivoRepository jpaCategoriaArchivoRepository;
     private final JpaCategoriaDestacadoRepository jpaCategoriaDestacadoRepository;
+    @Autowired
+    private final ImgBBUploaderServiceImpl imgBBUploaderService;
+    @Autowired
+    private final JpaCategoriaRepository jpaCategoriaRepository;
 
-
-    public CategoriaRepositoryImpl(JpaCategoriaRepository jpaRepository, CategoriaEntityMapper mapper, JpaCategoriaBuscarRepository jpaRepository2, JpaCategoriaArchivoRepository jpaCategoriaArchivoRepository, JpaCategoriaDestacadoRepository jpaCategoriaDestacadoRepository) {
+    public CategoriaRepositoryImpl(JpaCategoriaRepository jpaRepository,
+                                   CategoriaEntityMapper mapper,
+                                   JpaCategoriaBuscarRepository jpaRepository2,
+                                   JpaCategoriaArchivoRepository jpaCategoriaArchivoRepository,
+                                   JpaCategoriaDestacadoRepository jpaCategoriaDestacadoRepository,
+                                   JpaCategoriaRepository jpaCategoriaRepository,
+                                   ImgBBUploaderServiceImpl imgBBUploaderService) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
         this.jpaRepository2 = jpaRepository2;
         this.jpaCategoriaArchivoRepository = jpaCategoriaArchivoRepository;
         this.jpaCategoriaDestacadoRepository = jpaCategoriaDestacadoRepository;
+        this.imgBBUploaderService=imgBBUploaderService;
+        this.jpaCategoriaRepository=jpaCategoriaRepository;
     }
 
     @Override
@@ -89,14 +102,22 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     }
 
     @Override
-    public String borrarImagen(int id) {
-        CategoriaArchivoEntity imagen = jpaCategoriaArchivoRepository.findById(id).orElseThrow(null);
-        if (imagen!=null) {
-            return imagen.getDeleteUrl();
-        }else{
-            return null;
+    public String borrarImagen(int categoriaId) {
+        // 1. Buscar archivo asociado
+        Optional<CategoriaArchivoEntity> archivoOpt = jpaCategoriaArchivoRepository.findByCategoriaId_Id(categoriaId);
+
+        if (archivoOpt.isPresent()) {
+            // 2. Borrar imagen externa
+            imgBBUploaderService.borrarImagenDeImgBB(archivoOpt.get().getDeleteUrl());
+            // 3. Borrar registro del archivo
+            jpaCategoriaArchivoRepository.delete(archivoOpt.get());
         }
+
+        // 4. Borrar categoría (y cascada en la BDD elimina cualquier relación restante)
+        jpaCategoriaRepository.deleteById(categoriaId);
+        return null;
     }
+
 
     @Override
     public boolean AgregarDestacado(CategoriaEntity cat2) {

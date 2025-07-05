@@ -1,15 +1,21 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Producto;
 
+import com.formaprogramada.ecommerce_backend.Domain.Model.Producto.Producto;
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ImgBB.ImgBBData;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.*;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoArchivoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoColorEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoDestacadoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoArchivoRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoColorRepository;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoDestacadoRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoRepository;
+import com.formaprogramada.ecommerce_backend.Mapper.Producto.ArchivoMapper;
+import com.formaprogramada.ecommerce_backend.Mapper.Producto.ProductoDTOMapper;
+import com.formaprogramada.ecommerce_backend.Mapper.Producto.ProductoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -35,6 +41,8 @@ public class ProductoServiceImpl implements ProductoService {
     private JpaProductoColorRepository productoColorRepository;
     @Autowired
     private JpaProductoArchivoRepository productoArchivoRepository;
+    @Autowired
+    private JpaProductoDestacadoRepository productoDestacadoRepository;
     @Autowired
     private ImgBBUploaderService imgBBUploaderService;
     @Autowired
@@ -147,6 +155,7 @@ public class ProductoServiceImpl implements ProductoService {
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
     }
 
+    @Override
     public ProductoCompletoDTO obtenerProductoCompleto(Integer productoId) {
         return jdbcTemplate.execute((Connection con) -> {
             CallableStatement cs = con.prepareCall("{call sp_getProductoCompleto(?)}");
@@ -198,12 +207,45 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
-    public List<ProductoResponse> listarProductos() {
+    public List<ProductoResponseConDestacado> listarProductos() {
         return productoRepository.findAll()
                 .stream()
-                .map(ProductoResponse::new)
+                .map(producto -> {
+                    boolean destacado = productoDestacadoRepository.existsByProductoId(producto.getId());
+                    return new ProductoResponseConDestacado(producto, destacado);
+                })
                 .collect(Collectors.toList());
     }
+    @Override
+    public List<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosConArchivoPrincipalYColores() {
+        List<ProductoDestacadoEntity> destacados = productoDestacadoRepository.findAll();
+
+        return destacados.stream().map(destacado -> {
+            ProductoEntity producto = destacado.getProducto();
+
+            // Convertir a ProductoResponseDTO y luego a ProductoDTO
+            ProductoResponseDTO productoResponseDTO = ProductoMapper.toDTO(producto);
+            ProductoDTO productoDTO = ProductoDTOMapper.fromResponseDTO(productoResponseDTO);
+
+            List<String> colores = productoColorRepository.findByProductoId(producto.getId()).stream()
+                    .map(ProductoColorEntity::getColor)
+                    .collect(Collectors.toList());
+
+            ArchivoDTO archivoPrincipal = productoArchivoRepository.findByProductoIdOrderByOrdenAsc(producto.getId())
+                    .stream()
+                    .findFirst()
+                    .map(ArchivoMapper::toArchivoDTO)
+                    .orElse(null);
+
+            ProductoConArchivoPrincipalYColoresDTO dto = new ProductoConArchivoPrincipalYColoresDTO();
+            dto.setProducto(productoDTO);
+            dto.setColores(colores);
+            dto.setArchivoPrincipal(archivoPrincipal);
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
 
     @Override
     @Transactional

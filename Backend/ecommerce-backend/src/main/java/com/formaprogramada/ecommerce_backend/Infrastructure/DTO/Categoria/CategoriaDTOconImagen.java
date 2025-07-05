@@ -1,8 +1,5 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria;
 
-import jakarta.annotation.Nullable;
-
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,10 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoriaUpdateRequest {
+public class CategoriaDTOconImagen {
     private Integer id;
     private String nombre;
     private String descripcion;
     private boolean destacada;
     private String linkArchivo;
 }
+

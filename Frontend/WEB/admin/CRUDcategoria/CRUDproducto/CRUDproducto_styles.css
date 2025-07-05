@@ -373,7 +373,22 @@ input[type="file"]::before {
 input[type="file"]:hover::before {
   background: #ddd;
 }
+/* Botones debajo del preview */
+.form-botones {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: flex-start;
+  width: 100%;
+}
+/* Estilo específico para el botón azul de Editar */
+.crud-productos .btn-editar-azul {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+}
 
+.crud-productos .btn-editar-azul:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+}
 /* --- Detalles de producto --- */
 
 .product-detail {

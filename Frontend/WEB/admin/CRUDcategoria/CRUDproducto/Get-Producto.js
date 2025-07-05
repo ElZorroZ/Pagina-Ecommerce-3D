@@ -3,7 +3,61 @@ window.productoState = window.productoState || {
   coloresSeleccionados: [],
   archivosSeleccionados: []
 };
+let preview;
+  // Preview archivos
+  function actualizarPreview() {
+    preview.innerHTML = "";
+    if (!window.productoState.archivosSeleccionados || window.productoState.archivosSeleccionados.length === 0) {
+      return; // No hay archivos, no mostramos nada
+    }
+    window.productoState.archivosSeleccionados.forEach((archivo, idx) => {
+      const div = document.createElement("div");
+      div.style.position = "relative";
+      div.style.display = "inline-block";
+      div.style.marginRight = "10px";
 
+      const img = document.createElement("img");
+      img.style.width = "80px";
+      img.style.height = "80px";
+      img.style.objectFit = "cover";
+      img.style.border = "1px solid #ccc";
+      img.style.borderRadius = "4px";
+      
+      if (archivo instanceof File) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(archivo);
+      } else {
+        img.src = archivo.linkArchivo || archivo.url || "ruta_default.jpg";
+      }
+
+      div.appendChild(img);
+
+      const btnEliminar = document.createElement("button");
+      btnEliminar.textContent = "X";
+      btnEliminar.style.position = "absolute";
+      btnEliminar.style.top = "0";
+      btnEliminar.style.right = "0";
+      btnEliminar.style.background = "rgba(255,0,0,0.7)";
+      btnEliminar.style.color = "white";
+      btnEliminar.style.border = "none";
+      btnEliminar.style.cursor = "pointer";
+      btnEliminar.style.borderRadius = "0 4px 0 4px";
+      btnEliminar.style.padding = "0 4px";
+      btnEliminar.title = "Eliminar imagen";
+      btnEliminar.addEventListener("click", () => {
+        if (confirm("¿Seguro que querés eliminar esta imagen?")) {
+          window.productoState.archivosSeleccionados.splice(idx, 1);
+          actualizarPreview();
+        }
+      });
+
+      div.appendChild(btnEliminar);
+      preview.appendChild(div);
+    });
+  }
 // Función para refrescar token (la dejé igual)
 async function refreshAccessToken() {
   const refreshToken = localStorage.getItem("refreshToken");
@@ -68,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnAgregarColor = document.getElementById("btn-agregar-color");
   const inputColor = document.getElementById("input-color");
   const btnEditar = document.getElementById("btn-editar-producto");
-  const preview = document.getElementById("preview-imagenes");
+  preview = document.getElementById("preview-imagenes");
    const inputArchivos = document.getElementById("imagenes");
     console.log("inputColor:", inputColor);
 
@@ -106,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tablaBody.innerHTML = "";
       productos.forEach(producto => {
         const fila = document.createElement("tr");
+        const estrella = producto.destacado ? "⭐" : "☆";
         fila.innerHTML = `
           <td>${producto.id}</td>
           <td>${producto.nombre}</td>
@@ -114,20 +169,50 @@ document.addEventListener("DOMContentLoaded", () => {
           <td>
               <button class="select">Seleccionar</button>
               <button class="eliminar">Eliminar</button>
+              <button class="estrella">${estrella}</button>
           </td>
         `;
         fila.querySelector(".select").addEventListener("click", () => selectProducto(producto.id));
         fila.querySelector(".eliminar").addEventListener("click", () => eliminarProducto(producto.id));
+        fila.querySelector(".estrella").addEventListener("click", () => {
+          const yaEsDestacado = producto.destacado;
+          if (!yaEsDestacado) {
+            const destacadosActuales = [...document.querySelectorAll(".estrella")]
+              .filter(btn => btn.textContent === "⭐").length;
+
+            if (destacadosActuales >= 10) {
+              alert("No se pueden destacar más de 10 productos.");
+              return;
+            }
+          }
+          toggleDestacado(producto.id);
+        });
         tablaBody.appendChild(fila);
       });
     } catch (error) {
       console.error("Error al cargar productos:", error.message);
       alert("No se pudieron cargar los productos");
     }
+    window.cargarProductos = cargarProductos;
   }
 
   cargarProductos();
 
+  async function toggleDestacado(productoId) {
+  try {
+    const token = localStorage.getItem("accessToken");
+    const res = await fetch(`http://localhost:8080/api/productos/${productoId}/destacado`, {
+      method: "POST", // puede ser POST o PUT según cómo lo manejes
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    if (!res.ok) throw new Error("No se pudo cambiar el estado de destacado");
+    cargarProductos(); // refrescá la tabla
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+}
   // Seleccionar producto y cargar en formulario + preview
   async function selectProducto(productoId) {
     try {
@@ -138,22 +223,22 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) throw new Error("No se pudo cargar el producto");
       const data = await res.json();
       console.log('ProductoCompletoDTO recibido:', data);
-      window.productoState.coloresSeleccionados = Array.isArray(data.colores) && data.colores.length > 0
-        ? [...data.colores]
-        : window.productoState.coloresSeleccionados;
+      window.productoState.coloresSeleccionados = Array.isArray(data.colores)
+      ? [...data.colores]  // si es array (vacío o con elementos), actualiza
+      : [];                // si no es array, limpiar (opcional)
 
       window.productoState.archivosSeleccionados = Array.isArray(data.archivos) && data.archivos.length > 0
-        ? data.archivos.map(a => ({
-            id: a.id,
-            linkArchivo: a.linkArchivo || a.url,
-            orden: a.orden
-          }))
-        : window.productoState.archivosSeleccionados;
+      ? data.archivos.map(a => ({
+          id: a.id,
+          linkArchivo: a.linkArchivo || a.url,
+          orden: a.orden
+        }))
+      : []; 
 
       cargarProductoEnFormulario(data.producto, window.productoState.coloresSeleccionados, window.productoState.archivosSeleccionados);
       actualizarListaColores();
       actualizarPreview();
-
+      cargarProductoPreview(data.producto, window.productoState.coloresSeleccionados, window.productoState.archivosSeleccionados)
       btnEditar.style.display = "block";
       localStorage.setItem("productoId", productoId);
     } catch (error) {
@@ -182,57 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
    
 
 
-  // Preview archivos
-  function actualizarPreview() {
-    preview.innerHTML = "";
-    window.productoState.archivosSeleccionados.forEach((archivo, idx) => {
-      const div = document.createElement("div");
-      div.style.position = "relative";
-      div.style.display = "inline-block";
-      div.style.marginRight = "10px";
 
-      const img = document.createElement("img");
-      img.style.width = "80px";
-      img.style.height = "80px";
-      img.style.objectFit = "cover";
-      img.style.border = "1px solid #ccc";
-      img.style.borderRadius = "4px";
-
-      if (archivo instanceof File) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(archivo);
-      } else {
-        img.src = archivo.linkArchivo || archivo.url || "ruta_default.jpg";
-      }
-
-      div.appendChild(img);
-
-      const btnEliminar = document.createElement("button");
-      btnEliminar.textContent = "X";
-      btnEliminar.style.position = "absolute";
-      btnEliminar.style.top = "0";
-      btnEliminar.style.right = "0";
-      btnEliminar.style.background = "rgba(255,0,0,0.7)";
-      btnEliminar.style.color = "white";
-      btnEliminar.style.border = "none";
-      btnEliminar.style.cursor = "pointer";
-      btnEliminar.style.borderRadius = "0 4px 0 4px";
-      btnEliminar.style.padding = "0 4px";
-      btnEliminar.title = "Eliminar imagen";
-      btnEliminar.addEventListener("click", () => {
-        if (confirm("¿Seguro que querés eliminar esta imagen?")) {
-          window.productoState.archivosSeleccionados.splice(idx, 1);
-          actualizarPreview();
-        }
-      });
-
-      div.appendChild(btnEliminar);
-      preview.appendChild(div);
-    });
-  }
 
   // Carga producto en formulario
   function cargarProductoEnFormulario(producto, colores, archivos) {
@@ -322,32 +357,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 function cargarProductoPreview(producto, colores, archivos) {
-  document.getElementById("prev-nombre").textContent = producto.nombre;
-  document.getElementById("prev-desc").textContent = producto.descripcion;
-  document.getElementById("prev-precio").textContent = `$${producto.precio.toFixed(2)}`;
+  console.log("👉 Ejecutando cargarProductoPreview", { producto, colores, archivos });
+    console.log("Producto:", producto);
+  console.log("Colores:", colores);
   console.log("Archivos:", archivos);
 
-  const mainImage = document.getElementById("main-image");
-  if (archivos.length > 0) {
-    mainImage.src = archivos[0].linkArchivo || "ruta_default.jpg";
-  } else {
-    mainImage.src = "ruta_default.jpg";
-  }
+  document.getElementById("prev-nombre").textContent = producto.nombre || "";
+  document.getElementById("prev-desc").textContent = producto.descripcion || "";
+  document.getElementById("prev-precio").textContent = `$${(producto.precio || 0).toFixed(2)}`;
 
+  const mainImage = document.getElementById("main-image");
   const miniaturasDiv = document.getElementById("miniaturas");
   miniaturasDiv.innerHTML = "";
 
-  console.log("Archivos para miniaturas:", archivos);
+  // Buscar imágenes válidas (con linkArchivo o si es File)
+  const imagenesValidas = archivos
+    .filter(a => a instanceof File || a.linkArchivo || a.url);
 
-  archivos.forEach((archivo) => {
-    const src = archivo.linkArchivo || "ruta_default.jpg"; // Usamos linkArchivo según tu JSON
-    const thumb = document.createElement("img");
-    thumb.src = src;
-    thumb.className = "thumbnail-image";
-    thumb.onclick = () => mainImage.src = thumb.src;
-    miniaturasDiv.appendChild(thumb);
-  });
+  if (imagenesValidas.length > 0) {
+    const primeraSrc = imagenesValidas[0] instanceof File
+      ? URL.createObjectURL(imagenesValidas[0])
+      : imagenesValidas[0].linkArchivo || imagenesValidas[0].url;
 
+    mainImage.src = primeraSrc;
+
+    imagenesValidas.forEach((archivo) => {
+      const src = archivo instanceof File
+        ? URL.createObjectURL(archivo)
+        : archivo.linkArchivo || archivo.url;
+
+      const thumb = document.createElement("img");
+      thumb.src = src;
+      thumb.className = "thumbnail-image";
+      thumb.onclick = () => mainImage.src = thumb.src;
+      miniaturasDiv.appendChild(thumb);
+    });
+  } else {
+    mainImage.src = "ruta_default.jpg"; // imagen por defecto
+  }
 
   // Formatos (hardcoded)
   const formatos = ["STL", "OBJ", "AMF"];
@@ -380,6 +427,7 @@ function cargarProductoPreview(producto, colores, archivos) {
     colorDiv.textContent = "No hay colores disponibles";
   }
 }
+
 async function eliminarProducto(id) {
   if (!confirm("¿Seguro que querés eliminar este producto?")) return;
   try {

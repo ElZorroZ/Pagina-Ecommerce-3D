@@ -1,12 +1,10 @@
 package com.formaprogramada.ecommerce_backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaCrearRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;

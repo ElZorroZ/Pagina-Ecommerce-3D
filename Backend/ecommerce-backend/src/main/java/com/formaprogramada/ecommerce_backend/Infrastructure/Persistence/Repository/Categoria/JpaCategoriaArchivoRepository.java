@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface JpaCategoriaArchivoRepository extends JpaRepository<CategoriaArchivoEntity, Integer> {
     @Query("SELECT categoriaId FROM CategoriaArchivoEntity  WHERE categoriaId = :id")
     Optional<CategoriaArchivoEntity> findBycategoriaId(@Param("id") int id);
+    Optional<CategoriaArchivoEntity> findByCategoriaId_Id(Integer categoriaId);
 }

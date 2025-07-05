@@ -2,20 +2,23 @@ package com.formaprogramada.ecommerce_backend.Web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
-import com.formaprogramada.ecommerce_backend.Domain.Service.CategoriaService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Categoria.CategoriaService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.MaxDestacadosException;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaCrearRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaDTOconImagen;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.io.IOException;
 import java.util.*;
@@ -30,10 +33,7 @@ public class CategoriaController {
     @Autowired
     private ObjectMapper objectMapper;
 
-
-
-
-    @PutMapping("/crearCategoria")
+    @PostMapping
     public ResponseEntity<?> crearCategoria(@Valid @RequestBody CategoriaCrearRequest categoriaCrearRequest) {
         try {
             var categoria = CategoriaMapper.toDomain(categoriaCrearRequest);
@@ -59,68 +59,51 @@ public class CategoriaController {
     }
 
 
-    @GetMapping("/leerCategoriaTodas")
-    public Map<CategoriaEntity,String> leerCategoriaTodas() {
+    @GetMapping
+    public ResponseEntity<List<CategoriaDTO>> leerCategoriaTodas() {
         try {
-            Map<CategoriaEntity,String> lista= new HashMap<CategoriaEntity, String>();
-
-
-            lista=categoriaService.LeerCategorias(lista);
-            System.out.println("Se logro conseguir las categorias");
-            for (Map.Entry<CategoriaEntity,String> lista2: lista.entrySet()) {
-                System.out.println(lista2);
-            }
-            return lista;
-        } catch (IllegalArgumentException e) {
-            return null;
+            List<CategoriaDTO> lista = categoriaService.LeerCategorias();
+            System.out.println("Se logró conseguir las categorías");
+            return ResponseEntity.ok(lista);
+        } catch (Exception e) {
+            // Mejor manejar la excepción y devolver un error HTTP adecuado
+            System.err.println("Error al obtener categorías: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    @GetMapping("/leerCategoria/{id}")
-    public Map<CategoriaEntity,String> leerCategoriaUna(@PathVariable int id) {
+    @GetMapping("{id}")
+    public ResponseEntity<CategoriaDTOconImagen> leerCategoria(@PathVariable int id) {
         try {
-
-            Categoria categoria= new Categoria();
-            categoria.setId(id);
-            Map<CategoriaEntity,String> cate=categoriaService.LeerCategoria(categoria);
-            System.out.println(cate);
-            return cate;
+            CategoriaDTOconImagen dto = categoriaService.LeerCategoria(id);
+            return ResponseEntity.ok(dto);
         } catch (IllegalArgumentException e) {
-            return null;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
-
-
-    @PutMapping("/modificarCategoria/{id}")
-    public ResponseEntity<?> modificarCategoria(
+    @PutMapping("/{id}")
+    public ResponseEntity<?> modificarCategoriaCompleta(
             @PathVariable int id,
-            @Valid @RequestBody CategoriaUpdateRequest categoriaUpdateRequest) {
+            @RequestPart("categoria") @Valid CategoriaUpdateRequest categoriaUpdateRequest,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
         try {
-            Categoria categoria=CategoriaMapper.toDomain2(categoriaUpdateRequest);
-            categoria = categoriaService.ModificarCategoria(categoria, id);
-            return ResponseEntity.ok("Se hizo bien");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+            // Actualizar datos categoría
+            Categoria categoria = CategoriaMapper.toDomain2(categoriaUpdateRequest);
+            categoriaService.ModificarCategoria(categoria, id);
 
-    @PutMapping("/modificarCategoriaImagen/{id}")
-    public ResponseEntity<?> modificarCategoriaImagen(
-            @PathVariable int id,
-            @RequestPart("file") MultipartFile file) {
-        try {
-            if(categoriaService.ModificarCategoriaImagen(file, id)) {
-                return ResponseEntity.ok("Se hizo bien");
-            }else{
-                return ResponseEntity.ok("Se hizo mal");
+            // Si vino archivo, actualizar imagen
+            if (file != null && !file.isEmpty()) {
+                categoriaService.ModificarCategoriaImagen(file, id);
             }
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+
+            return ResponseEntity.ok("Categoría actualizada correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
-    @DeleteMapping("/borrarCategoria/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity<Void> borrarCategoria(
             @PathVariable int id) {
         try {
@@ -131,15 +114,18 @@ public class CategoriaController {
         }
     }
 
-    @PostMapping("/AgregarCategoriaDestacada/{id}")
-    public ResponseEntity<?> AgregarCategoriaDestacada(
-            @PathVariable int id) {
-            if(categoriaService.AgregarCategoriaDestacada(id)) {
-                return ResponseEntity.ok("Se hizo bien");
-            }else{
-                return ResponseEntity.ok("Se hizo mal");
-            }
+    @PostMapping("/toggleCategoriaDestacada/{id}")
+    public ResponseEntity<?> toggleCategoriaDestacada(@PathVariable int id) {
+        try {
+            categoriaService.toggleCategoriaDestacada(id);
+            return ResponseEntity.ok("Destacado actualizado correctamente");
+        } catch (MaxDestacadosException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
+
 
 
 

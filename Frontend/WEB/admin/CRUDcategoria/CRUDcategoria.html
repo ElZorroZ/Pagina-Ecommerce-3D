@@ -2,69 +2,60 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>CRUD Categorías</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUD de Categorias</title>
   <link rel="stylesheet" href="CRUDcategoria_styles.css" />
 </head>
 <body>
-    <header class="main-header">
-      <div class="container header-inner">
-          <div class="left-header">
-          <div class="logo"></div>
-          <nav class="nav">
-              <ul>
-              <li><a href="#">Set de mates</a></li>
-              <li><a href="#">Tazas</a></li>
-              <li><a href="#">Decoraciones</a></li>
-              <li><a href="#">Para la mesa</a></li>
-              <li><a href="#">Contacto</a></li>
-              </ul>
-          </nav>
-          </div>
-          <div class="right-header">
-          <a href="#" class="search-icon">🔍</a>
-          <a href="#" class="cart-icon">🛒 (0)</a>
-          </div>
-      </div>
-      <div class="alt-header mobile-header">
-    <div class="alt-header-inner">
-        <div class="logo">LOGO</div>
-        <button class="btn-search" aria-label="Buscar">🔍</button>
-        <button class="btn-cart" aria-label="Carrito">🛒</button>
-        <button class="btn-menu" aria-label="Menú">☰</button>
-      </div>
-
-      <nav class="catalog-menu">
-        <ul>
-          <li><a href="#">Categoría 1</a></li>
-          <li><a href="#">Categoría 2</a></li>
-          <li><a href="#">Categoría 3</a></li>
-          <!-- etc -->
-        </ul>
-      </nav>
-    </div>
-  </header>
   <div class="container">
-    <h1>Gestión de Categorías</h1>
+    <h1>Gestión de Categorias</h1>
 
-    <form id="category-form">
-      <input type="hidden" id="category-id" />
-      <input type="text" id="category-name" placeholder="Nombre de la categoría" required />
-      <button type="submit">Guardar</button>
-      <button type="button" id="cancel-btn" style="display:none;">Cancelar</button>
-    </form>
+    <!-- Tabla de productos existentes -->
+    <section>
+      <h2>Listado de Categorias</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-productos">
+          <!-- Filas dinámicas -->
+        </tbody>
+      </table>
+    </section>
 
-    <table id="categories-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <!-- Formulario para agregar/editar -->
+    <section class="crud-productos">
+      <h2>Agregar / Editar Categoria</h2>
+      <form id="form-producto">
+        <input type="hidden" id="categoria-id" />
+
+        <label>Nombre:</label>
+        <input type="text" id="nombre" maxlength="20" required placeholder="Máx. 20 caracteres" />
+
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" maxlength="80" placeholder="Máx. 80 caracteres" />
+
+        <label>Imagen (máx. 1):</label>
+        <input type="file" id="imagenes" multiple accept="image/*" />
+        <div id="preview-imagenes" style="display:flex; gap:10px; margin-top:10px;"></div>
+
+
+        <!-- BOTONES: DEBAJO DEL PREVIEW, A LA IZQUIERDA -->
+        <div class="form-botones">
+            <button type="submit">Guardar Categoria</button>
+            <button id="btn-editar-producto" class="btn-editar-azul" type="button" style="display: none;">Editar Producto</button>      
+        </div>
+      </form>
+    </section>
   </div>
+  <script src="/WEB/auth-utils-admin.js"></script>
+  <script src="Create-Categoria.js"></script>
+  <script src="Get-Categoria.js"></script>
 
-  <script src="app.js"></script>
 </body>
 </html>

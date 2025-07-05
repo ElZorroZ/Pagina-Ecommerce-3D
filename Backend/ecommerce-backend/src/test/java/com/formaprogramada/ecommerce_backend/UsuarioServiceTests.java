@@ -2,8 +2,8 @@ package com.formaprogramada.ecommerce_backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
-import com.formaprogramada.ecommerce_backend.Domain.Repository.CategoriaRepository;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Impl.CategoriaServiceImpl;
+import com.formaprogramada.ecommerce_backend.Domain.Repository.Categoria.CategoriaRepository;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Categoria.CategoriaServiceImpl;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Usuario.UsuarioService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
 import org.junit.jupiter.api.Test;

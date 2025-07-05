@@ -1,7 +1,9 @@
 package com.formaprogramada.ecommerce_backend.Web;
 
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.MaxDestacadosException;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoArchivoService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoDestacadoService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ImgBB.ImgBBData;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.*;
@@ -33,6 +35,9 @@ public class ProductoController {
     @Autowired
     private ImgBBUploaderService imgBBUploaderService;
 
+    @Autowired
+    private ProductoDestacadoService productoDestacadoService;
+
     //ENDPOINTS DE PRODUCTO
 
     @PostMapping
@@ -46,8 +51,24 @@ public class ProductoController {
     @GetMapping
     public ResponseEntity<?> obtenerProductos() {
         try {
-            List<ProductoResponse> productos = productoService.listarProductos();
+            List<ProductoResponseConDestacado> productos = productoService.listarProductos();
             return ResponseEntity.ok(productos); // 200 OK con la lista
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al obtener los productos: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/completo")
+    public ResponseEntity<?> obtenerTodosLosProductosCompletos() {
+        try {
+            List<ProductoConArchivoPrincipalYColoresDTO> productosCompletos = productoService.obtenerTodosConArchivoPrincipalYColores();
+
+            if (productosCompletos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No hay productos disponibles");
+            }
+
+            return ResponseEntity.ok(productosCompletos);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al obtener los productos: " + e.getMessage());
@@ -91,6 +112,22 @@ public class ProductoController {
         return ResponseEntity.noContent().build();
     }
 
+    //ENDPOINTS DE DESTACADOS DE PRODUCTO
+
+
+    @PostMapping("/{id}/destacado")
+    public ResponseEntity<?> toggleDestacado(@PathVariable Integer id) {
+        try {
+            productoDestacadoService.toggleProductoDestacado(id);
+            return ResponseEntity.ok().build();
+        } catch (MaxDestacadosException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al cambiar destacado: " + e.getMessage());
+        }
+    }
+
     //ENDPOINTS DE ARCHIVOS DE PRODUCTO
 
     @PostMapping(value = "/{productoId}/archivos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -118,10 +155,5 @@ public class ProductoController {
     }
 
 
-    @DeleteMapping("/archivos/{archivoId}")
-    public ResponseEntity<Void> eliminarArchivo(@PathVariable Integer archivoId) {
-        archivoService.eliminarArchivo(archivoId);
-        return ResponseEntity.noContent().build();
-    }
 
 }

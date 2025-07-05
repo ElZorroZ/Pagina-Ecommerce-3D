@@ -1,7 +1,10 @@
-package com.formaprogramada.ecommerce_backend.Domain.Service;
+package com.formaprogramada.ecommerce_backend.Domain.Service.Categoria;
 
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaDTOconImagen;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,12 +16,12 @@ public interface CategoriaService {
 
     Categoria CrearCategoria(Categoria categoria);
     Categoria CrearCategoriaConImagen(Categoria categoria, MultipartFile file)throws IOException;
-    Map<CategoriaEntity,String> LeerCategorias( Map<CategoriaEntity,String> lista);
-    Map<CategoriaEntity,String> LeerCategoria(Categoria categoria);
+    List<CategoriaDTO> LeerCategorias();
+    CategoriaDTOconImagen LeerCategoria(int id);
     Categoria ModificarCategoria(Categoria categoria, int id);
-    boolean ModificarCategoriaImagen(MultipartFile file , int id);
+    boolean ModificarCategoriaImagen(MultipartFile archivoNuevo, int id) throws IOException;
     void BorrarCategoria(int id);
-    boolean AgregarCategoriaDestacada(int id);
+    void toggleCategoriaDestacada(int id);
 
 
 }
