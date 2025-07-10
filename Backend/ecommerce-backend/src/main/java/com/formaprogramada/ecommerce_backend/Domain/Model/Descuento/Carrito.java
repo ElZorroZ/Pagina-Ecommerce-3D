@@ -9,9 +9,12 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-public class Descuento {
+public class Carrito {
     private Integer id;
-    private String nombre;
-    private String descripcion;
-    private Double porcentaje;
+    private Integer productoId;
+    private Integer usuarioId;
+    private Integer cantidad;
+    private double precioTotal;
+    private double precioUnitario;
+
 }

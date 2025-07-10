@@ -1,10 +1,12 @@
 package com.formaprogramada.ecommerce_backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.formaprogramada.ecommerce_backend.Domain.Repository.Descuento.DescuentoRepository;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Descuento.DescuentoService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Descuento.DescuentoCrearRequest;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Descuento.DescuentoRepositoryImpl;
+import com.formaprogramada.ecommerce_backend.Domain.Repository.Carrito.CarritoRepository;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Descuento.CarritoService;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaCrearRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Descuento.CarritoAgregarRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Carrito.CarritoRepositoryImpl;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,11 +17,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class DescuentoServiceTest {
+public class CarritoServiceTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -28,27 +31,31 @@ public class DescuentoServiceTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private DescuentoRepository descuentoRepository;
+    private CarritoRepository carritoRepository;
 
     @Autowired
-    private DescuentoRepositoryImpl descuentoRepositoryimpl;
+    private CarritoRepositoryImpl descuentoRepositoryimpl;
 
     @Autowired
-    private DescuentoService descuentoService;
+    private CarritoService carritoService;
 
     @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
     @Test
-    void testAgregarDescuento() throws Exception {
+    void testAgregarCarrito() throws Exception {
 
-        DescuentoCrearRequest request = new DescuentoCrearRequest();
-        request.setNombre("Des2");
-        request.setDescripcion("uNA Descripcion de DESCUenTO!2222343$");
-        request.setPorcentaje(20.5);
+        CarritoAgregarRequest request = new CarritoAgregarRequest();
+        request.setProductoId(2);
+        request.setUsuarioId(1);
+        request.setCantidad(10);
+        request.setPrecioTotal(100);
+        request.setPrecioUnitario(10);
 
 
-        mockMvc.perform(post("/api/descuento/crearDestacado")
+
+        mockMvc.perform(post("/api/carrito/agregarProductoaCarrito")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
     }
+
 }
