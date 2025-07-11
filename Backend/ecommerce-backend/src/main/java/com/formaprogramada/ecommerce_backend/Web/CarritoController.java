@@ -2,7 +2,8 @@ package com.formaprogramada.ecommerce_backend.Web;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Descuento.Carrito;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Descuento.CarritoService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Descuento.CarritoAgregarRequest;
-import com.formaprogramada.ecommerce_backend.Mapper.Descuento.CarritoMapper;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
+import com.formaprogramada.ecommerce_backend.Mapper.Carrito.CarritoMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,5 +35,57 @@ public class CarritoController {
         }
 
     }
+
+    @PutMapping("/sumarCantidad/{id}/{cantidad}")
+    public ResponseEntity<?> sumarCantidad(
+            @PathVariable int id,
+            @PathVariable int cantidad
+    ) {
+        try {
+            return ResponseEntity.ok(carritoService.SumarCantidad(cantidad,id));
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @DeleteMapping("/borrarProductoaCarrito/{id}")
+    public ResponseEntity<?> BorrarProductoaCarrito(
+            @PathVariable int id
+    ) {
+        try {
+            return ResponseEntity.ok(carritoService.BorrarProductoCarrito(id));
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @DeleteMapping("/vaciarCarrito/{id}")
+    public ResponseEntity<?> VaciarCarrito(
+            @PathVariable int id
+    ) {
+        try {
+            return ResponseEntity.ok(carritoService.VaciarCarrito(id));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("/verCarrito/{id}")
+    public ResponseEntity<List<CarritoEntity>> VerCarrito(
+            @PathVariable int id
+    ) {
+        try {
+            List<CarritoEntity> lista=carritoService.LeerUnCarrito(id);
+            System.out.println(lista);
+            return ResponseEntity.ok(lista);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+
 
 }

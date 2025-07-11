@@ -1,4 +1,4 @@
-package com.formaprogramada.ecommerce_backend.Mapper.Descuento;
+package com.formaprogramada.ecommerce_backend.Mapper.Carrito;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Descuento.Carrito;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Descuento.CarritoAgregarRequest;

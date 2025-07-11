@@ -13,15 +13,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
+@Rollback(false)
 public class CarritoServiceTest {
 
     @Autowired
@@ -44,11 +47,11 @@ public class CarritoServiceTest {
     void testAgregarCarrito() throws Exception {
 
         CarritoAgregarRequest request = new CarritoAgregarRequest();
-        request.setProductoId(2);
+        request.setProductoId(8);
         request.setUsuarioId(1);
-        request.setCantidad(10);
+        request.setCantidad(5);
         request.setPrecioTotal(100);
-        request.setPrecioUnitario(10);
+        request.setPrecioUnitario(20);
 
 
 
@@ -58,4 +61,40 @@ public class CarritoServiceTest {
                 .andExpect(status().isOk());
     }
 
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testSumarCarrito() throws Exception {
+
+        mockMvc.perform(put("/api/carrito/sumarCantidad/1/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testBorrarProductoDeCarrito() throws Exception {
+
+        mockMvc.perform(delete("/api/carrito/borrarProductoaCarrito/2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testBorrarCarrito() throws Exception {
+
+        mockMvc.perform(delete("/api/carrito/vaciarCarrito/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testObtenerCarrito() throws Exception {
+
+        mockMvc.perform(get("/api/carrito/verCarrito/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 }
