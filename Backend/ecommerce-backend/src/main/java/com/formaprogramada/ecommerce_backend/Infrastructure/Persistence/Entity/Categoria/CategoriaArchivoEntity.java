@@ -1,7 +1,6 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
