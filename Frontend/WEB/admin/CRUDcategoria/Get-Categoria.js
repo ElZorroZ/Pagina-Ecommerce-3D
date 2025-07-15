@@ -141,46 +141,66 @@ document.addEventListener("DOMContentLoaded", () => {
   // Cargar productos y llenar tabla
   async function cargarCategorias() {
     try {
-        const response = await fetchConRefresh("http://localhost:8080/api/categoria");
-        if (!response.ok) throw new Error("Error al obtener las categorías");
-        const categorias = await response.json();
-        tablaBody.innerHTML = "";
-        categorias.forEach(categoria => {
+      const response = await fetchConRefresh("http://localhost:8080/api/categoria");
+      if (!response.ok) throw new Error("Error al obtener las categorías");
+      const categorias = await response.json();
+      tablaBody.innerHTML = "";
+
+      categorias.forEach(categoria => {
         const estrella = categoria.destacada ? "⭐" : "☆";
         const fila = document.createElement("tr");
+
         fila.innerHTML = `
-            <td>${categoria.id}</td>
-            <td>${categoria.nombre}</td>
-            <td>${categoria.descripcion}</td>
-            <td>
-                <button class="select">Seleccionar</button>
-                <button class="eliminar">Eliminar</button>
-                <button class="estrella">${estrella}</button>
-            </td>
+          <td>${categoria.id}</td>
+          <td>${categoria.nombre}</td>
+          <td>${categoria.descripcion}</td>
+          <td>
+            <button class="select">Seleccionar</button>
+            ${
+              categoria.id === 1
+                ? '' // No mostrar botón eliminar si id es 1
+                : '<button class="eliminar">Eliminar</button>'
+            }
+            ${
+              categoria.id === 1
+                ? '' // No mostrar botón estrella si id es 1
+                : `<button class="estrella">${estrella}</button>`
+            }
+          </td>
         `;
+
         fila.querySelector(".select").addEventListener("click", () => selectCategoria(categoria.id));
-        fila.querySelector(".eliminar").addEventListener("click", () => eliminarCategoria(categoria.id));
-        fila.querySelector(".estrella").addEventListener("click", () => {
+
+        if (categoria.id !== 1) {
+          fila.querySelector(".eliminar").addEventListener("click", () => eliminarCategoria(categoria.id));
+        }
+
+        const btnEstrella = fila.querySelector(".estrella");
+        if (btnEstrella) {
+          btnEstrella.addEventListener("click", () => {
             const yaEsDestacado = categoria.destacada;
             if (!yaEsDestacado) {
-            const destacadosActuales = [...document.querySelectorAll(".estrella")]
+              const destacadosActuales = [...document.querySelectorAll(".estrella")]
                 .filter(btn => btn.textContent === "⭐").length;
 
-            if (destacadosActuales >= 10) {
+              if (destacadosActuales >= 10) {
                 alert("No se pueden destacar más de 10 categorías.");
                 return;
-            }
+              }
             }
             toggleCategoriaDestacada(categoria.id);
-        });
+          });
+        }
+
         tablaBody.appendChild(fila);
-        });
+      });
     } catch (error) {
-        console.error("Error al cargar categorías:", error.message);
-        alert("No se pudieron cargar las categorías");
+      console.error("Error al cargar categorías:", error.message);
+      alert("No se pudieron cargar las categorías");
     }
-    }
-    window.cargarCategorias = cargarCategorias;
+  }
+  window.cargarCategorias = cargarCategorias;
+
 
   cargarCategorias();
 

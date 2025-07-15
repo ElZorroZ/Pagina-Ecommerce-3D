@@ -115,6 +115,84 @@ async function fetchConRefresh(url, options = {}) {
 
   return response;
 }
+ function base64ToBlob(base64, mimeType) {
+  // Sacar prefijo "data:...;base64," si existe
+  if (base64.indexOf(",") !== -1) {
+    base64 = base64.split(",")[1];
+  }
+
+  // Limpiar saltos de línea o espacios
+  base64 = base64.replace(/[\r\n\s]+/g, '');
+
+  // Arreglar base64 URL-safe (reemplazar '-' y '_')
+  base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+
+  // Completar padding con '=' si falta
+  while (base64.length % 4 !== 0) {
+    base64 += '=';
+  }
+
+  try {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+  } catch (e) {
+    console.error('Error decodificando base64:', e);
+    throw e;
+  }
+}
+async function base64ToBlob(base64, mimeType) {
+  // Limpiar prefijo
+  if (base64.indexOf(",") !== -1) {
+    base64 = base64.split(",")[1];
+  }
+  // Construir data URL para fetch
+  const dataUrl = `data:${mimeType};base64,${base64}`;
+  const response = await fetch(dataUrl);
+  return await response.blob();
+}
+
+
+function mostrarArchivoSTL(base64) {
+  const preview = document.getElementById('stl-preview');
+  preview.innerHTML = "";
+
+  if (!base64) return;
+
+  const link = document.createElement('a');
+  link.href = 'data:application/sla;base64,' + base64;
+  link.download = 'archivo.stl';
+  link.textContent = 'Descargar STL';
+  link.style.display = 'inline-block';
+  link.style.marginRight = '10px';
+
+  // Botón eliminar
+  const btnEliminar = document.createElement('button');
+  btnEliminar.textContent = 'X';
+  btnEliminar.title = 'Eliminar archivo STL';
+  btnEliminar.style.background = 'rgba(255,0,0,0.7)';
+  btnEliminar.style.color = 'white';
+  btnEliminar.style.border = 'none';
+  btnEliminar.style.cursor = 'pointer';
+  btnEliminar.style.borderRadius = '4px';
+  btnEliminar.style.padding = '0 6px';
+
+  btnEliminar.addEventListener('click', () => {
+    window.productoState.archivoStl = null;
+    document.getElementById('archivo-stl').value = "";
+    preview.innerHTML = "";
+  });
+
+  preview.appendChild(link);
+  preview.appendChild(btnEliminar);
+}
+
+
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const tablaBody = document.getElementById("tabla-productos");
@@ -226,7 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
       window.productoState.coloresSeleccionados = Array.isArray(data.colores)
       ? [...data.colores]  // si es array (vacío o con elementos), actualiza
       : [];                // si no es array, limpiar (opcional)
-
       window.productoState.archivosSeleccionados = Array.isArray(data.archivos) && data.archivos.length > 0
       ? data.archivos.map(a => ({
           id: a.id,
@@ -241,6 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cargarProductoPreview(data.producto, window.productoState.coloresSeleccionados, window.productoState.archivosSeleccionados)
       btnEditar.style.display = "block";
       localStorage.setItem("productoId", productoId);
+      await cargarCategoriasYSeleccionar(data.producto.categoriaId);
     } catch (error) {
       console.error(error);
       alert("Error al cargar producto");
@@ -267,15 +345,63 @@ document.addEventListener("DOMContentLoaded", () => {
    
 
 
+  async function cargarCategoriasYSeleccionar(categoriaIdSeleccionada) {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await fetch("http://localhost:8080/api/categoria/combo", {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("No se pudieron cargar las categorías");
+      const categorias = await res.json();
 
+      const select = document.getElementById("categoria");
+      select.innerHTML = '<option value="">Seleccionar categoría</option>';
 
-  // Carga producto en formulario
-  function cargarProductoEnFormulario(producto, colores, archivos) {
-    document.getElementById("producto-id").value = producto.id || "";
-    document.getElementById("nombre").value = producto.nombre || "";
-    document.getElementById("descripcion").value = producto.descripcion || "";
-    document.getElementById("precio").value = producto.precio || "";
+      categorias.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat.id;
+        option.textContent = cat.nombre;
+        if (cat.id === categoriaIdSeleccionada) {
+          option.selected = true; // marcar la categoría del producto
+        }
+        select.appendChild(option);
+      });
+    } catch (err) {
+      alert("Error cargando categorías: " + err.message);
+    }
   }
+
+
+ // Carga producto en formulario
+function cargarProductoEnFormulario(producto, colores, archivos) {
+  console.log('Base64 recibido:', producto.archivoStl);
+
+  document.getElementById("producto-id").value = producto.id || "";
+  document.getElementById("nombre").value = producto.nombre || "";
+  document.getElementById("descripcion").value = producto.descripcion || "";
+  document.getElementById("precio").value = producto.precio || "";
+
+  // Nuevos campos
+  document.getElementById("codigo-inicial").value = producto.codigoInicial || "";
+  document.getElementById("version").value = producto.version || "";
+  document.getElementById("seguimiento").value = producto.seguimiento || "";
+
+  document.getElementById("dimension-alto").value = producto.dimensionAlto || "";
+  document.getElementById("dimension-ancho").value = producto.dimensionAncho || "";
+  document.getElementById("dimension-profundidad").value = producto.dimensionProfundidad || "";
+
+  document.getElementById("material").value = producto.material || "";
+  document.getElementById("tecnica").value = producto.tecnica || "";
+  document.getElementById("peso").value = producto.peso || "";
+
+  // STL preview (si querés mostrarlo como enlace para descargar)
+  if (producto.archivoStl) {
+    mostrarArchivoSTL(producto.archivoStl);
+  } else {
+    document.getElementById('stl-preview').innerHTML = "";
+  }
+
+}
 
   // Función para actualizar producto
   async function actualizarProducto() {
@@ -283,7 +409,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const nombre = document.getElementById("nombre").value.trim();
     const descripcion = document.getElementById("descripcion").value.trim();
     const precio = parseFloat(document.getElementById("precio").value);
-
+    const categoriaId = parseInt(document.getElementById("categoria").value);
+    
     if (!nombre || isNaN(precio)) {
       alert("Completa los campos obligatorios correctamente.");
       return;
@@ -297,12 +424,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const archivosNuevos = window.productoState.archivosSeleccionados
       .filter(a => a instanceof File);
-
     const productoCompletoDTO = {
-      producto: {
+       producto: {
         nombre,
         descripcion,
         precio,
+        categoriaId,
+        codigoInicial: document.getElementById("codigo-inicial").value.trim(),
+        version: document.getElementById("version").value.trim(),
+        seguimiento: document.getElementById("seguimiento").value.trim(),
+        dimensionAlto: document.getElementById("dimension-alto").value.trim(),
+        dimensionAncho: document.getElementById("dimension-ancho").value.trim(),
+        dimensionProfundidad: document.getElementById("dimension-profundidad").value.trim(),
+        material: document.getElementById("material").value.trim(),
+        peso: document.getElementById("peso").value.trim(),
+        tecnica: document.getElementById("tecnica").value.trim(),
+        archivoStl: null, // explícitamente null para evitar confusión
       },
       colores: window.productoState.coloresSeleccionados,
       archivos: archivosExistentes  // acá solo los links o IDs
@@ -318,7 +455,10 @@ document.addEventListener("DOMContentLoaded", () => {
     archivosNuevos.forEach(file => {
       formData.append("archivosNuevos", file);
     });
-
+    const archivoStlInput = document.getElementById("archivo-stl");
+      if (archivoStlInput && archivoStlInput.files.length > 0) {
+        formData.append("archivoStl", archivoStlInput.files[0]);
+      }
     try {
       console.log("Colores antes de enviar:", window.productoState.coloresSeleccionados);
       console.log("Archivos antes de enviar:", window.productoState.archivosSeleccionados);

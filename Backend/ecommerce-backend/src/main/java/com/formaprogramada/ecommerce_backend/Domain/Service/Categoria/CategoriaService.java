@@ -2,6 +2,7 @@ package com.formaprogramada.ecommerce_backend.Domain.Service.Categoria;
 
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaComboDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaDTOconImagen;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
@@ -22,6 +23,6 @@ public interface CategoriaService {
     boolean ModificarCategoriaImagen(MultipartFile archivoNuevo, int id) throws IOException;
     void BorrarCategoria(int id);
     void toggleCategoriaDestacada(int id);
-
+    List<CategoriaComboDTO> LeerCategoriasCombo();
 
 }

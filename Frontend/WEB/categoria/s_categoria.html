@@ -66,40 +66,17 @@
 
   <section class="products">
     <div class="container">
-      <h2>Productos Destacados</h2>
+      <h2>Productos</h2>
       <div class="product-grid">
-        
-        <div class="product-card">
-          <div class="product-info" onclick="window.location.href='/WEB/categoria/producto/s_producto.html'">
-            <img src="/img/ejemplo-1.jpeg" alt="Mate" />
-            <h3>Bandeja STING</h3>
-            <p class="product-desc">Mate con diseño STING grabado.</p>
-          </div>
+        <!-- Aquí se renderizan los productos dinámicamente -->
 
-          <div class="product-controls">
-            <label for="formato1">Formato:</label>
-            <select id="formato1" class="minimal-select">
-              <option value="Archivo">Archivo</option>
-              <option value="Impresion">Impresión</option>
-            </select>
 
-            <label for="color1">Color:</label>
-            <select id="color1" class="minimal-select">
-              <option value="negro">Negro</option>
-              <option value="blanco">Blanco</option>
-            </select>
-
-            <p class="product-price">$120</p>
-
-            <div class="product-actions">
-              <input type="number" min="1" value="1" class="quantity-input" />
-              <button class="add-to-cart-btn">Agregar</button>
-            </div>
-          </div>
-        </div>
+      </div>
     </div>
   </section>
 
+           <div id="pagination-controls" class="pagination"></div>
+<button id="next-page-btn" style="display: none;">Siguiente página</button>
   <footer class="main-footer">
     <div class="container">
       <div class="footer-info">
@@ -114,6 +91,6 @@
       </div>
     </div>
   </footer>
-  <script src="/auth-utils.js"></script>
+  <script src="s_categoria.js"></script>
 </body>
 </html>

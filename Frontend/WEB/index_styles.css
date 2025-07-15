@@ -76,6 +76,36 @@ body {
 .main-header .alt-header.mobile-header {
   display: none;
 }
+/* Estilo del dropdown */
+.dropdown {
+  position: relative;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 10px 0;
+  min-width: 150px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  z-index: 2000;
+}
+
+.dropdown-menu li {
+  padding: 5px 20px;
+}
+
+.dropdown-menu li:hover {
+  background-color: #eee;
+}
+
+/* Ocultamos el menú por defecto */
+.dropdown-menu[style*="display: none"] {
+  display: none;
+}
 /* --- Hero Principal --- */
 
 .hero {
@@ -91,10 +121,13 @@ body {
 
 .hero-img {
   width: 100%;
+  max-width: 400px;  /* limita ancho máximo a 400px */
   display: block;
   border-radius: 12px;
   transition: transform 0.3s ease;
+  margin: 0 auto; /* para centrar la imagen */
 }
+
 
 .hero-overlay {
   position: absolute;

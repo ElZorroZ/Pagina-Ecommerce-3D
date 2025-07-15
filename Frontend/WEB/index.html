@@ -6,21 +6,24 @@
   <title>Forma Programada - Inicio</title>
   <link rel="stylesheet" href="index_styles.css" />
 </head>
-<body>
+<body>                       
   <header class="main-header">
       <div class="container header-inner">
           <div class="left-header">
           <div class="logo"></div>
           <nav class="nav">
-              <ul>
-              <li><a href="#">Set de mates</a></li>
-              <li><a href="#">Tazas</a></li>
-              <li><a href="#">Decoraciones</a></li>
-              <li><a href="#">Para la mesa</a></li>
-              <li><a href="#">Contacto</a></li>
+            <ul id="categoria-lista">
+              <!-- otras categorías destacadas -->
+              <li id="mas-categorias" class="dropdown">
+                <a href="#" class="dropdown-toggle">Más categorías ▼</a>
+                <ul class="dropdown-menu" style="display:none;">
+                  <!-- Aquí van las categorías restantes dinámicas -->
+                </ul>
+              </li>
               <li id="adminPanel"><a href="#">Panel de Administración</a></li>              
             </ul>
           </nav>
+
           </div>
           <div class="right-header">
           <a href="#" class="search-icon">🔍</a>
@@ -40,9 +43,6 @@
 
       <nav class="catalog-menu">
         <ul>
-          <li><a href="#">Categoría 1</a></li>
-          <li><a href="#">Categoría 2</a></li>
-          <li><a href="#">Categoría 3</a></li>
           <!-- etc -->
         </ul>
       </nav>
@@ -52,35 +52,11 @@
 
   <section class="hero">
     <div class="hero-container">
-      <a href="/WEB/categoria/s_categoria.html" class="hero-link">
-        <img src="/img/hero-ejemplo.png" alt="Nueva Colección STING" class="hero-img" />
-        <div class="hero-overlay"></div>
-      </a>
     </div>
   </section>
 
   <section class="mini-heroes">
-    <div class="mini-hero">
-      <a href="coleccion.html">
-        <img src="/img/hero-ejemplo.png" alt="Categoría 1" />
-        <div class="mini-overlay"></div>
-      </a>
-      <div class="mini-hero-text">Trays</div>
-    </div>
-    <div class="mini-hero">
-      <a href="coleccion.html">
-        <img src="/img/hero-ejemplo.png" alt="Categoría 2" />
-        <div class="mini-overlay"></div>
-      </a>
-      <div class="mini-hero-text">Boxes</div>
-    </div>
-    <div class="mini-hero">
-      <a href="coleccion.html">
-        <img src="/img/hero-ejemplo.png" alt="Categoría 3" />
-        <div class="mini-overlay"></div>
-      </a>
-      <div class="mini-hero-text">Decorations</div>
-    </div>
+    
   </section>
 
 
@@ -107,8 +83,9 @@
   <section class="featured-products">
     <div class="container">
       <h2>Productos Destacados</h2>
-      <div class="product-grid" id="productos-container">
+      <div class="product-grid" id="contenedor-productos">
         <!-- Los productos se insertarán aquí -->
+
       </div>
     </div>
   </section>
@@ -130,6 +107,7 @@
     </div>
   </footer>
   <script src="index.js"></script>
+  <script src="categorias-index.js"></script>
   <script src="auth-utils.js"></script>
 </body>
 </html>

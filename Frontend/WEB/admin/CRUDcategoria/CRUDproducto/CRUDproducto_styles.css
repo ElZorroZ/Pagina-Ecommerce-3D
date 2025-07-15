@@ -207,6 +207,15 @@ input[type="file"] {
   background: linear-gradient(135deg, #000, #333);
   transform: scale(1.05);
 }
+
+.crud-productos form select {
+  padding: 8px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
 /* --- TABLA --- */
 /* Tabla general */
 table {

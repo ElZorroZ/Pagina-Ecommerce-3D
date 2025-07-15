@@ -5,10 +5,7 @@ import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Categoria.CategoriaService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.MaxDestacadosException;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaCrearRequest;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaDTO;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaDTOconImagen;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaUpdateRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.*;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaMapper;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +64,17 @@ public class CategoriaController {
             return ResponseEntity.ok(lista);
         } catch (Exception e) {
             // Mejor manejar la excepción y devolver un error HTTP adecuado
+            System.err.println("Error al obtener categorías: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/combo")
+    public ResponseEntity<List<CategoriaComboDTO>> leerCategoriasCombo() {
+        try {
+            List<CategoriaComboDTO> lista = categoriaService.LeerCategoriasCombo();
+            return ResponseEntity.ok(lista);
+        } catch (Exception e) {
             System.err.println("Error al obtener categorías: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

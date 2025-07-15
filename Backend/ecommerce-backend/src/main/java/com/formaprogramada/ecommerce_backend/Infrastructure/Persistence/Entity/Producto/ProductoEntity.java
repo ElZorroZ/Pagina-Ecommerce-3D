@@ -22,6 +22,9 @@ public class ProductoEntity {
     @Column(length = 20, nullable = false)
     private String nombre;
 
+    @Column(length = 15)
+    private String codigo;
+
     @Column(length = 80)
     private String descripcion;
 
@@ -30,6 +33,10 @@ public class ProductoEntity {
     private CategoriaEntity categoriaId;
 
     private float precio;
+
+    @Lob
+    @Column(name = "archivo", columnDefinition = "LONGBLOB")
+    private byte[] archivo;  // STL
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductoArchivoEntity> archivos;

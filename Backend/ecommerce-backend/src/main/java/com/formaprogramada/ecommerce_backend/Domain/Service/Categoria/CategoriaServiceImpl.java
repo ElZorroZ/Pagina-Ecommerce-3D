@@ -5,6 +5,7 @@ import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Categoria.CategoriaRepository;
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.MaxDestacadosException;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaComboDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaDTOconImagen;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ImgBB.ImgBBData;
@@ -17,6 +18,10 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Reposito
 import com.formaprogramada.ecommerce_backend.Mapper.Categoria.CategoriaEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,13 +47,22 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Autowired
     private final JpaCategoriaDestacadoRepository jpaCategoriaDestacadoRepository;
     private JpaCategoriaDestacadoRepository JpaCategoriaDestacadoRepository;
+
+    // Crear categoría (con o sin imagen) → invalida la lista
+    @Caching(evict = {
+        @CacheEvict(value = "categorias", allEntries = true),
+        @CacheEvict(value = "categoriasCombo", allEntries = true)
+        }
+    )
     @Override
     public Categoria CrearCategoria(Categoria categoria) {
-
-
         return categoriaRepository.guardar(categoria);
     }
-
+    @Caching(evict = {
+        @CacheEvict(value = "categorias", allEntries = true),
+        @CacheEvict(value = "categoriasCombo", allEntries = true)
+        }
+    )
     @Override
     public Categoria CrearCategoriaConImagen(Categoria categoria, MultipartFile file)throws IOException {
         Categoria categoria1=categoriaRepository.guardar(categoria);
@@ -65,6 +79,9 @@ public class CategoriaServiceImpl implements CategoriaService {
         return categoria1;
     }
 
+    // Cargar lista de categorías (lectura rápida)
+    @Cacheable(value = "categorias")
+    @Override
     public List<CategoriaDTO> LeerCategorias() {
         List<CategoriaEntity> categorias = jpaCategoriaRepository.findAll();
         List<CategoriaDestacadoEntity> destacados = jpaCategoriaDestacadoRepository.findAll();
@@ -83,6 +100,8 @@ public class CategoriaServiceImpl implements CategoriaService {
                 .collect(Collectors.toList());
     }
 
+    // Cargar una categoría individual
+    @Cacheable(value = "categoria", key = "#id")
     @Override
     public CategoriaDTOconImagen LeerCategoria(int id) {
         Categoria categoria = new Categoria();
@@ -97,12 +116,9 @@ public class CategoriaServiceImpl implements CategoriaService {
                 .anyMatch(dest -> dest.getCategoria().getId().equals(entidad.getId()));
 
         // Buscar la imagen
-        List<CategoriaArchivoEntity> archivos = jpaCategoriaArchivoRepository.findAll(); // o usar una query por categoría
-        String linkArchivo = archivos.stream()
-                .filter(a -> a.getCategoriaId().getId().equals(entidad.getId()))
-                .map(CategoriaArchivoEntity::getLinkArchivo)
-                .findFirst()
-                .orElse(null); // si no tiene imagen
+        Optional<CategoriaArchivoEntity> archivo = jpaCategoriaArchivoRepository.findByCategoriaId_Id(entidad.getId());
+        String linkArchivo = archivo.map(CategoriaArchivoEntity::getLinkArchivo).orElse(null);
+
 
         return CategoriaDTOconImagen.builder()
                 .id(entidad.getId())
@@ -113,14 +129,21 @@ public class CategoriaServiceImpl implements CategoriaService {
                 .build();
     }
 
-
+    // Modificar categoría → actualiza individual y borra lista
+    @Caching(
+        put = @CachePut(value = "categoria", key = "#id"),
+        evict = {
+            @CacheEvict(value = "categorias", allEntries = true),
+            @CacheEvict(value = "categoriasCombo", allEntries = true)
+        }
+    )
     @Override
     public Categoria ModificarCategoria(Categoria categoria, int id) {
-
-
         return categoriaRepository.modificar(categoria,id);
     }
 
+    // Modificar imagen = borra solo la categoría individual
+    @CacheEvict(value = "categoria", key = "#id")
     @Override
     public boolean ModificarCategoriaImagen(MultipartFile archivoNuevo, int id) throws IOException {
         // Buscar categoría para obtener la entidad
@@ -151,8 +174,13 @@ public class CategoriaServiceImpl implements CategoriaService {
         return true;
     }
 
-
-
+    // Borrar categoría → borra individual y lista
+    @Caching(evict = {
+        @CacheEvict(value = "categoria", key = "#id"),
+        @CacheEvict(value = "categorias", allEntries = true),
+        @CacheEvict(value = "categoriasCombo", allEntries = true)
+        }
+    )
     @Override
     public void BorrarCategoria(int id) {
         String url = categoriaRepository.borrarImagen(id);
@@ -162,6 +190,12 @@ public class CategoriaServiceImpl implements CategoriaService {
         categoriaRepository.borrar(id);
     }
 
+    // Destacar o quitar destacado → puede afectar lista y detalle
+    @Caching(evict = {
+        @CacheEvict(value = "categoria", key = "#id"),
+        @CacheEvict(value = "categorias", allEntries = true)
+        }
+    )
     @Override
     public void toggleCategoriaDestacada(int id) {
         Categoria categoria = new Categoria();
@@ -179,8 +213,8 @@ public class CategoriaServiceImpl implements CategoriaService {
             jpaCategoriaDestacadoRepository.delete(existente.get());
         } else {
             long cantidad = jpaCategoriaDestacadoRepository.count();
-            if (cantidad >= 2) {
-                throw new MaxDestacadosException("No se pueden destacar más de 2 categorías");
+            if (cantidad >= 3) {
+                throw new MaxDestacadosException("No se pueden destacar más de 3 categorías");
             }
 
             CategoriaDestacadoEntity nuevo = CategoriaDestacadoEntity.builder()
@@ -190,6 +224,24 @@ public class CategoriaServiceImpl implements CategoriaService {
         }
     }
 
+    // Leer combo de categorías (opcionalmente cacheado)
+    @Cacheable(value = "categoriasCombo")
+    @Override
+    public List<CategoriaComboDTO> LeerCategoriasCombo() {
+        List<CategoriaDestacadoEntity> destacados = jpaCategoriaDestacadoRepository.findAll();
 
+        return jpaCategoriaRepository.findAll().stream()
+                .map(c -> {
+                    boolean esDestacada = destacados.stream()
+                            .anyMatch(d -> d.getCategoria().getId().equals(c.getId()));
 
+                    // Buscar imagen de la categoría
+                    String imagen = jpaCategoriaArchivoRepository.findByCategoriaId_Id(c.getId())
+                            .map(CategoriaArchivoEntity::getLinkArchivo)
+                            .orElse(null);
+
+                    return new CategoriaComboDTO(c.getId(), c.getNombre(), esDestacada, imagen);
+                })
+                .toList();
+    }
 }

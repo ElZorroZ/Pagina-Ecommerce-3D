@@ -47,6 +47,8 @@ public class SecurityConfig {
                                 "/api/auth/refresh", "/api/usuario/confirmar-email",
                                 "/api/auth/reset-password-request",
                                 "/api/auth/reset-password/confirm").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categoria/combo").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN")

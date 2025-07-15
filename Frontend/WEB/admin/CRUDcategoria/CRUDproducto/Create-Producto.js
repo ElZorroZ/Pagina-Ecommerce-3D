@@ -99,6 +99,32 @@ async function fetchConRefresh(url, options = {}) {
     inputImagenes.value = "";
   });
 
+  async function cargarCategorias() {
+    try {
+      const token = localStorage.getItem("accessToken"); // o donde tengas el token guardado
+      const res = await fetch("http://localhost:8080/api/categoria/combo", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (!res.ok) throw new Error("No se pudieron cargar las categorías");
+      const categorias = await res.json();
+
+      const select = document.getElementById("categoria");
+      select.innerHTML = '<option value="">Seleccionar categoría</option>';
+
+      categorias.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat.id;
+        option.textContent = cat.nombre;
+        select.appendChild(option);
+      });
+    } catch (err) {
+      alert("Error cargando categorías: " + err.message);
+    }
+  }
+
+
   async function subirArchivoBackend(productoId, file, orden) {
     const formData = new FormData();
     formData.append("file", file);
@@ -110,10 +136,15 @@ async function fetchConRefresh(url, options = {}) {
     });
 
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || "Error subiendo archivo al backend");
+      let errorText = await res.text();
+      console.error("Error backend text:", errorText);
+      try {
+        const errorData = JSON.parse(errorText);
+        throw new Error(errorData.message || "Error subiendo archivo al backend");
+      } catch {
+        throw new Error(errorText || "Error subiendo archivo al backend");
+      }
     }
-    return await res.json();
   }
 
   const form = document.getElementById("form-producto");
@@ -199,70 +230,175 @@ async function fetchConRefresh(url, options = {}) {
       preview.appendChild(div);
     });
   }
+  cargarCategorias();
+  const inputArchivoStl = document.getElementById("archivo-stl");
+  const previewSTL = document.getElementById("stl-preview");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const nombre = document.getElementById("nombre").value.trim();
-    const descripcion = document.getElementById("descripcion").value.trim();
-    const precio = parseFloat(document.getElementById("precio").value);
-
-    if (!nombre || isNaN(precio)) {
-      alert("Por favor completa todos los campos obligatorios.");
-      return;
-    }
-    const tieneArchivosDeOtroProducto = window.productoState.archivosSeleccionados.some(a => !(a instanceof File));
-
-    if (tieneArchivosDeOtroProducto) {
-      alert("Estás usando imágenes que pertenecen a otro producto. Por favor eliminá esas imágenes antes de guardar uno nuevo.");
-      return;
-    }
-
-    try {
-      const productoPayload = {
-        nombre,
-        descripcion,
-        precio,
-        categoriaId: 1,
-        colores: window.productoState.coloresSeleccionados // ✅ corregido
-      };
-
-      const backendBase = "http://localhost:8080/api/productos";
-
-      const resProducto = await fetchConRefresh(backendBase, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(productoPayload),
-      });
-
-      if (!resProducto.ok) {
-        let errorText = await resProducto.text();
-        try {
-          const json = JSON.parse(errorText);
-          errorText = json.message || JSON.stringify(json);
-        } catch {}
-        throw new Error(errorText || "Error al guardar el producto");
-      }
-
-      const productoCreado = await resProducto.json();
-
-      if (window.productoState.archivosSeleccionados.length > 0) {
-        for (let i = 0; i < Math.min(window.productoState.archivosSeleccionados.length, 5); i++) {
-          await subirArchivoBackend(productoCreado.id, window.productoState.archivosSeleccionados[i], i);
-        }
-      }
-
-      alert("Producto, colores y archivos guardados con éxito!");
-      form.reset();
-      window.productoState.coloresSeleccionados = [];
-      window.productoState.archivosSeleccionados = [];
-      actualizarListaColores();
-      actualizarPreview();
-      cargarProductos();
-    } catch (error) {
-      alert("Error: " + error.message);
+  inputArchivoStl.addEventListener("change", function () {
+    const archivo = this.files[0];
+    if (archivo && archivo.name.endsWith(".stl")) {
+      window.productoState.archivoSTL = archivo;
+      actualizarPreviewSTL();
+    } else {
+      alert("El archivo debe ser .stl");
+      this.value = ""; // limpiar input
     }
   });
+
+  function actualizarPreviewSTL() {
+    previewSTL.innerHTML = "";
+    const archivo = window.productoState.archivoSTL;
+    if (!archivo) return;
+
+    const div = document.createElement("div");
+    div.style.position = "relative";
+    div.style.display = "inline-block";
+    div.style.marginRight = "10px";
+    div.style.padding = "6px 10px";
+    div.style.border = "1px solid #ccc";
+    div.style.borderRadius = "4px";
+    div.style.background = "#f9f9f9";
+    div.style.fontFamily = "monospace";
+
+    const nombreArchivo = document.createElement("span");
+    nombreArchivo.textContent = archivo.name;
+
+    const btnEliminar = document.createElement("button");
+    btnEliminar.textContent = "X";
+    btnEliminar.style.position = "absolute";
+    btnEliminar.style.top = "0";
+    btnEliminar.style.right = "0";
+    btnEliminar.style.background = "rgba(255,0,0,0.7)";
+    btnEliminar.style.color = "white";
+    btnEliminar.style.border = "none";
+    btnEliminar.style.cursor = "pointer";
+    btnEliminar.style.borderRadius = "0 4px 0 4px";
+    btnEliminar.style.padding = "0 4px";
+    btnEliminar.title = "Eliminar archivo STL";
+    btnEliminar.addEventListener("click", () => {
+      window.productoState.archivoSTL = null;
+      inputArchivoStl.value = "";
+      actualizarPreviewSTL();
+    });
+
+    div.appendChild(nombreArchivo);
+    div.appendChild(btnEliminar);
+    previewSTL.appendChild(div);
+  }
+
+  form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const nombre = document.getElementById("nombre").value.trim();
+  const descripcion = document.getElementById("descripcion").value.trim();
+  const precio = parseFloat(document.getElementById("precio").value);
+  const codigoInicial = document.getElementById("codigo-inicial").value.trim();
+  const versionInput = document.getElementById('version');
+  const versionValue = versionInput.value.trim();
+
+  if (!/^\d{1,4}$/.test(versionValue)) {
+    alert("La versión debe ser un número de hasta 4 dígitos.");
+    return;
+  }
+
+  const version = versionValue;
+  const seguimiento = document.getElementById("seguimiento").value.trim();
+
+  const dimensionAlto = parseInt(document.getElementById("dimension-alto").value);
+  const dimensionAncho = parseInt(document.getElementById("dimension-ancho").value);
+  const dimensionProfundidad = parseInt(document.getElementById("dimension-profundidad").value);
+
+  const material = document.getElementById("material").value.trim();
+  const peso = parseFloat(document.getElementById("peso").value);
+  const tecnica = document.getElementById("tecnica").value.trim();
+
+  if (!nombre || isNaN(precio)) {
+    alert("Por favor completa todos los campos obligatorios.");
+    return;
+  }
+
+  const tieneArchivosDeOtroProducto = window.productoState.archivosSeleccionados.some(a => !(a instanceof File));
+
+  if (tieneArchivosDeOtroProducto) {
+    alert("Estás usando imágenes que pertenecen a otro producto. Por favor eliminá esas imágenes antes de guardar uno nuevo.");
+    return;
+  }
+
+  const categoriaId = parseInt(document.getElementById("categoria").value);
+  if (!categoriaId) {
+    alert("Seleccioná una categoría");
+    return;
+  }
+
+  try {
+    // Armar FormData para enviar JSON + archivo
+    const formData = new FormData();
+
+    // Crear el objeto JSON con los datos
+    const productoPayload = {
+      nombre,
+      descripcion,
+      precio,
+      categoriaId,
+      colores: window.productoState.coloresSeleccionados, // ✅ colores
+      codigoInicial,
+      version,
+      seguimiento,
+      dimensionAlto,
+      dimensionAncho,
+      dimensionProfundidad,
+      material,
+      peso,
+      tecnica
+    };
+
+    // El JSON va como string en una parte llamada "producto" (podés cambiar el nombre si querés)
+    formData.append("producto", new Blob([JSON.stringify(productoPayload)], { type: "application/json" }));
+
+    // Agregar archivo STL (input con id "archivo-stl")
+    const archivoStlInput = document.getElementById("archivo-stl");
+    if (archivoStlInput && archivoStlInput.files.length > 0) {
+      formData.append("archivo", archivoStlInput.files[0]);
+    }
+
+    const backendBase = "http://localhost:8080/api/productos";
+
+    const resProducto = await fetchConRefresh(backendBase, {
+      method: "POST",
+      // NO seteamos Content-Type, fetch lo hará automáticamente con boundary correcto
+      body: formData,
+    });
+
+    if (!resProducto.ok) {
+      let errorText = await resProducto.text();
+      try {
+        const json = JSON.parse(errorText);
+        errorText = json.message || JSON.stringify(json);
+      } catch {}
+      throw new Error(errorText || "Error al guardar el producto");
+    }
+
+    const productoCreado = await resProducto.json();
+
+    // Subir imágenes normales (si las hay)
+    if (window.productoState.archivosSeleccionados.length > 0) {
+      for (let i = 0; i < Math.min(window.productoState.archivosSeleccionados.length, 5); i++) {
+        await subirArchivoBackend(productoCreado.id, window.productoState.archivosSeleccionados[i], i);
+      }
+    }
+
+    alert("Producto, colores, archivo STL y archivos guardados con éxito!");
+    form.reset();
+    window.productoState.coloresSeleccionados = [];
+    window.productoState.archivosSeleccionados = [];
+    actualizarListaColores();
+    actualizarPreview();
+    cargarProductos();
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+});
+
 })();
 
 });
