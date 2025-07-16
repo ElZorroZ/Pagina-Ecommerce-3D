@@ -106,6 +106,47 @@ body {
 .dropdown-menu[style*="display: none"] {
   display: none;
 }
+#adminPanel {
+  position: relative;
+}
+
+#adminPanel .dropdown-menu {
+  display: none;  /* oculto por defecto */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-width: 180px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  z-index: 1000;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+#adminPanel:hover .dropdown-menu {
+  display: block; /* solo visible al hacer hover */
+  cursor: pointer;
+}
+
+#adminPanel .dropdown-menu li a {
+  display: block;
+  padding: 8px 12px;
+  color: #333;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+#adminPanel .dropdown-menu li a:hover {
+  background-color: #eee;
+}
+
+#adminPanel > a {
+  cursor: pointer;
+}
+
 /* --- Hero Principal --- */
 
 .hero {

@@ -10,6 +10,5 @@ import java.util.List;
 
 public interface JpaProductoRepository extends JpaRepository<ProductoEntity, Integer> {
     Page<ProductoEntity> findByCategoriaId_Id(Integer categoriaId, Pageable pageable);
-
 }
 

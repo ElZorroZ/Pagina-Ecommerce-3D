@@ -20,7 +20,13 @@
                   <!-- Aquí van las categorías restantes dinámicas -->
                 </ul>
               </li>
-              <li id="adminPanel"><a href="#">Panel de Administración</a></li>              
+              <li id="adminPanel" class="dropdown">
+                <a href="#">Panel de Administración</a>
+                <ul class="dropdown-menu" style="display:none;">
+                  <li><a href="/WEB/admin/CRUDcategoria/CRUDcategoria.html">Gestión Categorías</a></li>
+                  <li><a href="/WEB/admin/CRUDcategoria/CRUDproducto/CRUDproducto.html">Gestión Productos</a></li>
+                </ul>
+              </li>
             </ul>
           </nav>
 

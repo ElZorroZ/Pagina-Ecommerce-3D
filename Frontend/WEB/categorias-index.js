@@ -1,12 +1,13 @@
-// header-categorias.js
-
 document.addEventListener('DOMContentLoaded', () => {
   const listaCategorias = document.getElementById('categoria-lista');
   const masCategorias = document.getElementById('mas-categorias');
   const dropdownMenu = masCategorias ? masCategorias.querySelector('.dropdown-menu') : null;
   const catalogMenu = document.querySelector('.catalog-menu ul');
 
-  if (!listaCategorias || !dropdownMenu || !catalogMenu || !masCategorias) return;
+  const adminPanel = document.getElementById('adminPanel');
+  const adminDropdownMenu = adminPanel ? adminPanel.querySelector('.dropdown-menu') : null;
+
+  if (!listaCategorias || !dropdownMenu || !catalogMenu || !masCategorias || !adminPanel || !adminDropdownMenu) return;
 
   fetch('http://localhost:8080/api/categoria/combo')
     .then(res => {
@@ -14,55 +15,73 @@ document.addEventListener('DOMContentLoaded', () => {
       return res.json();
     })
     .then(categorias => {
-      // Separar destacadas y normales
+      categorias = categorias.filter(c => c.id !== 1);
+
       const destacadas = categorias.filter(c => c.destacado);
       const normales = categorias.filter(c => !c.destacado);
 
-      // Función para crear un <li> con enlace a categoría
       const crearLiCategoria = (cat) => {
         const li = document.createElement('li');
         const a = document.createElement('a');
-        a.href = `/productos?categoria=${encodeURIComponent(cat.id)}`;
+        a.href = '/WEB/categoria/s_categoria.html?categoria=' + encodeURIComponent(cat.id);
         a.textContent = cat.nombre;
         li.appendChild(a);
         return li;
       };
 
-      // Limpiar elementos que no sean 'mas-categorias' o 'adminPanel'
       [...listaCategorias.children].forEach(li => {
         if (li.id !== 'mas-categorias' && li.id !== 'adminPanel') li.remove();
       });
 
-      // Insertar categorías destacadas (máximo 3) antes de 'mas-categorias'
       destacadas.slice(0, 3).forEach(cat => {
         const li = crearLiCategoria(cat);
         listaCategorias.insertBefore(li, masCategorias);
       });
 
-      // Vaciar dropdown y agregar sólo categorías normales (sin destacados)
       dropdownMenu.innerHTML = '';
       normales.forEach(cat => {
         dropdownMenu.appendChild(crearLiCategoria(cat));
       });
 
-      // Vaciar y llenar menú móvil con todas las categorías (destacadas + normales)
       catalogMenu.innerHTML = '';
       categorias.forEach(cat => {
         catalogMenu.appendChild(crearLiCategoria(cat));
       });
 
-      // Toggle dropdown al clickear "Más categorías"
+      // Toggle dropdown "Más categorías"
       masCategorias.querySelector('a').addEventListener('click', (e) => {
         e.preventDefault();
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        if (dropdownMenu.style.display === 'block') {
+          dropdownMenu.style.display = 'none';
+        } else {
+          dropdownMenu.style.display = 'block';
+          // Cerrar adminPanel si está abierto
+          adminDropdownMenu.style.display = 'none';
+        }
       });
 
-      // Cerrar dropdown si clickean afuera
+      // Toggle dropdown "Panel de Administración"
+      adminPanel.querySelector('a').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (adminDropdownMenu.style.display === 'block') {
+          adminDropdownMenu.style.display = 'none';
+        } else {
+          adminDropdownMenu.style.display = 'block';
+          // Cerrar "Más categorías" si está abierto
+          dropdownMenu.style.display = 'none';
+        }
+      });
+
+      // Cerrar dropdowns si clickean afuera
       document.addEventListener('click', (e) => {
         if (!masCategorias.contains(e.target)) {
           dropdownMenu.style.display = 'none';
         }
+        if (!adminPanel.contains(e.target)) {
+          adminDropdownMenu.style.display = 'none';
+        }
       });
+
     })
     .catch(err => {
       console.error('Error cargando categorías:', err);

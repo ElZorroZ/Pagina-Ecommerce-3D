@@ -1,3 +1,16 @@
+const btnMenu = document.querySelector('.btn-menu');
+const catalogMenu = document.querySelector('.catalog-menu');
+
+btnMenu.addEventListener('click', () => {
+  catalogMenu.classList.toggle('open');
+});
+
+// Opcional: cerrar menú si clickeas fuera
+catalogMenu.addEventListener('click', (e) => {
+  if (e.target === catalogMenu) {
+    catalogMenu.classList.remove('open');
+  }
+});
 // Obtener categoriaId de la URL
 const urlParams = new URLSearchParams(window.location.search);
 const categoriaId = urlParams.get('categoria');
@@ -24,45 +37,55 @@ function renderProductos(pageData) {
   }
 
   productos.forEach((item, index) => {
-    const producto = item.producto;  // acá extraés el producto real
-    const archivoPrincipal = item.archivoPrincipal;
-    const colores = item.colores || [];
+  let producto;
+  let archivoPrincipal;
+  let colores;
 
-    const imagen = archivoPrincipal?.linkArchivo || '/img/default.jpeg';
+  if (item.producto) {
+    producto = item.producto;
+    archivoPrincipal = item.archivoPrincipal;
+    colores = item.colores || [];
+  } else {
+    producto = item;
+    archivoPrincipal = producto.archivos && producto.archivos.length > 0 ? producto.archivos[0] : null;
+    colores = producto.colores || [];
+  }
 
-    const card = document.createElement('div');
-    card.className = 'product-card';
+  const imagen = archivoPrincipal?.linkArchivo || '/img/default.jpeg';
 
-    card.innerHTML = `
-      <div class="product-info" onclick="window.location.href='/WEB/categoria/producto/s_producto.html?id=${producto.id}'">
-        <img src="${imagen}" alt="${producto.nombre}" />
-        <h3>${producto.nombre}</h3>
-        <p class="product-desc">${producto.descripcion}</p>
+  const card = document.createElement('div');
+  card.className = 'product-card';
+
+  card.innerHTML = `
+    <div class="product-info" onclick="window.location.href='/WEB/categoria/producto/s_producto.html?id=${producto.id}'">
+      <img src="${imagen}" alt="${producto.nombre}" />
+      <h3>${producto.nombre}</h3>
+      <p class="product-desc">${producto.descripcion}</p>
+    </div>
+
+    <div class="product-controls">
+      <label for="formato${index}">Formato:</label>
+      <select id="formato${index}" class="minimal-select">
+        <option value="Archivo">STL</option>
+        <option value="Fisico">Fisico</option>
+      </select>
+
+      <label for="color${index}">Color:</label>
+      <select id="color${index}" class="minimal-select">
+        ${colores.map(color => `<option value="${color}">${color}</option>`).join('')}
+      </select>
+
+      <p class="product-price">$${producto.precio ? producto.precio.toFixed(2) : '0.00'}</p>
+
+      <div class="product-actions">
+        <input type="number" min="1" value="1" class="quantity-input" />
+        <button class="add-to-cart-btn">Agregar</button>
       </div>
+    </div>
+  `;
 
-      <div class="product-controls">
-        <label for="formato${index}">Formato:</label>
-        <select id="formato${index}" class="minimal-select">
-          <option value="Archivo">Archivo</option>
-          <option value="Impresion">Impresión</option>
-        </select>
-
-        <label for="color${index}">Color:</label>
-        <select id="color${index}" class="minimal-select">
-          ${colores.map(color => `<option value="${color}">${color}</option>`).join('')}
-        </select>
-
-        <p class="product-price">$${producto.precio ? producto.precio.toFixed(2) : '0.00'}</p>
-
-        <div class="product-actions">
-          <input type="number" min="1" value="1" class="quantity-input" />
-          <button class="add-to-cart-btn">Agregar</button>
-        </div>
-      </div>
-    `;
-
-    productGrid.appendChild(card);
-  });
+  productGrid.appendChild(card);
+});
 
   renderPaginacion(currentPage, totalPages, pageData);
 }

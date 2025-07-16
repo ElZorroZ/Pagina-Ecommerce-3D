@@ -73,7 +73,7 @@ async function refreshAccessToken() {
 function redirigirALogin() {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
-  window.location.href = "/login.html";
+  window.location.href = "/WEB/usuario/login/login.html";
 }
 
 function base64UrlDecode(str) {

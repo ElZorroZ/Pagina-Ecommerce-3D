@@ -419,11 +419,12 @@ public class ProductoServiceImpl implements ProductoService {
         // 3. Eliminar relaciones (colores, archivos, etc.) y producto localmente
         productoRepository.deleteById(id);
     }
-    @Cacheable(value = "productoCompleto", key = "#productoId")
+    @Cacheable(value = "productoCompleto", key = "#categoriaId")
     public Page<ProductoResponseDTO> listarProductosPorCategoria(Integer categoriaId, Pageable pageable) {
         Page<ProductoEntity> productosPage = productoRepository.findByCategoriaId_Id(categoriaId, pageable);
         return productosPage.map(ProductoMapper::toDTO);
     }
+
 
     @Override
     @Cacheable(value = "productosTodos")

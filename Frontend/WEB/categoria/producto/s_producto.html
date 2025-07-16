@@ -7,149 +7,97 @@
   <link rel="stylesheet" href="s_producto_styles.css" />
 </head>
 <body>
-  <header class="main-header">
+    <header class="main-header">
       <div class="container header-inner">
           <div class="left-header">
           <div class="logo"></div>
           <nav class="nav">
-              <ul>
-              <li><a href="#">Set de mates</a></li>
-              <li><a href="#">Tazas</a></li>
-              <li><a href="#">Decoraciones</a></li>
-              <li><a href="#">Para la mesa</a></li>
-              <li><a href="#">Contacto</a></li>
-              </ul>
+            <ul id="categoria-lista">
+              <!-- otras categorías destacadas -->
+              <li id="mas-categorias" class="dropdown">
+                <a href="#" class="dropdown-toggle">Más categorías ▼</a>
+                <ul class="dropdown-menu" style="display:none;">
+                  <!-- Aquí van las categorías restantes dinámicas -->
+                </ul>
+              </li>
+              <li id="adminPanel" class="dropdown">
+                <a href="#">Panel de Administración</a>
+                <ul class="dropdown-menu" style="display:none;">
+                  <li><a href="/WEB/admin/CRUDcategoria/CRUDcategoria.html">Gestión Categorías</a></li>
+                  <li><a href="/WEB/admin/CRUDcategoria/CRUDproducto/CRUDproducto.html">Gestión Productos</a></li>
+                </ul>
+              </li>
+            </ul>
           </nav>
+
           </div>
           <div class="right-header">
           <a href="#" class="search-icon">🔍</a>
           <a href="#" class="cart-icon">🛒 (0)</a>
-          </div>
+          <li id="loginLink"><a href="/WEB/usuario/login/login.html" class="cart-icon">LOGIN</a></li>
+          <li id="cuentaLink" style="display:none;"><a href="/WEB/usuario/perfil/perfil.html" class="cart-icon">CUENTA</a></li>  
+        </div>
       </div>
       <div class="alt-header mobile-header">
-        <div class="alt-header-inner">
-            <div class="logo">LOGO</div>
-            <button class="btn-search" aria-label="Buscar">🔍</button>
-            <button class="btn-cart" aria-label="Carrito">🛒</button>
-            <button class="btn-menu" aria-label="Menú">☰</button>
-          </div>
-    
-          <nav class="catalog-menu">
-            <ul>
-              <li><a href="#">Categoría 1</a></li>
-              <li><a href="#">Categoría 2</a></li>
-              <li><a href="#">Categoría 3</a></li>
-              <!-- etc -->
-            </ul>
-          </nav>
-        </div>
+    <div class="alt-header-inner">
+        <div class="logo">LOGO</div>
+        <button class="btn-search" aria-label="Buscar">🔍</button>
+        <button class="btn-cart" aria-label="Carrito">🛒</button>
+        <button class="btn-menu" aria-label="Menú">☰</button>
+        <a href="/WEB/usuario/login/login.html" class="cart-icon"> LOGIN</a>
+      </div>
+
+      <nav class="catalog-menu">
+        <ul>
+          <!-- etc -->
+        </ul>
+      </nav>
+    </div>
   </header>
 
   <main class="product-detail container">
-    <div class="product-gallery">
-        <div class="product-images">
-            <img class="product-image-main" src="/img/ejemplo-1.jpeg" alt="Producto principal" />
-            <div class="product-thumbnails">
-                <img src="/img/ejemplo-1.jpeg" alt="miniatura 1" class="selected" />
-                <img src="/img/ejemplo-2.jfif" alt="miniatura 2" />
-                <img src="/img/ejemplo-1.jpeg" alt="miniatura 3" />
-            </div>
-        </div>
+  <div class="product-gallery">
+    <div class="product-images">
+      <img id="main-image" class="product-image-main" src="" alt="Producto principal" />
+      <div class="product-thumbnails"></div>
+    </div>
+    <div class="product-details">
+      <h3>Detalles</h3>
+      <ul>
+        <li><strong>Dimensión:</strong> <span id="detalle-dimension">-</span></li>
+        <li><strong>Material:</strong> <span id="detalle-material">-</span></li>
+        <li><strong>Técnica:</strong> <span id="detalle-tecnica">-</span></li>
+        <li><strong>Peso:</strong> <span id="detalle-peso">-</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="product-info-detail">
+    <h1 id="producto-nombre"></h1>
+    <p class="description" id="producto-descripcion"></p>
+
+    <div class="options">
+      <p>Formato:</p>
+      <div class="option-buttons" id="opciones-formato"></div>
+
+      <p>Color:</p>
+      <div class="option-buttons" id="opciones-color"></div>
     </div>
 
+    <p class="price" id="producto-precio"></p>
+
+    <div class="buy-section">
+      <input type="number" min="1" value="1" class="quantity-input" />
+      <button class="add-to-cart-btn-detail">Comprar</button>
     </div>
+  </div>
+</main>
 
-    <div class="product-info-detail">
-      <h1>Bandeja STING</h1>
-      <p class="description">Bandeja de diseño lacado, elegante y resistente. Ideal para decorar o servir.</p>
+<section class="related-products container" id="related-products-section">
+  <h2>Productos Relacionados</h2>
+  <div class="product-grid" id="productos-relacionados"></div>
+</section>
 
-      <div class="options">
-        <p>Formato:</p>
-        <div class="option-buttons">
-          <label><input type="radio" name="formato" value="Archivo" checked />Archivo</label>
-          <label><input type="radio" name="formato" value="Impresión" />Impresión</label>
-        </div>
-
-        <p>Color:</p>
-        <div class="option-buttons">
-          <label><input type="radio" name="color" value="Negro" checked />Negro</label>
-          <label><input type="radio" name="color" value="Blanco" />Blanco</label>
-        </div>
-      </div>
-
-      <p class="price">$120</p>
-
-      <div class="buy-section">
-        <input type="number" min="1" value="1" class="quantity-input" />
-        <button class="add-to-cart-btn-detail">Comprar</button>
-      </div>
-    </div>
-  </main>
-
-  <section class="related-products container">
-    <h2>Productos Relacionados</h2>
-    <div class="product-grid">
-      <div class="product-card">
-          <div class="product-info" onclick="window.location.href='/producto/1'">
-            <img src="/img/ejemplo-1.jpeg" alt="Mate" />
-            <h3>Bandeja STING</h3>
-            <p class="product-desc">Mate con diseño STING grabado.</p>
-          </div>
-
-          <div class="product-controls">
-            <label for="formato1">Formato:</label>
-            <select id="formato1" class="minimal-select">
-              <option value="Archivo">Archivo</option>
-              <option value="Impresion">Impresión</option>
-            </select>
-
-            <label for="color1">Color:</label>
-            <select id="color1" class="minimal-select">
-              <option value="negro">Negro</option>
-              <option value="blanco">Blanco</option>
-            </select>
-
-            <p class="product-price">$120</p>
-
-            <div class="product-actions">
-              <input type="number" min="1" value="1" class="quantity-input" />
-              <button class="add-to-cart-btn">Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="product-card">
-          <div class="product-info" onclick="window.location.href='/producto/1'">
-            <img src="/img/ejemplo-1.jpeg" alt="Mate" />
-            <h3>Bandeja STING</h3>
-            <p class="product-desc">Mate con diseño STING grabado.</p>
-          </div>
-
-          <div class="product-controls">
-            <label for="formato1">Formato:</label>
-            <select id="formato1" class="minimal-select">
-              <option value="Archivo">Archivo</option>
-              <option value="Impresion">Impresión</option>
-            </select>
-
-            <label for="color1">Color:</label>
-            <select id="color1" class="minimal-select">
-              <option value="negro">Negro</option>
-              <option value="blanco">Blanco</option>
-            </select>
-
-            <p class="product-price">$120</p>
-
-            <div class="product-actions">
-              <input type="number" min="1" value="1" class="quantity-input" />
-              <button class="add-to-cart-btn">Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        
-    </div>
-  </section>
 
   <footer class="main-footer">
     <div class="container">
@@ -167,5 +115,7 @@
   </footer>
 
   <script src="s_producto.js"></script>
+  <script src="/WEB/categorias-index.js"></script>
+  <script src="/WEB/auth-utils-admin.js"></script>
 </body>
 </html>

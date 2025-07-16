@@ -7,26 +7,35 @@
   <link rel="stylesheet" href="perfil_styles.css" />
 </head>
 <body>
-    <header class="main-header">
+      <header class="main-header">
       <div class="container header-inner">
           <div class="left-header">
           <div class="logo"></div>
           <nav class="nav">
-              <ul>
-              <li><a href="#">Set de mates</a></li>
-              <li><a href="#">Tazas</a></li>
-              <li><a href="#">Decoraciones</a></li>
-              <li><a href="#">Para la mesa</a></li>
-              <li><a href="#">Contacto</a></li>
-              <li id="adminPanel"><a href="#">Panel de Administración</a></li>              
+            <ul id="categoria-lista">
+              <!-- otras categorías destacadas -->
+              <li id="mas-categorias" class="dropdown">
+                <a href="#" class="dropdown-toggle">Más categorías ▼</a>
+                <ul class="dropdown-menu" style="display:none;">
+                  <!-- Aquí van las categorías restantes dinámicas -->
+                </ul>
+              </li>
+              <li id="adminPanel" class="dropdown">
+                <a href="#">Panel de Administración</a>
+                <ul class="dropdown-menu" style="display:none;">
+                  <li><a href="/WEB/admin/CRUDcategoria/CRUDcategoria.html">Gestión Categorías</a></li>
+                  <li><a href="/WEB/admin/CRUDcategoria/CRUDproducto/CRUDproducto.html">Gestión Productos</a></li>
+                </ul>
+              </li>
             </ul>
           </nav>
+
           </div>
           <div class="right-header">
           <a href="#" class="search-icon">🔍</a>
           <a href="#" class="cart-icon">🛒 (0)</a>
           <li id="loginLink"><a href="/WEB/usuario/login/login.html" class="cart-icon">LOGIN</a></li>
-          <li id="cuentaLink" style="display:none;"><a href="/WEB/usuario/login/login.html" class="cart-icon">CUENTA</a></li>  
+          <li id="cuentaLink" style="display:none;"><a href="/WEB/usuario/perfil/perfil.html" class="cart-icon">CUENTA</a></li>  
         </div>
       </div>
       <div class="alt-header mobile-header">
@@ -40,9 +49,6 @@
 
       <nav class="catalog-menu">
         <ul>
-          <li><a href="#">Categoría 1</a></li>
-          <li><a href="#">Categoría 2</a></li>
-          <li><a href="#">Categoría 3</a></li>
           <!-- etc -->
         </ul>
       </nav>
@@ -152,6 +158,7 @@
 
 
   <script src="perfil.js"></script>
+  <script src="/WEB/categorias-index.js"></script>
   <script src="/WEB/auth-utils.js"></script>
 </body>
 </html>
