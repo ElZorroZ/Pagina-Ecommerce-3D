@@ -3,10 +3,9 @@ package com.formaprogramada.ecommerce_backend;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Carrito.CarritoRepository;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Descuento.CarritoService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaCrearRequest;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Descuento.CarritoAgregarRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoAgregarRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdatePedido;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Carrito.CarritoRepositoryImpl;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -97,4 +95,24 @@ public class CarritoServiceTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testActualizarUsuario() throws Exception {
+        UsuarioUpdatePedido request= new UsuarioUpdatePedido();
+        request.setCp("4245");
+        request.setApellido("VelazquesMejorado");
+        request.setCiudad("Guadalajara");
+        request.setNombre("Zorro");
+        request.setGmail("thiago2007crackz@gmail.com");
+        request.setDireccion("por ahi");
+        request.setTelefono("18384135");
+
+        mockMvc.perform(put("/api/auth/actualizar-usuario")
+                        .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+
 }

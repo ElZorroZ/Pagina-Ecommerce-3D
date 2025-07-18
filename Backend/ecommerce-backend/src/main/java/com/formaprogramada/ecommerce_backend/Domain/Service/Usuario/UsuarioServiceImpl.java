@@ -116,4 +116,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setPassword(passwordHasher.hash(request.getNuevaPassword()));
         usuarioRepository.guardar(usuario);
     }
+
+    @Override
+    public Boolean actualizarUsuarioAlComprar(Usuario usuario) {
+        usuarioRepository.buscarPorGmail(usuario.getGmail())
+                .orElseThrow(() -> new IllegalArgumentException("El usuario a actualizar no existe"));
+        return usuarioRepository.actualizarUsuario(usuario);
+    }
 }

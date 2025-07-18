@@ -1,4 +1,4 @@
-package com.formaprogramada.ecommerce_backend.Domain.Model.Descuento;
+package com.formaprogramada.ecommerce_backend.Domain.Model.Carrito;
 
 import jakarta.persistence.Entity;
 import lombok.*;
@@ -16,5 +16,6 @@ public class Carrito {
     private Integer cantidad;
     private double precioTotal;
     private double precioUnitario;
+    private boolean esDigital;
 
 }

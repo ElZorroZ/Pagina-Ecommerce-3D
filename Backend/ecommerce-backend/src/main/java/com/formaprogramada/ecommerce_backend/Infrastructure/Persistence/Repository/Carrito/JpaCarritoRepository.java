@@ -1,6 +1,5 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Carrito;
 
-import com.formaprogramada.ecommerce_backend.Domain.Model.Descuento.Carrito;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

@@ -1,7 +1,6 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Descuento;
 
-import com.formaprogramada.ecommerce_backend.Domain.Model.Descuento.Carrito;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Descuento.DescuentoDTO;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 
 import java.util.List;

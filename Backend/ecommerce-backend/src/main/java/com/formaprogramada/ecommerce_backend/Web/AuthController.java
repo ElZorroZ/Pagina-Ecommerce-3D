@@ -11,9 +11,12 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Auth.RefreshToke
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ResetPassword.ResetPasswordConfirmRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ResetPassword.ResetPasswordRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioRegistroRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdatePedido;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario.JpaUsuarioRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario.UsuarioRepositoryImpl;
+import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioActualizarMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioRegistroMapper;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
@@ -50,9 +53,11 @@ public class AuthController {
     private final JwtSpecialTokenService jwtSpecialTokenService;
     private final JpaUsuarioRepository jpaUsuarioRepository;
     private final JwtTokenService jwtTokenService;
+
     @Autowired
     private UsuarioRepository usuarioRepository;
     UsuarioMapper mapper = new UsuarioMapper();
+    UsuarioActualizarMapper mapper2= new UsuarioActualizarMapper();
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UsuarioRegistroRequest request) {
@@ -116,10 +121,6 @@ public class AuthController {
     }
 
 
-
-
-
-
     @PostMapping("/reset-password-request")
     public ResponseEntity<?> solicitarRestablecerPassword(@RequestBody ResetPasswordRequest request) {
         String email = request.getEmail();
@@ -166,8 +167,15 @@ public class AuthController {
         return ResponseEntity.ok("Contraseña actualizada correctamente");
     }
 
+    @PutMapping("/actualizar-usuario")
+    public ResponseEntity<?> actualizarUsuario(@RequestBody UsuarioUpdatePedido request){
 
+        var usuario = mapper2.toDomain(request);
 
-
-
+        if (usuarioService.actualizarUsuarioAlComprar(usuario)) {
+            return ResponseEntity.ok().build();
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

@@ -1,7 +1,7 @@
 package com.formaprogramada.ecommerce_backend.Mapper.Carrito;
 
-import com.formaprogramada.ecommerce_backend.Domain.Model.Descuento.Carrito;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Descuento.CarritoAgregarRequest;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoAgregarRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +14,7 @@ public class CarritoMapper {
         carrito.setCantidad(request.getCantidad());
         carrito.setPrecioTotal(request.getPrecioTotal());
         carrito.setPrecioUnitario(request.getPrecioUnitario());
+        carrito.setEsDigital(request.getEsDigital());
         return carrito;
     }
 
@@ -40,6 +41,8 @@ public class CarritoMapper {
         carritoEntity.cantidad( carrito.getCantidad());
         carritoEntity.precioTotal( carrito.getPrecioTotal());
         carritoEntity.precioUnitario( carrito.getPrecioUnitario());
+        carritoEntity.esDigital(carrito.isEsDigital());
+
 
 
         return carritoEntity.build();

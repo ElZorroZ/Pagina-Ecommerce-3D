@@ -1,6 +1,6 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Carrito;
 
-import com.formaprogramada.ecommerce_backend.Domain.Model.Descuento.Carrito;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Carrito.CarritoRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.Carrito.CarritoMapper;

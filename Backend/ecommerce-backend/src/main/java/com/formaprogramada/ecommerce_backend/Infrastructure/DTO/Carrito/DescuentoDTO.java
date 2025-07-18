@@ -1,4 +1,4 @@
-package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Descuento;
+package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

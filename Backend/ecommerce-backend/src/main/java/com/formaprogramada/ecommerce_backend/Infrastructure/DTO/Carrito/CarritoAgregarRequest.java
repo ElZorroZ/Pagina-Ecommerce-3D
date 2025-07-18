@@ -1,9 +1,7 @@
-package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Descuento;
+package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito;
 
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,5 +31,8 @@ public class CarritoAgregarRequest {
 
     @DecimalMin(value = "0", inclusive = false)
     private int precioUnitario;
+
+    @NotNull(message = "El saber si lo quiere digital o no es obligatorio")
+    private Boolean esDigital;
 
 }

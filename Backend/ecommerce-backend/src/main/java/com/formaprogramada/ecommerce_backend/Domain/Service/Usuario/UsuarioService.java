@@ -16,4 +16,6 @@ public interface UsuarioService {
     Usuario actualizarUsuario(Usuario usuario);
     Optional<Usuario> buscarPorGmail(String gmail);
     void cambiarPassword(String gmail, CambioPasswordRequest request);
+    Boolean actualizarUsuarioAlComprar(Usuario usuario);
+
 }

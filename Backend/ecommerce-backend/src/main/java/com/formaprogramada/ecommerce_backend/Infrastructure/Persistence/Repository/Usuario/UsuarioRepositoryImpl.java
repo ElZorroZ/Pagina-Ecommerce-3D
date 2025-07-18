@@ -2,6 +2,7 @@ package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Reposit
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Usuario.UsuarioRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
+import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioActualizarMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioMapper;
 import org.springframework.stereotype.Repository;
 
@@ -13,10 +14,12 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
 
     private final JpaUsuarioRepository jpaRepository;
     private final UsuarioMapper mapper;
+    private final UsuarioActualizarMapper mapper2;
 
-    public UsuarioRepositoryImpl(JpaUsuarioRepository jpaRepository, UsuarioMapper mapper) {
+    public UsuarioRepositoryImpl(JpaUsuarioRepository jpaRepository, UsuarioMapper mapper, UsuarioActualizarMapper mapper2) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
+        this.mapper2 = mapper2;
     }
 
     @Override
@@ -41,6 +44,17 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     public Optional<Usuario> buscarPorId(Integer id) {
         return jpaRepository.findById(id)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    public Boolean actualizarUsuario(Usuario usuario) {
+        UsuarioEntity entity = mapper2.toEntity(usuario);
+        try {
+            jpaRepository.actualizarUsuario(entity.getGmail(), entity.getNombre(), entity.getApellido(), entity.getDireccion(), entity.getCp(), entity.getCiudad(), entity.getTelefono());
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

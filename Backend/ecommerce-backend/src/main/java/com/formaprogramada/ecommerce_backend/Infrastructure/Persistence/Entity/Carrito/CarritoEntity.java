@@ -32,5 +32,8 @@ public class CarritoEntity {
     @Column(length = 100, nullable = false)
     private double precioUnitario;
 
+    @Column(nullable = false)
+    private boolean esDigital;
+
 
 }

@@ -1,7 +1,7 @@
 package com.formaprogramada.ecommerce_backend.Web;
-import com.formaprogramada.ecommerce_backend.Domain.Model.Descuento.Carrito;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Descuento.CarritoService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Descuento.CarritoAgregarRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoAgregarRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.Carrito.CarritoMapper;
 import jakarta.validation.Valid;
