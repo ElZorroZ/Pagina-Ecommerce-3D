@@ -45,11 +45,12 @@ public class CarritoServiceTest {
     void testAgregarCarrito() throws Exception {
 
         CarritoAgregarRequest request = new CarritoAgregarRequest();
-        request.setProductoId(8);
+        request.setProductoId(2);
         request.setUsuarioId(1);
-        request.setCantidad(5);
+        request.setCantidad(1);
         request.setPrecioTotal(100);
         request.setPrecioUnitario(20);
+        request.setEsDigital(true);
 
 
 

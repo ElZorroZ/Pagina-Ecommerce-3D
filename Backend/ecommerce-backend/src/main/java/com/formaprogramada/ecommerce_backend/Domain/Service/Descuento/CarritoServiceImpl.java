@@ -16,7 +16,13 @@ public class CarritoServiceImpl implements CarritoService {
 
     @Override
     public Carrito AgregarCarrito(Carrito carrito) {
-        return carritoRepository.CrearDescuento(carrito);
+        if (carrito.isEsDigital() && carrito.getCantidad() <= 1) {
+            return carritoRepository.CrearDescuento(carrito);
+        } else if (!carrito.isEsDigital()) {
+            return carritoRepository.CrearDescuento(carrito);
+        } else {
+            throw new IllegalArgumentException("La compra si es digital no deberia tener una cantidad de 1");
+        }
     }
 
     @Override
