@@ -34,7 +34,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         String hash = passwordHasher.hash(usuario.getPassword());
         usuario.setPassword(hash);
-        usuario.setPermiso(false);
+        usuario.setPermiso(0);
 
         return usuarioRepository.guardar(usuario);
     }

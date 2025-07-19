@@ -33,7 +33,6 @@ public class CarritoController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     @PutMapping("/sumarCantidad/{id}/{cantidad}")

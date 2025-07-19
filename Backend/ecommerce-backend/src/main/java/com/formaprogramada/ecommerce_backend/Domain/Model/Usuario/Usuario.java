@@ -9,7 +9,7 @@ import lombok.*;
 public class Usuario {
 
     private Integer id;
-    private Boolean permiso;
+    private int permiso;
     private String nombre;
     private String apellido;
     private String gmail;

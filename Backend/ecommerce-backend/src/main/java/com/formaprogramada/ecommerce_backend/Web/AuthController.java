@@ -67,7 +67,7 @@ public class AuthController {
 
         var usuario = UsuarioRegistroMapper.toDomain(request);
 
-        usuario.setPermiso(false);
+        usuario.setPermiso(0);
         usuario.setVerificado(false);
 
         usuario = usuarioService.registrarUsuario(usuario);

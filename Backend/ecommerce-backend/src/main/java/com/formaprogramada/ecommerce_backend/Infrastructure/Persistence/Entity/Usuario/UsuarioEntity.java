@@ -28,7 +28,7 @@ public class UsuarioEntity {
     private String password;
 
     @Column(nullable = false)
-    private Boolean permiso;
+    private int permiso;
 
     @Column(nullable = false)
     private boolean verificado = false;
