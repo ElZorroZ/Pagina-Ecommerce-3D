@@ -28,8 +28,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralError(Exception ex) {
-        // Para errores inesperados
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor");
+        ex.printStackTrace(); // Esto lo va a mostrar en la consola
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error interno del servidor: " + ex.getMessage());
     }
 }
 

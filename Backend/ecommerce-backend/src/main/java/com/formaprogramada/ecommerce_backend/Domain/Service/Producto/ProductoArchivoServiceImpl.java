@@ -5,6 +5,7 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.P
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoArchivoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +21,9 @@ public class ProductoArchivoServiceImpl implements ProductoArchivoService {
     private ProductoService productoService;
     @Autowired
     private ImgBBUploaderService imgBBUploaderService;
+    @Autowired
+    private CacheManager cacheManager;
+
     @Override
     public ProductoArchivoEntity agregarArchivo(ProductoArchivoEntity archivo) {
         return archivoRepository.save(archivo);
@@ -37,6 +41,8 @@ public class ProductoArchivoServiceImpl implements ProductoArchivoService {
         archivo.setLinkArchivo(data.getUrl());      // URL pública de la imagen
         archivo.setDeleteUrl(data.getDelete_url());  // URL para borrar la imagen en ImgBB
         archivo.setOrden(orden);
+
+        cacheManager.getCache("productoCompleto").evict(productoId);
 
         return archivoRepository.save(archivo);
     }

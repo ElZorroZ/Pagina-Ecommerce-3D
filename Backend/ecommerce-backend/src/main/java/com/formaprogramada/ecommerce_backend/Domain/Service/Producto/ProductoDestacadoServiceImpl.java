@@ -6,7 +6,10 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Reposito
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -17,8 +20,14 @@ public class ProductoDestacadoServiceImpl implements ProductoDestacadoService {
     private final JpaProductoRepository productoRepository;
     @Autowired
     private final JpaProductoDestacadoRepository destacadoRepository;
-
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "productosDestacados", allEntries = true),
+            @CacheEvict(value = "productos", allEntries = true),
+            @CacheEvict(value = "producto", key = "#productoId"),
+            @CacheEvict(value = "productoCompleto", key = "#productoId")
+    })
+    @Transactional
     public void toggleProductoDestacado(Integer productoId) {
         ProductoEntity producto = productoRepository.findById(productoId)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));

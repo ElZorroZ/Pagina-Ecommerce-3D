@@ -57,11 +57,6 @@ public class ProductoController {
         return ResponseEntity.ok(response);
     }
 
-
-
-
-
-
     @GetMapping
     public ResponseEntity<?> obtenerProductos() {
         try {
