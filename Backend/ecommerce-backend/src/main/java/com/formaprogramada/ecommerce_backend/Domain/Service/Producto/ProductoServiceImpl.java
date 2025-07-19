@@ -1,4 +1,5 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Producto;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Producto.ProductoArchivo;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoDetalleEntity;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Producto.Producto;
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
@@ -15,6 +16,7 @@ import com.formaprogramada.ecommerce_backend.Mapper.Producto.ArchivoMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Producto.ProductoDTOMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Producto.ProductoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -32,6 +34,7 @@ import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,7 +49,8 @@ public class ProductoServiceImpl implements ProductoService {
     private JpaProductoArchivoRepository productoArchivoRepository;
     @Autowired
     private JpaProductoDetalleRepository productoDetalleRepository;
-
+    @Autowired
+    private ProductoCacheService productoCacheService;
     @Autowired
     private JpaProductoDestacadoRepository productoDestacadoRepository;
     @Autowired
@@ -55,12 +59,12 @@ public class ProductoServiceImpl implements ProductoService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     private static final Logger logger = LoggerFactory.getLogger(ProductoServiceImpl.class);
+    @Autowired
+    private CacheManager cacheManager;
+
     @Caching(evict = {
             @CacheEvict(value = "productos", allEntries = true),
             @CacheEvict(value = "productosDestacados", allEntries = true)
-    }, put = {
-            @CachePut(value = "productoResponse", key = "#result.id"),
-            @CachePut(value = "productoCompleto", key = "#result.id")
     })
     @Transactional
     public ProductoResponse crearProducto(ProductoRequestConColores dto, MultipartFile archivoStl) throws IOException {
@@ -118,6 +122,23 @@ public class ProductoServiceImpl implements ProductoService {
                 .stream()
                 .map(ProductoColorEntity::getColor)
                 .toList();
+
+        ProductoCompletoDTO completo = null;
+        for (int i = 0; i < 3; i++) {
+            completo = obtenerProductoCompletoSinCache(productoGuardado.getId());
+            if (completo != null && completo.getProducto() != null) break;
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // Buena práctica: volver a marcar el hilo como interrumpido
+                throw new RuntimeException("Interrumpido al esperar para volver a obtener el producto completo", e);
+            }
+        }
+
+        if (completo != null && completo.getProducto() != null) {
+            cacheManager.getCache("productoCompleto").put(productoGuardado.getId(), completo);
+        }
+        productoCacheService.refrescarCacheProducto(productoGuardado.getId());
 
         return new ProductoResponse(productoGuardado, detalle, coloresGuardados);
     }
@@ -240,7 +261,7 @@ public class ProductoServiceImpl implements ProductoService {
             }
 
         }
-
+        productoCacheService.refrescarCacheProducto(id);
         return productoActualizado;
     }
 
@@ -252,68 +273,75 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
 
-    @Cacheable(value = "productoCompleto", key = "#productoId")
     @Override
+    @Cacheable(value = "productoCompleto", key = "#productoId", unless = "#result == null || #result.producto == null")
+    @Transactional
     public ProductoCompletoDTO obtenerProductoCompleto(Integer productoId) {
+        return obtenerProductoCompletoSinCache(productoId);
+    }
+
+    public ProductoCompletoDTO obtenerProductoCompletoSinCache(Integer productoId) {
         try {
-        return jdbcTemplate.execute((Connection con) -> {
-            CallableStatement cs = con.prepareCall("{call sp_getProductoCompleto(?)}");
-            cs.setInt(1, productoId);
-            boolean hasResults = cs.execute();
+            return jdbcTemplate.execute((Connection con) -> {
+                CallableStatement cs = con.prepareCall("{call sp_getProductoCompleto(?)}");
+                cs.setInt(1, productoId);
+                boolean hasResults = cs.execute();
 
-            ProductoCompletoDTO resultado = new ProductoCompletoDTO();
-
-            if (hasResults) {
-                ResultSet rsProducto = cs.getResultSet();
-                if (rsProducto.next()) {
-                    ProductoDTO prod = new ProductoDTO();
-                    prod.setId(rsProducto.getInt("id"));
-                    prod.setNombre(rsProducto.getString("nombre"));
-                    prod.setDescripcion(rsProducto.getString("descripcion"));
-                    prod.setCategoriaId(rsProducto.getInt("categoriaId"));
-                    prod.setPrecio(rsProducto.getFloat("precio"));
-
-                    // STL como base64 (opcional, puede ser null)
-                    prod.setArchivoStl(rsProducto.getString("archivo"));
-
-                    // Descomponer código
-                    String codigo = rsProducto.getString("codigo");
-                    if (codigo != null && codigo.length() >= 7) {
-                        prod.setCodigoInicial(codigo.substring(0, 3));
-
-                        String versionString = codigo.substring(3, 7);
-                        if (versionString.matches("\\d+")) {
-                            prod.setVersion(versionString); // Guardar como String, no int
-                        } else {
-                            System.err.println("Versión inválida: " + versionString);
-                            prod.setVersion("0"); // o manejarlo de otro modo
-                        }
-
-                        if (codigo.length() > 7) {
-                            prod.setSeguimiento(codigo.substring(7));
-                        }
-                    }
-
-                    // Otros campos
-                    String dim = rsProducto.getString("dimension"); // un string
-                    if (dim != null) {
-                        String[] partes = dim.split("x"); // o split(";") según formato
-                        if (partes.length == 3) {
-                            prod.setDimensionAlto(partes[0]);
-                            prod.setDimensionAncho(partes[1]);
-                            prod.setDimensionProfundidad(partes[2]);
-                        }
-                    }
-                    prod.setMaterial(rsProducto.getString("material"));
-                    prod.setTecnica(rsProducto.getString("tecnica"));
-                    prod.setPeso(rsProducto.getString("peso"));
-
-                    resultado.setProducto(prod);
+                if (!hasResults) {
+                    System.err.println("No se encontraron resultados para el producto con ID: " + productoId);
+                    return null;
                 }
 
+                ResultSet rsProducto = cs.getResultSet();
+                if (!rsProducto.next()) {
+                    System.err.println("Producto no encontrado para ID: " + productoId);
+                    return null;
+                }
 
+                ProductoCompletoDTO resultado = new ProductoCompletoDTO();
+                ProductoDTO prod = new ProductoDTO();
 
-                // Pasar al siguiente result set para colores
+                prod.setId(rsProducto.getInt("id"));
+                prod.setNombre(rsProducto.getString("nombre"));
+                prod.setDescripcion(rsProducto.getString("descripcion"));
+                prod.setCategoriaId(rsProducto.getInt("categoriaId"));
+                prod.setPrecio(rsProducto.getFloat("precio"));
+                prod.setArchivoStl(rsProducto.getString("archivo"));
+
+                String codigo = rsProducto.getString("codigo");
+                if (codigo != null && codigo.length() >= 7) {
+                    prod.setCodigoInicial(codigo.substring(0, 3));
+
+                    String versionString = codigo.substring(3, 7);
+                    if (versionString.matches("\\d+")) {
+                        prod.setVersion(versionString);
+                    } else {
+                        System.err.println("Versión inválida: " + versionString);
+                        prod.setVersion("0");
+                    }
+
+                    if (codigo.length() > 7) {
+                        prod.setSeguimiento(codigo.substring(7));
+                    }
+                }
+
+                String dim = rsProducto.getString("dimension");
+                if (dim != null) {
+                    String[] partes = dim.split("x");
+                    if (partes.length == 3) {
+                        prod.setDimensionAlto(partes[0]);
+                        prod.setDimensionAncho(partes[1]);
+                        prod.setDimensionProfundidad(partes[2]);
+                    }
+                }
+
+                prod.setMaterial(rsProducto.getString("material"));
+                prod.setTecnica(rsProducto.getString("tecnica"));
+                prod.setPeso(rsProducto.getString("peso"));
+
+                resultado.setProducto(prod);
+
+                // Colores
                 if (cs.getMoreResults()) {
                     ResultSet rsColores = cs.getResultSet();
                     List<String> colores = new ArrayList<>();
@@ -323,29 +351,42 @@ public class ProductoServiceImpl implements ProductoService {
                     resultado.setColores(colores);
                 }
 
-                // Pasar al siguiente result set para archivos
+                // Archivos
                 if (cs.getMoreResults()) {
-                    ResultSet rsArchivos = cs.getResultSet();
-                    List<ArchivoDTO> archivos = new ArrayList<>();
-                    while (rsArchivos.next()) {
-                        ArchivoDTO archivo = new ArchivoDTO();
-                        archivo.setId(rsArchivos.getInt("id"));
-                        archivo.setProductId(rsArchivos.getInt("productId"));
-                        archivo.setLinkArchivo(rsArchivos.getString("linkArchivo"));
-                        archivo.setOrden(rsArchivos.getInt("orden"));
-                        archivos.add(archivo);
+                    try {
+                        ResultSet rsArchivos = cs.getResultSet();
+                        List<ArchivoDTO> archivos = new ArrayList<>();
+                        while (rsArchivos.next()) {
+                            ArchivoDTO archivo = new ArchivoDTO();
+                            archivo.setId(rsArchivos.getInt("id"));
+                            archivo.setProductId(rsArchivos.getInt("productId"));
+                            archivo.setLinkArchivo(rsArchivos.getString("linkArchivo")); // Asegurate que exista en el SP
+                            archivo.setOrden(rsArchivos.getInt("orden"));
+                            archivos.add(archivo);
+                        }
+                        resultado.setArchivos(archivos);
+                    } catch (SQLException e) {
+                        System.err.println("Error procesando archivos: " + e.getMessage());
                     }
-                    resultado.setArchivos(archivos);
+                } else {
+                    System.out.println("No hay resultset de archivos");
                 }
-            }
-            return resultado;
-        });
+
+                // Validación antes de devolver
+                if (resultado.getProducto() == null || resultado.getProducto().getId() == null) {
+                    System.err.println("Producto incompleto → no se cachea");
+                    return null;
+                }
+
+                return resultado;
+            });
         } catch (Exception e) {
             System.err.println("Error en obtenerProductoCompleto: " + productoId + " → " + e.getClass().getSimpleName() + ": " + e.getMessage());
             e.printStackTrace();
-            throw e; // para que explote y puedas verlo en el frontend
+            throw e;
         }
     }
+
 
     @Cacheable(value = "productos")
     @Override
@@ -358,6 +399,13 @@ public class ProductoServiceImpl implements ProductoService {
                 })
                 .collect(Collectors.toList());
     }
+    @Cacheable("productosIds")
+    public List<Integer> obtenerTodosLosIds() {
+        return productoRepository.findAll().stream()
+                .map(ProductoEntity::getId)
+                .collect(Collectors.toList());
+    }
+
     @Cacheable(value = "productosDestacados")
     @Override
     public Page<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosConArchivoPrincipalYColores(Pageable pageable) {
@@ -418,8 +466,9 @@ public class ProductoServiceImpl implements ProductoService {
 
         // 3. Eliminar relaciones (colores, archivos, etc.) y producto localmente
         productoRepository.deleteById(id);
+        productoCacheService.refrescarCacheProducto(id);
     }
-    @Cacheable(value = "productoCompleto", key = "#categoriaId")
+    @Cacheable(value = "productoCompleto", key = "#categoriaId + '-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<ProductoResponseDTO> listarProductosPorCategoria(Integer categoriaId, Pageable pageable) {
         Page<ProductoEntity> productosPage = productoRepository.findByCategoriaId_Id(categoriaId, pageable);
         return productosPage.map(ProductoMapper::toDTO);

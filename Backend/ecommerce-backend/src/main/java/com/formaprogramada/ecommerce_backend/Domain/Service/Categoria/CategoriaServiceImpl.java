@@ -56,6 +56,11 @@ public class CategoriaServiceImpl implements CategoriaService {
     )
     @Override
     public Categoria CrearCategoria(Categoria categoria) {
+        // Verificar si ya existe una categoría con ese nombre (ignorar mayúsculas/minúsculas)
+        if (categoriaRepository.buscarPorNombreIgnoreCase(categoria.getNombre()).isPresent()) {
+            throw new IllegalArgumentException("Ya existe una categoría con ese nombre");
+        }
+
         return categoriaRepository.guardar(categoria);
     }
     @Caching(evict = {
@@ -65,6 +70,9 @@ public class CategoriaServiceImpl implements CategoriaService {
     )
     @Override
     public Categoria CrearCategoriaConImagen(Categoria categoria, MultipartFile file)throws IOException {
+        if (categoriaRepository.buscarPorNombreIgnoreCase(categoria.getNombre()).isPresent()) {
+            throw new IllegalArgumentException("Ya existe una categoría con ese nombre");
+        }
         Categoria categoria1=categoriaRepository.guardar(categoria);
         ImgBBData data = imgBBUploaderService.subirImagen(file);
 
@@ -139,6 +147,9 @@ public class CategoriaServiceImpl implements CategoriaService {
     )
     @Override
     public Categoria ModificarCategoria(Categoria categoria, int id) {
+        if (categoriaRepository.buscarPorNombreIgnoreCase(categoria.getNombre()).isPresent()) {
+            throw new IllegalArgumentException("Ya existe una categoría con ese nombre");
+        }
         return categoriaRepository.modificar(categoria,id);
     }
 

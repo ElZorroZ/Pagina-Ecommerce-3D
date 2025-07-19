@@ -129,4 +129,11 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
 
         return true;
     }
+    @Override
+    public Optional<Categoria> buscarPorNombreIgnoreCase(String nombre) {
+        return jpaCategoriaRepository.findByNombreIgnoreCase(nombre)
+                .map(mapper::toDomain);
+    }
+
+
 }

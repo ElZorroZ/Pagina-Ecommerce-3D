@@ -4,6 +4,7 @@ import com.formaprogramada.ecommerce_backend.Domain.Model.Categoria.Categoria;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 
 import java.util.Map;
+import java.util.Optional;
 
 
 public interface CategoriaRepository {
@@ -15,5 +16,6 @@ public interface CategoriaRepository {
     void borrar(int id);
     String borrarImagen(int categoriaId);
     boolean AgregarDestacado(CategoriaEntity id);
+    Optional<Categoria> buscarPorNombreIgnoreCase(String nombre);
 
 }

@@ -19,6 +19,8 @@ public interface ProductoService {
             List<MultipartFile> archivosNuevos, MultipartFile archivoStl
     ) throws IOException;
     void eliminarProducto(Integer id);
+    List<Integer> obtenerTodosLosIds();
+    ProductoCompletoDTO obtenerProductoCompletoSinCache(Integer productoId);
     ProductoCompletoDTO obtenerProductoCompleto(Integer id);
     Page<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosConArchivoPrincipalYColores(Pageable pageable);
     Page<ProductoResponseDTO> listarProductosPorCategoria(Integer categoriaId, Pageable pageable);
