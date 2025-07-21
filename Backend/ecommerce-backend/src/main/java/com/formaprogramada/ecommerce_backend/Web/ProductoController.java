@@ -1,10 +1,7 @@
 package com.formaprogramada.ecommerce_backend.Web;
 
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.MaxDestacadosException;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoArchivoService;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoDestacadoService;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.*;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ImgBB.ImgBBData;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.*;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
@@ -35,6 +32,9 @@ public class ProductoController {
     private ProductoService productoService;
 
     @Autowired
+    private ProductoAprobadoService productoAprobadoService;
+
+    @Autowired
     private ProductoArchivoService archivoService;
 
     @Autowired
@@ -59,7 +59,7 @@ public class ProductoController {
             @RequestPart("producto") ProductoAprobacionRequest dto,
             @RequestPart(value = "archivo", required = false) MultipartFile archivo) throws IOException {
 
-        ProductoResponse response = productoService.crearAprobacionProducto(dto, archivo);
+        ProductoResponse response = productoAprobadoService.crearAprobacionProducto(dto, archivo);
         return ResponseEntity.ok(response);
     }
 
