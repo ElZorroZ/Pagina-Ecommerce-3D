@@ -27,8 +27,6 @@ public interface ProductoService {
     Page<ProductoResponseDTO> listarProductosPorCategoria(Integer categoriaId, Pageable pageable);
     Page<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosLosProductosConColoresYArchivo(Pageable pageable);
 
-
-    ProductoResponse crearAprobacionProducto(ProductoAprobacionRequest dto, MultipartFile archivoStl) throws IOException;
-
+    
 }
 
