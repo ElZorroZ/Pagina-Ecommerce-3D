@@ -31,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(UsuarioRegistroRequest request) {
         Usuario usuario = UsuarioRegistroMapper.toDomain(request);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-        usuario.setPermiso(false);
+        usuario.setPermiso(0);
         usuario.setId(null);
         usuarioRepository.guardar(usuario);
 
@@ -58,9 +58,15 @@ public class AuthServiceImpl implements AuthService {
         Usuario usuario = usuarioRepository
                 .buscarPorGmail(request.getGmail())
                 .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
-
-        String rol = usuario.getPermiso() ? "ADMIN" : "CLIENTE";
-        Map<String, Object> claims = Map.of("roles", List.of("ROLE_" + rol));
+        String rol = "";
+        if (usuario.getPermiso()==0){
+            rol = "CLIENTE";
+        } else if (usuario.getPermiso()==1) {
+            rol = "ADMIN";
+        } else if (usuario.getPermiso()==2) {
+            rol = "COLABORADOR";
+        }
+        Map<String, Object> claims = Map.of("roles", List.of("ROLE_" +  rol));
 
         String token = jwtService.generateAccessToken(claims, usuario.getGmail());
         String refreshToken = jwtService.generateRefreshToken(claims, usuario.getGmail());
@@ -82,7 +88,15 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Refresh token inválido o expirado");
         }
 
-        String rol = usuario.getPermiso() ? "ADMIN" : "CLIENTE";
+        String rol = "";
+        if (usuario.getPermiso()==0){
+            rol = "CLIENTE";
+        } else if (usuario.getPermiso()==1) {
+            rol = "ADMIN";
+        } else if (usuario.getPermiso()==2) {
+            rol = "COLABORADOR";
+
+        }
         Map<String, Object> claims = Map.of("roles", List.of("ROLE_" + rol));
 
         String newToken = jwtService.generateAccessToken(claims, usuario.getGmail());

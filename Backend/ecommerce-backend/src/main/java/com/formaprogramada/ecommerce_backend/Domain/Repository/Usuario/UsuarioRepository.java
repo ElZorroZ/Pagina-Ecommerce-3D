@@ -11,5 +11,6 @@ public interface UsuarioRepository {
     Optional<Usuario> buscarPorGmail(String gmail); // Útil para login, validación o recuperación
     Optional<Usuario> buscarPorId(Integer id);
     Boolean actualizarUsuario(Usuario usuario);
+    Boolean modificarPermisoUsuario(int id, int permiso);
 
 }

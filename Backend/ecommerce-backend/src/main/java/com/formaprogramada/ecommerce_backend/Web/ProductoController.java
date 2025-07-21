@@ -8,10 +8,7 @@ import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoSer
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ImgBB.ImgBBData;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.*;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoArchivoEntity;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoColorEntity;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoDetalleEntity;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.*;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoDetalleRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoRepository;
 import com.formaprogramada.ecommerce_backend.Mapper.Producto.ProductoMapper;
@@ -56,6 +53,16 @@ public class ProductoController {
         ProductoResponse response = productoService.crearProducto(dto, archivo);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductoResponse> crearAprobacionProducto(
+            @RequestPart("producto") ProductoAprobacionRequest dto,
+            @RequestPart(value = "archivo", required = false) MultipartFile archivo) throws IOException {
+
+        ProductoResponse response = productoService.crearAprobacionProducto(dto, archivo);
+        return ResponseEntity.ok(response);
+    }
+
 
     @GetMapping
     public ResponseEntity<?> obtenerProductos() {

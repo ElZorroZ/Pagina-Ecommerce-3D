@@ -1,6 +1,7 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Producto;
 
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.*;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoAprobacionEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,9 @@ public interface ProductoService {
     Page<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosConArchivoPrincipalYColores(Pageable pageable);
     Page<ProductoResponseDTO> listarProductosPorCategoria(Integer categoriaId, Pageable pageable);
     Page<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosLosProductosConColoresYArchivo(Pageable pageable);
+
+
+    ProductoResponse crearAprobacionProducto(ProductoAprobacionRequest dto, MultipartFile archivoStl) throws IOException;
 
 }
 

@@ -1,9 +1,14 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaArchivoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -20,5 +25,10 @@ public interface JpaUsuarioRepository extends JpaRepository<UsuarioEntity, Integ
             @Param("p_ciudad") String ciudad,
             @Param("p_telefono") String telefono
     );
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE UsuarioEntity  u SET u.permiso= :permiso WHERE u.id= :id")
+    void modificarPermiso(@Param("id") int id, @Param("permiso") int permiso);
 
 }

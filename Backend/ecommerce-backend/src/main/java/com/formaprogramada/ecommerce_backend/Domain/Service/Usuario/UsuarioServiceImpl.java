@@ -123,4 +123,11 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new IllegalArgumentException("El usuario a actualizar no existe"));
         return usuarioRepository.actualizarUsuario(usuario);
     }
+
+    @Override
+    public Boolean modificarPermisoUsuario(int id, int permiso) {
+        usuarioRepository.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException("El usuario a modificar no existe"));
+        return usuarioRepository.modificarPermisoUsuario(id, permiso);
+    }
+
 }

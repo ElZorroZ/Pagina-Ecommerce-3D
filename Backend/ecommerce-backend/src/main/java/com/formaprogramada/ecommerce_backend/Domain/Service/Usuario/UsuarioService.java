@@ -17,5 +17,7 @@ public interface UsuarioService {
     Optional<Usuario> buscarPorGmail(String gmail);
     void cambiarPassword(String gmail, CambioPasswordRequest request);
     Boolean actualizarUsuarioAlComprar(Usuario usuario);
+    Boolean modificarPermisoUsuario(int id, int permiso);
+
 
 }

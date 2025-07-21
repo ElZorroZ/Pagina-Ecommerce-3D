@@ -1,6 +1,7 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Email;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
+import com.formaprogramada.ecommerce_backend.Domain.Repository.Usuario.UsuarioRepository;
 import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacion.TokenVerificacionService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario.JpaUsuarioRepository;
@@ -33,6 +34,7 @@ public class EmailServiceImpl implements EmailService {
     private JpaUsuarioRepository jpaUsuarioRepository;
     private final TokenVerificacionService tokenService;
     private final UsuarioMapper usuarioMapper;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     public void enviarEmailHtml(String destinatario, String asunto, Map<String, Object> variables, String plantilla) {
@@ -148,6 +150,12 @@ public class EmailServiceImpl implements EmailService {
         // Actualizar email
         usuario.setGmail(nuevoEmail);
         jpaUsuarioRepository.save(usuario);
+    }
+
+    @Override
+    public Boolean modificarPermisoUsuario(int id, int permiso) {
+        usuarioRepository.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException("El usuario a modificar no existe"));
+        return usuarioRepository.modificarPermisoUsuario(id, permiso);
     }
 
 }

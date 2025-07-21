@@ -100,6 +100,22 @@ public class UsuarioController {
         }
     }
 
+    @PutMapping("/modificar-permisodeusuario/{id}/{permiso}")
+    public ResponseEntity<?> modificarPermisoUsuario(@PathVariable int id,@PathVariable int permiso){
+
+        if(permiso == 0 || permiso == 2) {
+
+            if (emailService.modificarPermisoUsuario(id,permiso)) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
+        else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 
 
 

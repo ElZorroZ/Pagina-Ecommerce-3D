@@ -83,7 +83,15 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         UsuarioEntity usuarioEntity = tokenEntity.getUsuario();
         Usuario usuario = usuarioMapper.toDomain(usuarioEntity);
 
-        String rol = usuario.getPermiso() ? "ADMIN" : "CLIENTE";
+        String rol = "";
+        if (usuario.getPermiso()==0){
+            rol = "CLIENTE";
+        } else if (usuario.getPermiso()==1) {
+            rol = "ADMIN";
+        } else if (usuario.getPermiso()==2) {
+            rol = "COLABORADOR";
+
+        }
         Map<String, Object> claims = Map.of("roles", List.of("ROLE_" + rol));
 
         String newAccessToken = jwtService.generateAccessToken(claims, username);

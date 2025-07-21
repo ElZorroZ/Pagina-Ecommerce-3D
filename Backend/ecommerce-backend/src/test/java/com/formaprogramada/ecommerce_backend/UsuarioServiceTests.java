@@ -108,4 +108,12 @@ class UsuarioControllerTests {
 				.andExpect(status().isBadRequest())
 				.andExpect(content().string("Datos inválidos"));
 	}
+
+	@WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+	@Test
+	void testModificarUnUsuario() throws Exception {
+		mockMvc.perform(put("/api/usuario/modificar-permisodeusuario/2/2")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
 }

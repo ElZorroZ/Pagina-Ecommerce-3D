@@ -58,6 +58,12 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     }
 
     @Override
+    public Boolean modificarPermisoUsuario(int id, int permiso) {
+        jpaRepository.modificarPermiso(id, permiso);
+        return true;
+    }
+
+    @Override
     public List<Usuario> findAll() {
         return jpaRepository.findAll()
                 .stream()
