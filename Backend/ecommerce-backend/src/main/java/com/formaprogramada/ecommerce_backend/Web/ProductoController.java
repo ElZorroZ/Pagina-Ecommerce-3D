@@ -54,15 +54,6 @@ public class ProductoController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ProductoResponse> crearAprobacionProducto(
-            @RequestPart("producto") ProductoAprobacionRequest dto,
-            @RequestPart(value = "archivo", required = false) MultipartFile archivo) throws IOException {
-
-        ProductoResponse response = productoAprobadoService.crearAprobacionProducto(dto, archivo);
-        return ResponseEntity.ok(response);
-    }
-
 
     @GetMapping
     public ResponseEntity<?> obtenerProductos() {
