@@ -2,6 +2,8 @@ package com.formaprogramada.ecommerce_backend.Web;
 
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobacionRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoResponse;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +36,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
+@NoArgsConstructor
+@AllArgsConstructor
 @RequestMapping("/api/productosAprobacion")
 public class ProductoAprobacionController {
     @Autowired
@@ -49,12 +53,13 @@ public class ProductoAprobacionController {
     private ProductoDestacadoService productoDestacadoService;
 
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ProductoResponse> crearAprobacionProducto(
+    @PostMapping(path = "/crearAprobacionProducto",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductoAprobacionResponse> crearAprobacionProducto(
             @RequestPart("producto") ProductoAprobacionRequest dto,
-            @RequestPart(value = "archivo", required = false) MultipartFile archivo) throws IOException {
+            @RequestPart(value = "producto", required = false) MultipartFile archivo) throws IOException {
 
-        ProductoResponse response = productoAprobadoService.crearAprobacionProducto(dto, archivo);
+        ProductoAprobacionResponse response = productoAprobadoService.crearAprobacionProducto(dto, archivo);
+        System.out.println(response);
         return ResponseEntity.ok(response);
     }
 }

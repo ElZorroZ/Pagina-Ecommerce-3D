@@ -1,7 +1,6 @@
-package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto;
+package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.ProductoAprobado;
 
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoColorAprobacionEntity;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoColorEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
