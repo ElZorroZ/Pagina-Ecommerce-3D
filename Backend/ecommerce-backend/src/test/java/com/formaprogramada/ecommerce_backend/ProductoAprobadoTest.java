@@ -4,18 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoAprobadoCacheService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoAprobadoService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoArchivoService;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoService;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Categoria.CategoriaCrearRequest;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobacionRequest;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobacionResponse;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ProductoAprobacionRequest;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ProductoCompletoAprobacionDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -23,16 +22,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
+import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = {com.formaprogramada.ecommerce_backend.EcommerceBackendApplication.class, com.formaprogramada.ecommerce_backend.TestSecurityConfig.class})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-public class ProductoAprobadoController {
+public class ProductoAprobadoTest {
 
 
     @Autowired
@@ -53,25 +51,25 @@ public class ProductoAprobadoController {
 
     @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
     @Test
-    void testCrearUnProductoPorAprobarSinArchivo() throws Exception {
+    void testCrearUnProductoPorAprobar() throws Exception {
 
         UsuarioEntity usuario = new UsuarioEntity();
         usuario.setId(1);
 
         ProductoAprobacionRequest request = new ProductoAprobacionRequest();
-        request.setNombre("Hola");
-        request.setDescripcion("Hola");
+        request.setNombre("Hola2");
+        request.setDescripcion("Hola2");
         request.setCreadorId(usuario);
-        request.setCategoriaId(1);
-        request.setCodigoInicial("13ef");
-        request.setPrecio(900);
-        request.setDimensionAlto(93);
-        request.setDimensionAncho(92);
-        request.setDimensionProfundidad(2);
-        request.setMaterial("Madera");
-        request.setTecnica("Filar");
-        request.setPeso("1kg");
-        request.setColores(Collections.singletonList("rojo"));
+        request.setCategoriaId(3);
+        request.setCodigoInicial("13ef2");
+        request.setPrecio(9002);
+        request.setDimensionAlto(932);
+        request.setDimensionAncho(922);
+        request.setDimensionProfundidad(22);
+        request.setMaterial("Madera2");
+        request.setTecnica("Filar2");
+        request.setPeso("1kg2");
+        request.setColores(Collections.singletonList("verde"));
 
         // Solo el JSON del DTO como multipart
         MockMultipartFile productoJson = new MockMultipartFile(
@@ -86,5 +84,42 @@ public class ProductoAprobadoController {
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk());
     }
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testAprobarUnProducto() throws Exception {
+
+        int id=1;
+        String codigoInicial = "0001";
+        String versionStr ="1";
+        String seguimiento = "?";
+
+        mockMvc.perform(post("/api/productosAprobacion/AprobarProducto")
+                        .param("id", "3")
+                        .param("codigoInicial", "123")
+                        .param("versionStr", "v1")
+                        .param("seguimiento", "abc")) // opcional en este caso
+            .andExpect(status().isOk());
+    }
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testborrarUnProducto() throws Exception {
+
+
+        mockMvc.perform(delete("/api/productosAprobacion/BorrarProducto")
+                        .param("id", "3"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    void testVerProductos_OK() throws Exception {
+
+        mockMvc.perform(get("/api/productosAprobacion/VerProductos") // ajustá si tenés prefijo distinto
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
 
 }

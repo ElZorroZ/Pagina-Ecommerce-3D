@@ -1,5 +1,6 @@
-package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto;
+package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar;
 
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ArchivoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,5 +13,5 @@ import java.util.List;
 public class ProductoCompletoAprobacionDTO {
     private ProductoAprobacioDTO producto;
     private List<String> colores;
-    private List<ArchivoDTO> archivos;
+    private List<ProductoAprobacionArchivoDTO> archivos;
 }

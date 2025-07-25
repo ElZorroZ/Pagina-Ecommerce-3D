@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 @Entity
 @Table(name = "producto_aprobacion")
+@ToString(exclude = {"archivos", "colores"})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

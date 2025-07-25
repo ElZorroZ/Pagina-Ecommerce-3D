@@ -1,9 +1,7 @@
-package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto;
+package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar;
 
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoAprobacionEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoDetalleAprobacionEntity;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoDetalleEntity;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
