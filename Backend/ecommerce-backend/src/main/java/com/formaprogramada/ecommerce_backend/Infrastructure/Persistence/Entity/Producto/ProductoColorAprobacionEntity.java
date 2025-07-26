@@ -1,16 +1,16 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 @Entity
 @Table(name = "producto_colores_aprobacion")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Setter
+@Getter
 public class ProductoColorAprobacionEntity {
 
         @Id

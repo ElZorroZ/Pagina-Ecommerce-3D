@@ -1,4 +1,4 @@
-package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto;
+package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 @Entity
 @Table(name = "producto_aprobacion")
+@ToString(exclude = {"archivos", "colores"})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,9 +44,9 @@ public class ProductoAprobacionEntity {
     private byte[] archivo;  // STL
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductoArchivoEntity> archivos;
+    private List<ProductoArchivoAprobacionEntity> archivos;
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductoColorEntity> colores = new ArrayList<>();
+    private List<ProductoColorAprobacionEntity> colores = new ArrayList<>();
 }
 

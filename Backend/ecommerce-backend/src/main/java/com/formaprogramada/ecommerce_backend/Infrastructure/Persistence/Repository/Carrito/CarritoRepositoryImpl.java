@@ -45,8 +45,6 @@ public class CarritoRepositoryImpl implements CarritoRepository {
     public Boolean VaciarCarrito(int id) {
         try{
             jpaCarritoRepository.vaciarCarrito(id);
-
-
             return true;
         } catch (Exception e) {
             throw new RuntimeException(e);

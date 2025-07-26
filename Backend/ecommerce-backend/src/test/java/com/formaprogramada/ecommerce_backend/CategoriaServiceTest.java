@@ -50,6 +50,7 @@ class CategoriaServiceTests {
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testAgregarCategoriaConImagen() throws Exception {
+
         CategoriaCrearRequest request = new CategoriaCrearRequest("nombre de prueba", "descripción de prueba");
         String categoriaJson = new ObjectMapper().writeValueAsString(request);
 
