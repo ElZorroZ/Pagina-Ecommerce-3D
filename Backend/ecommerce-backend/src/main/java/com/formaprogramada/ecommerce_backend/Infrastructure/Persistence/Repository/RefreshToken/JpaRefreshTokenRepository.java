@@ -4,6 +4,7 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.R
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,5 +12,6 @@ public interface JpaRefreshTokenRepository extends JpaRepository<RefreshTokenEnt
     Optional<RefreshTokenEntity> findByToken(String token);
     Optional<RefreshTokenEntity> findByTokenAndEstado(String token, String estado);
     List<RefreshTokenEntity> findAllByUsuarioIdAndEstado(Integer usuarioId, String estado);
+    List<RefreshTokenEntity> findAllByEstadoAndFechaExpiracionBefore(String estado, LocalDateTime fechaExpiracion);
 
 }

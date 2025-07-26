@@ -32,9 +32,6 @@ public class ProductoController {
     private ProductoService productoService;
 
     @Autowired
-    private ProductoAprobadoService productoAprobadoService;
-
-    @Autowired
     private ProductoArchivoService archivoService;
 
     @Autowired
@@ -83,20 +80,21 @@ public class ProductoController {
 
 
     @GetMapping("/completo")
-    public ResponseEntity<?> obtenerTodosLosProductosCompletos(Pageable pageable) {
+    public ResponseEntity<?> obtenerTodosLosProductosCompletos() {
         try {
-            Page<ProductoConArchivoPrincipalYColoresDTO> productosPage = productoService.obtenerTodosConArchivoPrincipalYColores(pageable);
+            List<ProductoConArchivoPrincipalYColoresDTO> productos = productoService.obtenerProductosDestacados();
 
-            if (productosPage.isEmpty()) {
+            if (productos.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No hay productos disponibles");
             }
 
-            return ResponseEntity.ok(productosPage);
+            return ResponseEntity.ok(productos);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al obtener los productos: " + e.getMessage());
         }
     }
+
     @GetMapping("/todos")
     public ResponseEntity<?> obtenerTodosLosProductos(Pageable pageable) {
         try {
@@ -132,7 +130,7 @@ public class ProductoController {
             @PathVariable Integer id,
             @RequestPart("producto") ProductoCompletoDTO productoCompletoDTO,
             @RequestPart(value = "archivosNuevos", required = false) List<MultipartFile> archivosNuevos,
-            @RequestPart(value = "archivoStl", required = false) MultipartFile archivoStl) {
+            @RequestPart(value = "archivoComprimido", required = false) MultipartFile archivoStl) {
 
         try {
             ProductoEntity actualizado = productoService.actualizarProductoCompleto(id, productoCompletoDTO, archivosNuevos, archivoStl);

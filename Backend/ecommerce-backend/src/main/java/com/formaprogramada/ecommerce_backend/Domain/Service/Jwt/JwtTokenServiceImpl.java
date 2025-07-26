@@ -105,7 +105,8 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         logger.info("Nuevo refresh token generado y guardado para usuario: {}", username);
 
         // Eliminar el token viejo después de guardar el nuevo
-        jpaRefreshTokenRepository.delete(tokenEntity);
+        tokenEntity.setEstado("EXPIRED");
+        jpaRefreshTokenRepository.save(tokenEntity);
         logger.info("Refresh token eliminado: {}", refreshToken);
 
         // Ahora respondé con el nuevo

@@ -36,10 +36,10 @@
         <input type="hidden" id="producto-id" />
 
         <label>Nombre:</label>
-        <input type="text" id="nombre" maxlength="20" required placeholder="Máx. 20 caracteres" />
+        <input type="text" id="nombre" maxlength="80" required placeholder="Máx. 80 caracteres" />
 
         <label for="descripcion">Descripción:</label>
-        <input type="text" id="descripcion" maxlength="80" placeholder="Máx. 500 caracteres" />
+        <input type="text" id="descripcion" maxlength="500" placeholder="Máx. 500 caracteres" />
         
         <label for="categoria">Categoría:</label>
         <select id="categoria" required>
@@ -60,10 +60,9 @@
         <input type="file" id="imagenes" multiple accept="image/*" />
         <div id="preview-imagenes" style="display:flex; gap:10px; margin-top:10px;"></div>
            <!-- NUEVOS CAMPOS -->
-        <label>Archivo (Solo STL):</label>
-        <label for="archivo-stl">Archivo STL:</label>
-        <input type="file" id="archivo-stl" accept=".stl" />
-        <div id="stl-preview" style="display:flex; gap:10px; margin-top:10px;"></div>
+        <label for="archivo-comprimido">Archivo comprimido (ZIP, RAR, 7Z, TAR, etc.):</label>
+        <input type="file" id="archivo-comprimido" accept=".zip,.rar,.7z,.tar,.gz,.bz2" />
+        <div id="comprimido-preview" style="display:flex; gap:10px; margin-top:10px;"></div>
 
         <label for="codigo-inicial">Código Inicial (3 letras):</label>
         <input type="text" id="codigo-inicial" pattern="[A-Za-z]{3}" title="Debe contener exactamente 3 letras" required maxlength="3" />

@@ -115,65 +115,54 @@ async function fetchConRefresh(url, options = {}) {
 
   return response;
 }
- function base64ToBlob(base64, mimeType) {
-  // Sacar prefijo "data:...;base64," si existe
-  if (base64.indexOf(",") !== -1) {
-    base64 = base64.split(",")[1];
-  }
 
-  // Limpiar saltos de línea o espacios
-  base64 = base64.replace(/[\r\n\s]+/g, '');
-
-  // Arreglar base64 URL-safe (reemplazar '-' y '_')
-  base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
-
-  // Completar padding con '=' si falta
-  while (base64.length % 4 !== 0) {
-    base64 += '=';
-  }
-
-  try {
-    const byteCharacters = atob(base64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: mimeType });
-  } catch (e) {
-    console.error('Error decodificando base64:', e);
-    throw e;
-  }
+function base64UrlToBase64(base64url) {
+  return base64url.replace(/-/g, '+').replace(/_/g, '/');
 }
-async function base64ToBlob(base64, mimeType) {
-  // Limpiar prefijo
-  if (base64.indexOf(",") !== -1) {
-    base64 = base64.split(",")[1];
+
+function fixBase64Padding(base64) {
+  const padLength = (4 - (base64.length % 4)) % 4;
+  return base64 + "=".repeat(padLength);
+}
+
+function base64ToUint8Array(base64) {
+  base64 = base64UrlToBase64(base64).replace(/\s/g, '');
+  base64 = fixBase64Padding(base64);
+  const raw = atob(base64);
+  const uint8Array = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) {
+    uint8Array[i] = raw.charCodeAt(i);
   }
-  // Construir data URL para fetch
-  const dataUrl = `data:${mimeType};base64,${base64}`;
-  const response = await fetch(dataUrl);
-  return await response.blob();
+  return uint8Array;
 }
 
 
-function mostrarArchivoSTL(base64) {
-  const preview = document.getElementById('stl-preview');
-  preview.innerHTML = "";
-
+function mostrarArchivoComprimido(base64, nombre = 'archivo.zip') {
   if (!base64) return;
 
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+
+  const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+
+  const preview = document.getElementById('comprimido-preview');
+  preview.innerHTML = '';
+
   const link = document.createElement('a');
-  link.href = 'data:application/sla;base64,' + base64;
-  link.download = 'archivo.stl';
-  link.textContent = 'Descargar STL';
+  link.href = url;
+  link.download = nombre;
+  link.textContent = `Descargar ${nombre}`;
   link.style.display = 'inline-block';
   link.style.marginRight = '10px';
 
-  // Botón eliminar
   const btnEliminar = document.createElement('button');
   btnEliminar.textContent = 'X';
-  btnEliminar.title = 'Eliminar archivo STL';
+  btnEliminar.title = 'Eliminar archivo comprimido';
   btnEliminar.style.background = 'rgba(255,0,0,0.7)';
   btnEliminar.style.color = 'white';
   btnEliminar.style.border = 'none';
@@ -182,17 +171,15 @@ function mostrarArchivoSTL(base64) {
   btnEliminar.style.padding = '0 6px';
 
   btnEliminar.addEventListener('click', () => {
-    window.productoState.archivoStl = null;
-    document.getElementById('archivo-stl').value = "";
+    window.productoState.archivoComprimido = null;
+    document.getElementById('archivo-comprimido').value = "";
     preview.innerHTML = "";
+    URL.revokeObjectURL(url);
   });
 
   preview.appendChild(link);
   preview.appendChild(btnEliminar);
 }
-
-
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const tablaBody = document.getElementById("tabla-productos");
@@ -374,8 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
  // Carga producto en formulario
 function cargarProductoEnFormulario(producto, colores, archivos) {
-  console.log('Base64 recibido:', producto.archivoStl);
-
+  
   document.getElementById("producto-id").value = producto.id || "";
   document.getElementById("nombre").value = producto.nombre || "";
   document.getElementById("descripcion").value = producto.descripcion || "";
@@ -395,10 +381,11 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
   document.getElementById("peso").value = producto.peso || "";
 
   // STL preview (si querés mostrarlo como enlace para descargar)
-  if (producto.archivoStl) {
-    mostrarArchivoSTL(producto.archivoStl);
+  if (producto.archivoComprimido) {
+    console.log("Base64 recibido:", producto.archivoComprimido);
+    mostrarArchivoComprimido(producto.archivoComprimido);
   } else {
-    document.getElementById('stl-preview').innerHTML = "";
+    document.getElementById('comprimido-preview').innerHTML = "";
   }
 
 }
@@ -439,7 +426,7 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
         material: document.getElementById("material").value.trim(),
         peso: document.getElementById("peso").value.trim(),
         tecnica: document.getElementById("tecnica").value.trim(),
-        archivoStl: null, // explícitamente null para evitar confusión
+        archivoComprimido: null, // explícitamente null para evitar confusión
       },
       colores: window.productoState.coloresSeleccionados,
       archivos: archivosExistentes  // acá solo los links o IDs
@@ -455,10 +442,15 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
     archivosNuevos.forEach(file => {
       formData.append("archivosNuevos", file);
     });
-    const archivoStlInput = document.getElementById("archivo-stl");
-      if (archivoStlInput && archivoStlInput.files.length > 0) {
-        formData.append("archivoStl", archivoStlInput.files[0]);
+    const archivoComprimidoInput = document.getElementById("archivo-comprimido");
+      if (archivoComprimidoInput) {
+        console.log("Archivos en archivo-comprimido input:", archivoComprimidoInput.files);
+        if (archivoComprimidoInput.files.length > 0) {
+          console.log("Agregando archivoComprimido al formData:", archivoComprimidoInput.files[0]);
+          formData.append("archivoComprimido", archivoComprimidoInput.files[0]);
+        }
       }
+
     try {
       console.log("Colores antes de enviar:", window.productoState.coloresSeleccionados);
       console.log("Archivos antes de enviar:", window.productoState.archivosSeleccionados);

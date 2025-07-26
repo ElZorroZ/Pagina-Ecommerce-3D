@@ -2,11 +2,13 @@ package com.formaprogramada.ecommerce_backend.Domain.Service.Producto;
 
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Categoria.CategoriaRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoCompletoDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoResponseDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Categoria.JpaCategoriaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,19 +40,10 @@ public class ProductoCacheService {
     public void precargarCacheProductosTodos(Pageable pageable) {
         productoService.obtenerTodosLosProductosConColoresYArchivo(pageable);
     }
-    @Transactional
-    public void precargarCachePorCategoria(Pageable pageable) {
-        List<Integer> categoriasIds = categoriaRepository.findAllIds();
-
-        for (Integer id : categoriasIds) {
-            productoService.listarProductosPorCategoria(id, pageable);
-        }
-    }
-
 
     @Transactional
-    public void precargarCacheProductosDestacados(Pageable pageable) {
-        productoService.obtenerTodosConArchivoPrincipalYColores(pageable);
+    public void precargarCachePorCategoria(Integer categoriaId, Pageable pageable) {
+        productoService.listarProductosPorCategoria(categoriaId, pageable);
     }
 
     // Refresca el cache de un producto específico (llama a obtenerProductoCompleto)
@@ -68,6 +61,5 @@ public class ProductoCacheService {
     @Transactional
     public void precargarOtrosCaches() {
         productoService.listarProductos(); // cachea "productos"
-        productoService.obtenerTodosConArchivoPrincipalYColores(PageRequest.of(0, 10)); // cachea "productosDestacados" o paginado
     }
 }

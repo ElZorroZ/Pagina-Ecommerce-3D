@@ -145,6 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!response.ok) throw new Error("Error al obtener las categorías");
       const categorias = await response.json();
       tablaBody.innerHTML = "";
+      tablaBody.innerHTML = "";
 
       categorias.forEach(categoria => {
         const estrella = categoria.destacada ? "⭐" : "☆";

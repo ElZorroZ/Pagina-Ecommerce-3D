@@ -76,7 +76,7 @@ function cargarProductos(productos) {
   const contenedor = document.getElementById('contenedor-productos');
   contenedor.innerHTML = '';
 
-  productos.content.forEach(item => {
+  productos.forEach(item => {
     const producto = item.producto;
     const imagen = item.archivoPrincipal?.linkArchivo || "/img/default.jpeg";
     const colores = item.colores || ["Negro", "Blanco"];
@@ -85,33 +85,32 @@ function cargarProductos(productos) {
     card.classList.add("product-card");
 
     card.innerHTML = `
-  <div class="product-info" onclick="window.location.href='/WEB/categoria/producto/s_producto.html?id=${producto.id}'">
-    <img src="${imagen}" alt="${producto.nombre}" />
-    <h3>${producto.nombre}</h3>
-    <p class="product-desc">${producto.descripcion}</p>
-  </div>
+      <div class="product-info" onclick="window.location.href='/WEB/categoria/producto/s_producto.html?id=${producto.id}'">
+        <img src="${imagen}" alt="${producto.nombre}" />
+        <h3>${producto.nombre}</h3>
+        <p class="product-desc">${producto.descripcion}</p>
+      </div>
 
-  <div class="product-controls">
-    <label>Formato:</label>
-    <select class="minimal-select">
-      <option value="Archivo">STL</option>
-      <option value="Fisico">Fisico</option>
-    </select>
+      <div class="product-controls">
+        <label>Formato:</label>
+        <select class="minimal-select">
+          <option value="Archivo">STL</option>
+          <option value="Fisico">Físico</option>
+        </select>
 
-    <label>Color:</label>
-    <select class="minimal-select">
-      ${colores.map(color => `<option>${color}</option>`).join("")}
-    </select>
+        <label>Color:</label>
+        <select class="minimal-select">
+          ${colores.map(color => `<option>${color}</option>`).join("")}
+        </select>
 
-    <p class="product-price">$${producto.precio.toFixed(2)}</p>
+        <p class="product-price">$${producto.precio.toFixed(2)}</p>
 
-    <div class="product-actions">
-      <input type="number" min="1" value="1" class="quantity-input" />
-      <button class="add-to-cart-btn">Agregar</button>
-    </div>
-  </div>
-`;
-
+        <div class="product-actions">
+          <input type="number" min="1" value="1" class="quantity-input" />
+          <button class="add-to-cart-btn">Agregar</button>
+        </div>
+      </div>
+    `;
 
     contenedor.appendChild(card);
   });

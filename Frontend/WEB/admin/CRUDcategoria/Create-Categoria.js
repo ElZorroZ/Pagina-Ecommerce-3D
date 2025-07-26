@@ -196,6 +196,7 @@ async function fetchConRefresh(url, options = {}) {
       form.reset();
       window.categoriaState.archivosSeleccionados = [];
       actualizarPreview();
+      await cargarCategorias();
       // Aquí podés actualizar la lista de categorías si querés
     } else {
       // Con imagen: enviamos multipart/form-data al segundo endpoint

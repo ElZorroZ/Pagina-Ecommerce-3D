@@ -14,7 +14,7 @@ public class ProductoDTO {
     private Integer categoriaId;
     private Float precio;
     private String archivo;
-    private String archivoStl; // nuevo campo para STL en base64
+    private String archivoComprimido; // nuevo campo para archivo comprimido
     private String codigoInicial;
     private String version;
     private String seguimiento;

@@ -231,23 +231,24 @@ async function fetchConRefresh(url, options = {}) {
     });
   }
   cargarCategorias();
-  const inputArchivoStl = document.getElementById("archivo-stl");
-  const previewSTL = document.getElementById("stl-preview");
+  const inputArchivoComprimido = document.getElementById("archivo-comprimido");
+  const previewComprimido = document.getElementById("comprimido-preview");
 
-  inputArchivoStl.addEventListener("change", function () {
+  inputArchivoComprimido.addEventListener("change", function () {
     const archivo = this.files[0];
-    if (archivo && archivo.name.endsWith(".stl")) {
-      window.productoState.archivoSTL = archivo;
-      actualizarPreviewSTL();
+    const extensionesPermitidas = [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2"];
+    if (archivo && extensionesPermitidas.some(ext => archivo.name.endsWith(ext))) {
+      window.productoState.archivoComprimido = archivo;
+      actualizarPreviewComprimido();
     } else {
-      alert("El archivo debe ser .stl");
+      alert("El archivo debe ser uno de estos: .zip,.rar,.7z,.tar,.gz,.bz2");
       this.value = ""; // limpiar input
     }
   });
 
-  function actualizarPreviewSTL() {
-    previewSTL.innerHTML = "";
-    const archivo = window.productoState.archivoSTL;
+  function actualizarPreviewComprimido() {
+    previewComprimido.innerHTML = "";
+    const archivo = window.productoState.archivoComprimido;
     if (!archivo) return;
 
     const div = document.createElement("div");
@@ -276,14 +277,14 @@ async function fetchConRefresh(url, options = {}) {
     btnEliminar.style.padding = "0 4px";
     btnEliminar.title = "Eliminar archivo STL";
     btnEliminar.addEventListener("click", () => {
-      window.productoState.archivoSTL = null;
-      inputArchivoStl.value = "";
-      actualizarPreviewSTL();
+      window.productoState.archivoComprimido = null;
+      inputArchivoComprimido.value = "";
+      actualizarPreviewComprimido();
     });
 
     div.appendChild(nombreArchivo);
     div.appendChild(btnEliminar);
-    previewSTL.appendChild(div);
+    previewComprimido.appendChild(div);
   }
 
   form.addEventListener("submit", async (e) => {
@@ -356,9 +357,9 @@ async function fetchConRefresh(url, options = {}) {
     formData.append("producto", new Blob([JSON.stringify(productoPayload)], { type: "application/json" }));
 
     // Agregar archivo STL (input con id "archivo-stl")
-    const archivoStlInput = document.getElementById("archivo-stl");
-    if (archivoStlInput && archivoStlInput.files.length > 0) {
-      formData.append("archivo", archivoStlInput.files[0]);
+    const archivoComprimidoInput = document.getElementById("archivo-comprimido");
+    if (archivoComprimidoInput && archivoComprimidoInput.files.length > 0) {
+      formData.append("archivo", archivoComprimidoInput.files[0]);
     }
 
     const backendBase = "http://localhost:8080/api/productos";
@@ -387,7 +388,7 @@ async function fetchConRefresh(url, options = {}) {
       }
     }
 
-    alert("Producto, colores, archivo STL y archivos guardados con éxito!");
+    alert("Producto, colores, archivo Comprimido y imagenes guardados con éxito!");
     form.reset();
     window.productoState.coloresSeleccionados = [];
     window.productoState.archivosSeleccionados = [];

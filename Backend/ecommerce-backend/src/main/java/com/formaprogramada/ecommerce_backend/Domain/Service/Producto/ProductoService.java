@@ -1,7 +1,6 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Producto;
 
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.*;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoAprobacionEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,10 +22,14 @@ public interface ProductoService {
     List<Integer> obtenerTodosLosIds();
     ProductoCompletoDTO obtenerProductoCompletoSinCache(Integer productoId);
     ProductoCompletoDTO obtenerProductoCompleto(Integer id);
-    Page<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosConArchivoPrincipalYColores(Pageable pageable);
+    List<ProductoConArchivoPrincipalYColoresDTO> obtenerProductosDestacados();
     Page<ProductoResponseDTO> listarProductosPorCategoria(Integer categoriaId, Pageable pageable);
     Page<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosLosProductosConColoresYArchivo(Pageable pageable);
+    List<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosLosProductosSinPaginado();
+    List<ProductoResponseDTO> listarProductosPorCategoriaSP(Integer categoriaId, Pageable pageable);
+    long contarProductosPorCategoria(Integer categoriaId);
 
-    
-}
+
+
+    }
 
