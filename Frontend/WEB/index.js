@@ -1,117 +1,237 @@
-const btnMenu = document.querySelector('.btn-menu');
-const catalogMenu = document.querySelector('.catalog-menu');
+let productsGrid;
+let categoriesDropdown;
+let heroTitle;
+let heroDescription;
+let heroBadge;
+let heroBg;
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM elements
+    productsGrid = document.getElementById('products-grid');
+    categoriesDropdown = document.querySelector('#categories-dropdown .dropdown-content');
+    heroTitle = document.getElementById('hero-title');
+    heroDescription = document.getElementById('hero-description');
+    heroBadge = document.getElementById('hero-badge');
+    heroBg = document.querySelector('.hero-bg');
+    loadCategories();
+    loadProducts();
+    loadLatestProduct();
+    initializeEventListeners();
+    const mobileButton = document.querySelector('.mobile-menu'); // encuentra ese botón nuevo
+    const mobileNav = document.getElementById('mobile-nav');
 
-btnMenu.addEventListener('click', () => {
-  catalogMenu.classList.toggle('open');
-});
-
-// Opcional: cerrar menú si clickeas fuera
-catalogMenu.addEventListener('click', (e) => {
-  if (e.target === catalogMenu) {
-    catalogMenu.classList.remove('open');
-  }
-});
-document.addEventListener("DOMContentLoaded", () => {
-  const miniHeroesContainer = document.querySelector('.mini-heroes');
-  const heroContainer = document.querySelector('.hero-container');
-
-  if (!miniHeroesContainer || !heroContainer) return;
-
-  fetch('http://localhost:8080/api/categoria/combo')
-    .then(res => {
-      if (!res.ok) throw new Error('Error al obtener categorías');
-      return res.json();
-    })
-    .then(categorias => {
-      // Filtrar solo las categorías destacadas para mini-heroes
-      const destacadas = categorias.filter(cat => cat.destacado && cat.id !== 1);
-
-      // Buscar la categoría con id === 1 para hero principal
-      const heroPrincipal = categorias.find(cat => cat.id === 1);
-
-      // Limpiar contenido previo (si existe)
-      miniHeroesContainer.innerHTML = '';
-
-      // Crear y agregar cada mini-hero
-      destacadas.forEach(cat => {
-        const miniHero = document.createElement('div');
-        miniHero.className = 'mini-hero';
-
-        miniHero.innerHTML = `
-          <a href="/WEB/categoria/s_categoria.html?categoria=${encodeURIComponent(cat.id)}">  
-            <img src="${cat.linkArchivo || '/img/default.jpeg'}" alt="${cat.nombre}" />
-            <div class="mini-overlay"></div>
-          </a>
-          <div class="mini-hero-text">${cat.nombre}</div>
-        `;
-
-        miniHeroesContainer.appendChild(miniHero);
-      });
-
-      // Actualizar hero principal si existe
-      if (heroPrincipal) {
-        heroContainer.innerHTML = `
-          <a href="/WEB/categoria/s_categoria.html?categoria=all" class="hero-link">
-            <img src="${heroPrincipal.linkArchivo || '/img/default.jpeg'}" alt="${heroPrincipal.nombre}" class="hero-img" />
-            <div class="hero-overlay"></div>
-          </a>
-        `;
-      }
-    })
-    .catch(err => {
-      console.error('Error cargando categorías:', err);
+    mobileButton.addEventListener('click', () => {
+        mobileNav.classList.toggle('show');  // muestra/oculta menú móvil
     });
 
-    //Cargar destacados
-    fetch("http://localhost:8080/api/productos/completo")
-      .then(response => {
-        if (!response.ok) throw new Error("No se pudieron cargar los productos");
-        return response.json();
-      })
-      .then(data => cargarProductos(data))
-      .catch(error => console.error("Error al cargar productos:", error));
-  });
 
-function cargarProductos(productos) {
-  const contenedor = document.getElementById('contenedor-productos');
-  contenedor.innerHTML = '';
+    document.addEventListener('click', (e) => {
+        if (!mobileNav.contains(e.target) && !mobileButton.contains(e.target)) {
+            mobileNav.classList.remove('show');
+        }
+    });
+    document.addEventListener('click', handleClicks); 
 
-  productos.forEach(item => {
-    const producto = item.producto;
-    const imagen = item.archivoPrincipal?.linkArchivo || "/img/default.jpeg";
-    const colores = item.colores || ["Negro", "Blanco"];
+});
 
-    const card = document.createElement("div");
-    card.classList.add("product-card");
+// Load categories from API
+async function loadCategories() {
+    const categories = await API.getCategories();
+    renderCategories(categories);
+}
+
+// Render categories in dropdown
+function renderCategories(categories) {
+    if (!Array.isArray(categories)) {
+        console.error('Categorías inválidas:', categories);
+        return;
+    }
+
+    categoriesDropdown.innerHTML = '';
+    
+    categories.forEach(category => {
+        if (category.id === 1) return; // 👈 Saltar la categoría con id 1
+        const categoryLink = document.createElement('a');
+        categoryLink.href = '#';
+        categoryLink.className = 'dropdown-category';
+        categoryLink.textContent = category.nombre; // "nombre" según tu DTO
+        categoryLink.dataset.categoryId = category.id;
+        
+        categoriesDropdown.appendChild(categoryLink);
+    });
+}
+
+
+// Load products from API
+async function loadProducts() {
+    const products = await API.getCompleteProducts(); 
+    renderProducts(products);
+}
+
+// Load products by category
+async function loadProductsByCategory(categoryId) {
+    const products = await API.getProductsByCategory(categoryId);
+    renderProducts(products);
+}
+
+// Render products in grid
+function renderProducts(products) {
+    productsGrid.innerHTML = '';
+
+    products.forEach(productDTO => {
+        const productCard = createProductCard(productDTO);
+        productsGrid.appendChild(productCard);
+    });
+}
+
+// Create product card element
+function createProductCard(dto) {
+    const { producto, archivoPrincipal } = dto;
+
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.dataset.productId = producto.id;
+    card.style.cursor = 'pointer';
 
     card.innerHTML = `
-      <div class="product-info" onclick="window.location.href='/WEB/categoria/producto/s_producto.html?id=${producto.id}'">
-        <img src="${imagen}" alt="${producto.nombre}" />
-        <h3>${producto.nombre}</h3>
-        <p class="product-desc">${producto.descripcion}</p>
-      </div>
-
-      <div class="product-controls">
-        <label>Formato:</label>
-        <select class="minimal-select">
-          <option value="Archivo">STL</option>
-          <option value="Fisico">Físico</option>
-        </select>
-
-        <label>Color:</label>
-        <select class="minimal-select">
-          ${colores.map(color => `<option>${color}</option>`).join("")}
-        </select>
-
-        <p class="product-price">$${producto.precio.toFixed(2)}</p>
-
-        <div class="product-actions">
-          <input type="number" min="1" value="1" class="quantity-input" />
-          <button class="add-to-cart-btn">Agregar</button>
+        <div class="product-image">
+            <img src="${archivoPrincipal?.linkArchivo || 'src/assets/product-grid.jpg'}" alt="${producto.nombre}">
         </div>
-      </div>
+        <div class="product-info">
+            <h3 class="product-name">${producto.nombre}</h3>
+            <p class="product-price">$${producto.precio}</p>
+        </div>
     `;
 
-    contenedor.appendChild(card);
-  });
+    return card;
+}
+
+// Load latest product for hero section
+async function loadLatestProduct() {
+    const latestProductDTO = await API.getLatestProduct();
+    updateHeroSection(latestProductDTO);
+}
+
+// Update hero section con datos adaptados
+function updateHeroSection(productDTO) {
+    if (productDTO && productDTO.producto) {
+        heroTitle.textContent = productDTO.producto.nombre;
+        
+        // Si tienes descripción en ProductoDTO
+        heroDescription.textContent = productDTO.producto.descripcion || '';
+        
+        // Badge NEW si tienes lógica para determinar si es nuevo o no,
+        // sino puedes usar isNew que pusiste en fallback (modificar según necesidad)
+        heroBadge.textContent = productDTO.isNew ? 'NUEVO' : 'NUEVO';
+        
+        // Actualizar imagen con archivoPrincipal.linkArchivo
+        if (productDTO.archivoPrincipal && productDTO.archivoPrincipal.linkArchivo) {
+            heroBg.style.backgroundImage = `url(${productDTO.archivoPrincipal.linkArchivo})`;
+        }
+        
+        // Guardar ID para navegación (botón)
+        const heroBtn = document.querySelector('.hero-btn');
+        if (heroBtn) {
+            heroBtn.dataset.productId = productDTO.producto.id;
+        }
+    }
+}
+
+// Search functionality
+async function searchProducts(query) {
+    const products = await API.searchProducts(query);
+    renderProducts(products);
+}
+
+// Add to cart functionality (placeholder)
+function addToCart(productId) {
+    console.log(`Adding product ${productId} to cart`);
+    
+    // Update cart count
+    const cartCount = document.querySelector('.cart-count');
+    const currentCount = parseInt(cartCount.textContent);
+    cartCount.textContent = currentCount + 1;
+}
+
+// Initialize all event listeners
+function initializeEventListeners() {
+    // Main click event handler
+    document.addEventListener('click', handleClicks);
+    
+    // Shop dropdown functionality
+    initializeDropdown();
+    
+}
+
+// Handle all click events
+function handleClicks(e) {
+    // Handle hero button click - navigate to product
+    if (e.target.classList.contains('hero-btn')) {
+        const productId = e.target.dataset.productId;
+        if (productId) {
+            window.location.href = `producto.html?id=${productId}`;
+        } else {
+            document.querySelector('.bestsellers').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+    }
+    
+    // Handle product card clicks - navigate to product page
+    if (e.target.closest('.product-card')) {
+        const productCard = e.target.closest('.product-card');
+        const productId = productCard.dataset.productId;
+        if (productId) {
+            window.location.href = `producto.html?id=${productId}`;
+        }
+    }
+    
+    // Handle view all button - navigate to products page
+    if (e.target.classList.contains('view-all-btn')) {
+        window.location.href = '/products';
+    }
+    
+    // Handle explore all products button - navigate to products page
+    if (e.target.classList.contains('featured-btn')) {
+        window.location.href = `/categoria.html?categoria=all`;
+    }
+    
+    // Handle category clicks in dropdown
+    if (e.target.classList.contains('dropdown-category')) {
+        e.preventDefault();
+        const categoryId = e.target.dataset.categoryId;
+        const categoryName = e.target.textContent.toLowerCase().replace(/ /g, '-');
+        if (categoryId) {
+            window.location.href = `/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
+        }
+    }
+
+}
+
+
+// Initialize shop dropdown functionality
+function initializeDropdown() {
+    const shopTrigger = document.getElementById('shop-trigger');
+    const categoriesDropdownMenu = document.getElementById('categories-dropdown');
+
+    if (shopTrigger && categoriesDropdownMenu) {
+        // Show dropdown on hover
+        shopTrigger.addEventListener('mouseenter', () => {
+            categoriesDropdownMenu.classList.add('show');
+        });
+        
+        // Hide dropdown when leaving the entire dropdown area
+        const navDropdown = shopTrigger.parentElement;
+        navDropdown.addEventListener('mouseleave', () => {
+            categoriesDropdownMenu.classList.remove('show');
+        });
+    }
+}
+
+// Utility function to format price
+function formatPrice(price) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(price);
 }

@@ -1,119 +1,189 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Forma Programada - Inicio</title>
-  <link rel="stylesheet" href="index_styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forma programada</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>                       
-  <header class="main-header">
-      <div class="container header-inner">
-          <div class="left-header">
-          <div class="logo"></div>
-          <nav class="nav">
-            <ul id="categoria-lista">
-              <!-- otras categorías destacadas -->
-              <li id="mas-categorias" class="dropdown">
-                <a href="#" class="dropdown-toggle">Más categorías ▼</a>
-                <ul class="dropdown-menu" style="display:none;">
-                  <!-- Aquí van las categorías restantes dinámicas -->
-                </ul>
-              </li>
-              <li id="adminPanel" class="dropdown">
-                <a href="#">Panel de Administración</a>
-                <ul class="dropdown-menu" style="display:none;">
-                  <li><a href="/WEB/admin/CRUDcategoria/CRUDcategoria.html">Gestión Categorías</a></li>
-                  <li><a href="/WEB/admin/CRUDcategoria/CRUDproducto/CRUDproducto.html">Gestión Productos</a></li>
-                </ul>
-              </li>
-            </ul>
-          </nav>
+<body>
+           <!-- Header -->
+    <header class="header">
+        
+        <!-- Main navigation -->
+        <div class="nav-container">
+            <div class="nav-content">
+                <!-- Logo -->
+                <div class="logo">
+                    <h1><a href="/WEB/index.html" style="text-decoration: none; color: inherit;">Forma programada</a></h1>
+                </div>
 
-          </div>
-          <div class="right-header">
-          <a href="#" class="search-icon">🔍</a>
-          <a href="#" class="cart-icon">🛒 (0)</a>
-          <li id="loginLink"><a href="/WEB/usuario/login/login.html" class="cart-icon">LOGIN</a></li>
-          <li id="cuentaLink" style="display:none;"><a href="/WEB/usuario/perfil/perfil.html" class="cart-icon">CUENTA</a></li>  
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <div class="nav-dropdown">
+                        <a href="#" class="nav-link" id="shop-trigger">Shop</a>
+                        <div class="dropdown-menu" id="categories-dropdown">
+                            <div class="dropdown-content">
+                                <!-- Categories will be loaded dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Panel de administración (dropdown) -->
+                    <div class="nav-dropdown hidden" id="admin-dropdown">
+                        <span class="nav-link" style="cursor: default;">Panel de administración</span>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-content" id="admin-options"></div>
+                        </div>
+                        </div>
+
+                </nav>
+
+                <!-- Right side icons -->
+                <div class="nav-icons">
+                    <!-- Contenedor de cuenta -->
+                    <div class="nav-dropdown" id="account-dropdown">
+                        <button class="icon-btn account-icon" id="account-btn" title="Cuenta" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown para cuenta (solo visible si hay JWT) -->
+                        <div class="dropdown-menu" id="account-menu" style="display: none;">
+                            <div class="dropdown-content">
+                            <a href="/WEB/usuario/perfil/perfil.html">Acceder Cuenta</a>
+                            <a href="#" id="logout-btn">Salir de la cuenta</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="icon-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn cart-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m2 2 3.6 7.8A1 1 0 0 0 6.5 11H19a1 1 0 0 0 .9-1.4L17 3H6.5"/>
+                            <path d="m9 13 1 6h4l1-6"/>
+                            <circle cx="9" cy="20" r="1"/>
+                            <circle cx="15" cy="20" r="1"/>
+                        </svg>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <!-- Navegación móvil -->
+                    <div id="mobile-nav" class="mobile-nav">
+                        <!-- Agregá links o lo que necesites acá -->
+                    </div>
+                    <!-- Botón para menú móvil -->
+                    <button class="mobile-menu icon-btn" aria-label="Menú móvil">
+                        <!-- Icono hamburguesa simple -->
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="alt-header mobile-header">
-    <div class="alt-header-inner">
-        <div class="logo">LOGO</div>
-        <button class="btn-search" aria-label="Buscar">🔍</button>
-        <button class="btn-cart" aria-label="Carrito">🛒</button>
-        <button class="btn-menu" aria-label="Menú">☰</button>
-        <a href="/WEB/usuario/login/login.html" class="cart-icon"> LOGIN</a>
-      </div>
-
-      <nav class="catalog-menu">
-        <ul>
-          <!-- etc -->
-        </ul>
-      </nav>
-    </div>
-  </header>
+    </header>
 
 
-  <section class="hero">
-    <div class="hero-container">
-    </div>
-  </section>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-content">
+            <div class="hero-text">
+                <span class="hero-badge" id="hero-badge">NUEVO</span>
+                <h1 class="hero-title" id="hero-title">Farolito Lamp</h1>
+                <p class="hero-description" id="hero-description">
+                    Handcrafted geometric lighting that transforms any space with warm, ambient illumination.
+                </p>
+                <button class="hero-btn">COMPRAR AHORA</button>
+            </div>
+        </div>
+        
+        <div class="hero-gradient-bottom"></div>
+    </section>
 
-  <section class="mini-heroes">
-    
-  </section>
+    <!-- Bestsellers Section -->
+    <section class="bestsellers">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="section-header">
+                <h2 class="section-title">Productos Destacados</h2>
+            </div>
 
+            <!-- Products Grid -->
+            <div class="products-grid" id="products-grid">
+                <!-- Products will be loaded dynamically -->
+            </div>
 
+            <!-- Featured Collection CTA -->
+            <div class="featured-cta">
+                <h3 class="featured-title">Descubre todos nuestros productos</h3>
+                <p class="featured-description">
+                </p>
+                <button class="featured-btn">Explora todos nuestros productos</button>
+            </div>
+        </div>
+    </section>
 
-  <section class="services-info">
-    <div class="container">
-      <div class="service-card">
-        <img src="/img/ejemplo-1.jpeg" alt="Métodos de pago">
-        <h3>Métodos de Pago</h3>
-        <p>Aceptamos tarjetas de crédito, débito y transferencias bancarias.</p>
-      </div>
-      <div class="service-card">
-        <img src="/img/ejemplo-1.jpeg" alt="Servicio al cliente">
-        <h3>Atención Personalizada</h3>
-        <p>Soporte por WhatsApp y correo para resolver tus dudas.</p>
-      </div>
-      <div class="service-card">
-        <img src="/img/ejemplo-1.jpeg" alt="Delivery">
-        <h3>Envíos a Todo el País</h3>
-        <p>Despachos rápidos y seguros desde nuestro taller en Vejle.</p>
-      </div>
-    </div>
-  </section>
-  <section class="featured-products">
-    <div class="container">
-      <h2>Productos Destacados</h2>
-      <div class="product-grid" id="contenedor-productos">
-        <!-- Los productos se insertarán aquí -->
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <h3>Forma programada</h3>
+                        <p>Diseños 3D hechos realidad.</p>
+                        <p>Argentina, CABA, Palermo.</p>
+                    </div>
+                </div>
 
-      </div>
-    </div>
-  </section>
+                <div class="footer-section">
+                    <h4>Compañia</h4>
+                    <ul>
+                        <li><a href="#">Sobre nosotros</a></li>
+                        <li><a href="#">Contacto</a></li>
+                        <li><a href="#">Partners</a></li>
+                    </ul>
+                </div>
 
+                <div class="footer-section">
+                    <h4>Soporte</h4>
+                    <ul>
+                        <li><a href="#">Centro de ayuda</a></li>
+                        <li><a href="#">Envios</a></li>
+                        <li><a href="#">Reembolsos</a></li>
+                        <li><a href="#">Guia de medidas</a></li>
+                    </ul>
+                </div>
+            </div>
 
-
-  <footer class="main-footer">
-    <div class="container">
-      <div class="footer-info">
-        <p>© 2025 Forma programada</p>
-        <p>Palermo, CABA</p>
-        <p>Tel: +5411890423 | Email: formaprogramada@gmail.com</p>
-      </div>
-      <div class="footer-links">
-        <a href="#">Política de Privacidad</a>
-        <a href="#">Términos y Condiciones</a>
-        <a href="#">Cookies</a>
-      </div>
-    </div>
-  </footer>
-  <script src="index.js"></script>
-  <script src="categorias-index.js"></script>
-  <script src="auth-utils.js"></script>
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Forma programada. Todos los derechos reservados.</p>
+                    <div class="footer-links">
+                        <a href="#">Politicas de privacidad</a>
+                        <a href="#">Terminos de servicios</a>
+                        <a href="#">Politicas de cookies</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="api.js"></script>
+    <script src="admin-access.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>

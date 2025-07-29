@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categoría - Forma programada</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+            <!-- Header -->
+    <header class="header">
+        
+        <!-- Main navigation -->
+        <div class="nav-container">
+            <div class="nav-content">
+                <!-- Logo -->
+                <div class="logo">
+                    <h1><a href="/WEB/index.html" style="text-decoration: none; color: inherit;">Forma programada</a></h1>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <div class="nav-dropdown">
+                        <a href="#" class="nav-link" id="shop-trigger">Shop</a>
+                        <div class="dropdown-menu" id="categories-dropdown">
+                            <div class="dropdown-content">
+                                <!-- Categories will be loaded dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Panel de administración (dropdown) -->
+                    <div class="nav-dropdown hidden" id="admin-dropdown">
+                        <a href="#" class="nav-link">Panel de administración</a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-content" id="admin-options">
+                                <a href="/WEB/admin/CRUDCategoria/CRUDcategoria.html">Administrar Categorias</a>
+                                <a href="/WEB/admin/CRUDProducto/CRUDproducto.html">Administrar Productos</a>
+                                <a href="/WEB/admin/Aprobacion/CRUDAprobacion.html">Administrar Colaboradores</a>
+                                <a href="/WEB/admin/PagoySeguimiento/pagoYseguimiento.html">Administrar Pedidos </a>
+
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Right side icons -->
+                <div class="nav-icons">
+                    <!-- Contenedor de cuenta -->
+                    <div class="nav-dropdown" id="account-dropdown">
+                        <button class="icon-btn account-icon" id="account-btn" title="Cuenta" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown para cuenta (solo visible si hay JWT) -->
+                        <div class="dropdown-menu" id="account-menu" style="display: none;">
+                            <div class="dropdown-content">
+                            <a href="/WEB/usuario/perfil/perfil.html">Acceder Cuenta</a>
+                            <a href="#" id="logout-btn">Salir de la cuenta</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="icon-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn cart-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m2 2 3.6 7.8A1 1 0 0 0 6.5 11H19a1 1 0 0 0 .9-1.4L17 3H6.5"/>
+                            <path d="m9 13 1 6h4l1-6"/>
+                            <circle cx="9" cy="20" r="1"/>
+                            <circle cx="15" cy="20" r="1"/>
+                        </svg>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <!-- Navegación móvil -->
+                    <div id="mobile-nav" class="mobile-nav">
+                        <!-- Agregá links o lo que necesites acá -->
+                    </div>
+                    <!-- Botón para menú móvil -->
+                    <button class="mobile-menu icon-btn" aria-label="Menú móvil">
+                        <!-- Icono hamburguesa simple -->
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Category Hero Section -->
+    <section class="category-hero">
+        <div class="container">
+            <div class="category-hero-content">
+                <h1 class="category-title" id="category-title">Lámparas de Mesa</h1>
+                <p class="category-description" id="category-description">Iluminación 3D impresa para cualquier habitación de tu hogar.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="category-main">
+        <div class="container">
+            <div class="category-layout">
+                <!-- Sidebar with filters -->
+                <aside class="category-sidebar">
+                    <div class="filter-section">
+                        <h3 class="filter-title">Filtros</h3>
+                        
+                        <!-- Category Filter -->
+                        <div class="filter-group">
+                            <h4 class="filter-group-title">Categorías</h4>
+                            <div class="filter-options" id="category-filters">
+                                <label class="filter-option">
+                                    <input type="radio" name="category" value="all" checked>
+                                    <span>Todos</span>
+                                </label>
+                                <!-- Categories will be loaded dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Price Filter -->
+                        <div class="filter-group">
+                            <h4 class="filter-group-title">Precio</h4>
+                            <div class="filter-options">
+                                <label class="filter-option">
+                                    <input type="radio" name="price" value="all" checked>
+                                    <span>Todos</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="radio" name="price" value="under-50">
+                                    <span>Menos de $50</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="radio" name="price" value="50-100">
+                                    <span>$50 - $100</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="radio" name="price" value="over-100">
+                                    <span>Más de $100</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="filter-group">
+                            <h4 class="filter-group-title">Estado</h4>
+                            <div class="filter-options">
+                                <label class="filter-option">
+                                    <input type="radio" name="status" value="all" checked>
+                                    <span>Todos</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="radio" name="status" value="new">
+                                    <span>Nuevos</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="radio" name="status" value="bestsellers">
+                                    <span>Más vendidos</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Products Grid -->
+                <div class="category-content">
+                    <div class="category-products-header">
+                        <div class="products-count">
+                            <span id="products-count">Cargando productos...</span>
+                        </div>
+                        <div class="sort-options">
+                            <select id="sort-select" class="sort-select">
+                                <option value="name">Ordenar por nombre</option>
+                                <option value="price-low">Precio: menor a mayor</option>
+                                <option value="price-high">Precio: mayor a menor</option>
+                                <option value="newest">Más recientes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="category-products-grid" id="category-products-grid">
+                        <!-- Products will be loaded dynamically -->
+                    </div>
+
+                    <!-- Loading State -->
+                    <div class="loading-state" id="loading-state">
+                        <div class="loading-spinner"></div>
+                        <p>Cargando productos...</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-state" id="empty-state" style="display: none;">
+                        <div class="empty-state-content">
+                            <div class="empty-state-icon">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="m21 21-4.35-4.35"/>
+                                </svg>
+                            </div>
+                            <h3>No se encontraron productos</h3>
+                            <p>Intenta ajustar los filtros o explora otras categorías.</p>
+                            <button class="empty-state-btn" onclick="clearFilters()">Limpiar filtros</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <h3>Forma programada</h3>
+                        <p>Diseños 3D hechos realidad.</p>
+                        <p>Argentina, CABA, Palermo.</p>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Compañia</h4>
+                    <ul>
+                        <li><a href="#">Sobre nosotros</a></li>
+                        <li><a href="#">Contacto</a></li>
+                        <li><a href="#">Partners</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Soporte</h4>
+                    <ul>
+                        <li><a href="#">Centro de ayuda</a></li>
+                        <li><a href="#">Envios</a></li>
+                        <li><a href="#">Reembolsos</a></li>
+                        <li><a href="#">Guia de medidas</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Forma programada. Todos los derechos reservados.</p>
+                    <div class="footer-links">
+                        <a href="#">Politicas de privacidad</a>
+                        <a href="#">Terminos de servicios</a>
+                        <a href="#">Politicas de cookies</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="api.js"></script>
+    <script src="categoria.js" defer></script>
+</body>
+</html>

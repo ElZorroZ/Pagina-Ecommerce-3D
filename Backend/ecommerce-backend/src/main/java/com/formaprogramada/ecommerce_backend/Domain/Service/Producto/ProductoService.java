@@ -28,6 +28,7 @@ public interface ProductoService {
     List<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosLosProductosSinPaginado();
     List<ProductoResponseDTO> listarProductosPorCategoriaSP(Integer categoriaId, Pageable pageable);
     long contarProductosPorCategoria(Integer categoriaId);
+    ProductoConArchivoPrincipalYColoresDTO obtenerUltimoProducto();
 
 
 

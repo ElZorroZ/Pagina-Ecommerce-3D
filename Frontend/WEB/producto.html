@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producto - Forma programada</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+        <!-- Header -->
+    <header class="header">
+        
+        <!-- Main navigation -->
+        <div class="nav-container">
+            <div class="nav-content">
+                <!-- Logo -->
+                <div class="logo">
+                    <h1><a href="/WEB/index.html" style="text-decoration: none; color: inherit;">Forma programada</a></h1>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <div class="nav-dropdown">
+                        <a href="#" class="nav-link" id="shop-trigger">Shop</a>
+                        <div class="dropdown-menu" id="categories-dropdown">
+                            <div class="dropdown-content">
+                                <!-- Categories will be loaded dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Panel de administración (dropdown) -->
+                    <div class="nav-dropdown hidden" id="admin-dropdown">
+                        <a href="#" class="nav-link">Panel de administración</a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-content" id="admin-options">
+                                <a href="/WEB/admin/CRUDCategoria/CRUDcategoria.html">Administrar Categorias</a>
+                                <a href="/WEB/admin/CRUDProducto/CRUDproducto.html">Administrar Productos</a>
+                                <a href="/WEB/admin/Aprobacion/CRUDAprobacion.html">Administrar Colaboradores</a>
+                                <a href="/WEB/admin/PagoySeguimiento/pagoYseguimiento.html">Administrar Pedidos </a>
+
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Right side icons -->
+                <div class="nav-icons">
+                    <!-- Contenedor de cuenta -->
+                    <div class="nav-dropdown" id="account-dropdown">
+                        <button class="icon-btn account-icon" id="account-btn" title="Cuenta" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown para cuenta (solo visible si hay JWT) -->
+                        <div class="dropdown-menu" id="account-menu" style="display: none;">
+                            <div class="dropdown-content">
+                            <a href="/WEB/usuario/perfil/perfil.html">Acceder Cuenta</a>
+                            <a href="#" id="logout-btn">Salir de la cuenta</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="icon-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn cart-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m2 2 3.6 7.8A1 1 0 0 0 6.5 11H19a1 1 0 0 0 .9-1.4L17 3H6.5"/>
+                            <path d="m9 13 1 6h4l1-6"/>
+                            <circle cx="9" cy="20" r="1"/>
+                            <circle cx="15" cy="20" r="1"/>
+                        </svg>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <!-- Navegación móvil -->
+                    <div id="mobile-nav" class="mobile-nav">
+                        <!-- Agregá links o lo que necesites acá -->
+                    </div>
+                    <!-- Botón para menú móvil -->
+                    <button class="mobile-menu icon-btn" aria-label="Menú móvil">
+                        <!-- Icono hamburguesa simple -->
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <a href="index.html">Inicio</a>
+            <span>/</span>
+            <a href="#" id="breadcrumb-category">Categoría</a>
+            <span>/</span>
+            <span id="breadcrumb-product">Producto</span>
+        </div>
+    </div>
+
+    <!-- Product Page -->
+    <main class="product-page">
+        <div class="container">
+            <div class="product-layout">
+                <!-- Left Side - Images -->
+                <div class="product-images" id="product-images">
+                    <div class="main-image">
+                        <img id="main-product-image" src="" alt="Producto">
+                    </div>
+                    <div class="image-thumbnails" id="image-thumbnails">
+                        <!-- Thumbnails will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Right Side - Product Info (Sticky) -->
+                <div class="product-info" id="product-info">
+                    <div class="product-info-content">
+                        <div class="product-rating">
+                            <div class="stars" id="product-stars">
+                                <!-- Stars will be generated here -->
+                            </div>
+                            <span class="review-count" id="review-count">0 reviews</span>
+                        </div>
+
+                        <h1 class="product-title" id="product-title">Cargando...</h1>
+                        <p class="product-price" id="product-price">$0</p>
+
+                        <div class="product-options">
+                            <div class="color-selector" id="color-selector">
+                                <label>Color:</label>
+                                <div class="color-options" id="color-options">
+                                    <!-- Color options will be generated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="add-to-cart-btn" id="add-to-cart-btn">
+                            AGREGAR AL CARRITO
+                        </button>
+
+                        <div class="delivery-info">
+                            <p>Entrega estimada: <span id="estimated-delivery">3-5 días hábiles</span></p>
+                        </div>
+
+                        <div class="product-highlights" id="product-highlights">
+                            <p>Envío gratis en compras sobre $100.000</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Details Section -->
+            <section class="product-details" id="product-details">
+                <h2>Detalles del Producto</h2>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <h3>Dimensiones</h3>
+                        <p id="product-dimensions">-</p>
+                    </div>
+                    <div class="detail-item">
+                        <h3>Material</h3>
+                        <p id="product-material">-</p>
+                    </div>
+                    <div class="detail-item">
+                        <h3>Peso</h3>
+                        <p id="product-weight">-</p>
+                    </div>
+                    <div class="detail-item">
+                        <h3>Técnica</h3>
+                        <p id="product-tecnica">2 años</p>
+                    </div>
+                </div>
+                <div class="product-description">
+                    <h3>Descripción</h3>
+                    <p id="product-description">-</p>
+                </div>
+            </section>
+
+            <!-- Reviews Section -->
+            <section class="reviews-section" id="reviews-section">
+                <div class="reviews-header">
+                    <h2>Reseñas</h2>
+                    <button class="write-review-btn" id="write-review-btn">Escribir Reseña</button>
+                </div>
+
+                <div class="reviews-summary" id="reviews-summary">
+                    <div class="average-rating">
+                        <div class="big-rating" id="big-rating">0.0</div>
+                        <div class="stars-large" id="stars-large">
+                            <!-- Large stars will be generated here -->
+                        </div>
+                        <p class="total-reviews" id="total-reviews">Basado en 0 reseñas</p>
+                    </div>
+                    <div class="rating-breakdown" id="rating-breakdown">
+                        <!-- Rating breakdown will be generated here -->
+                    </div>
+                </div>
+
+                <div class="reviews-list" id="reviews-list">
+                    <!-- Reviews will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Write Review Modal -->
+            <div class="modal" id="review-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Escribir Reseña</h3>
+                        <button class="close-modal" id="close-review-modal">&times;</button>
+                    </div>
+                    <form id="review-form">
+                        <div class="form-group">
+                            <label>Calificación:</label>
+                            <div class="star-rating" id="star-rating">
+                                <span class="star" data-rating="1">★</span>
+                                <span class="star" data-rating="2">★</span>
+                                <span class="star" data-rating="3">★</span>
+                                <span class="star" data-rating="4">★</span>
+                                <span class="star" data-rating="5">★</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="review-title">Título:</label>
+                            <input type="text" id="review-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="review-text">Reseña:</label>
+                            <textarea id="review-text" rows="4" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="reviewer-name">Nombre:</label>
+                            <input type="text" id="reviewer-name" required>
+                        </div>
+                        <button type="submit">Publicar Reseña</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+   <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <h3>Forma programada</h3>
+                        <p>Diseños 3D hechos realidad.</p>
+                        <p>Argentina, CABA, Palermo.</p>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Compañia</h4>
+                    <ul>
+                        <li><a href="#">Sobre nosotros</a></li>
+                        <li><a href="#">Contacto</a></li>
+                        <li><a href="#">Partners</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Soporte</h4>
+                    <ul>
+                        <li><a href="#">Centro de ayuda</a></li>
+                        <li><a href="#">Envios</a></li>
+                        <li><a href="#">Reembolsos</a></li>
+                        <li><a href="#">Guia de medidas</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Forma programada. Todos los derechos reservados.</p>
+                    <div class="footer-links">
+                        <a href="#">Politicas de privacidad</a>
+                        <a href="#">Terminos de servicios</a>
+                        <a href="#">Politicas de cookies</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="api.js"></script>
+    <script src="producto.js"></script>
+</body>
+</html>

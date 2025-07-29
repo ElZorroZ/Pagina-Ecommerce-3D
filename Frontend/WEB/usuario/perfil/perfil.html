@@ -7,53 +7,95 @@
   <link rel="stylesheet" href="perfil_styles.css" />
 </head>
 <body>
-      <header class="main-header">
-      <div class="container header-inner">
-          <div class="left-header">
-          <div class="logo"></div>
-          <nav class="nav">
-            <ul id="categoria-lista">
-              <!-- otras categorías destacadas -->
-              <li id="mas-categorias" class="dropdown">
-                <a href="#" class="dropdown-toggle">Más categorías ▼</a>
-                <ul class="dropdown-menu" style="display:none;">
-                  <!-- Aquí van las categorías restantes dinámicas -->
-                </ul>
-              </li>
-              <li id="adminPanel" class="dropdown">
-                <a href="#">Panel de Administración</a>
-                <ul class="dropdown-menu" style="display:none;">
-                  <li><a href="/WEB/admin/CRUDcategoria/CRUDcategoria.html">Gestión Categorías</a></li>
-                  <li><a href="/WEB/admin/CRUDcategoria/CRUDproducto/CRUDproducto.html">Gestión Productos</a></li>
-                </ul>
-              </li>
-            </ul>
-          </nav>
+    <!-- Header -->
+    <header class="header">
+        
+        <!-- Main navigation -->
+        <div class="nav-container">
+            <div class="nav-content">
+                <!-- Logo -->
+                <div class="logo">
+                    <h1><a href="/WEB/index.html" style="text-decoration: none; color: inherit;">Forma programada</a></h1>
+                </div>
 
-          </div>
-          <div class="right-header">
-          <a href="#" class="search-icon">🔍</a>
-          <a href="#" class="cart-icon">🛒 (0)</a>
-          <li id="loginLink"><a href="/WEB/usuario/login/login.html" class="cart-icon">LOGIN</a></li>
-          <li id="cuentaLink" style="display:none;"><a href="/WEB/usuario/perfil/perfil.html" class="cart-icon">CUENTA</a></li>  
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <div class="nav-dropdown">
+                        <a href="#" class="nav-link" id="shop-trigger">Shop</a>
+                        <div class="dropdown-menu" id="categories-dropdown">
+                            <div class="dropdown-content">
+                                <!-- Categories will be loaded dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Panel de administración (dropdown) -->
+                    <div class="nav-dropdown hidden" id="admin-dropdown">
+                        <a href="#" class="nav-link">Panel de administración</a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-content" id="admin-options">
+                                <a href="/WEB/admin/CRUDCategoria/CRUDcategoria.html">Administrar Categorias</a>
+                                <a href="/WEB/admin/CRUDProducto/CRUDproducto.html">Administrar Productos</a>
+                                <a href="/WEB/admin/Aprobacion/CRUDAprobacion.html">Administrar Colaboradores</a>
+                                <a href="/WEB/admin/PagoySeguimiento/pagoYseguimiento.html">Administrar Pedidos </a>
+
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Right side icons -->
+                <div class="nav-icons">
+                    <!-- Contenedor de cuenta -->
+                    <div class="nav-dropdown" id="account-dropdown">
+                        <button class="icon-btn account-icon" id="account-btn" title="Cuenta" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown para cuenta (solo visible si hay JWT) -->
+                        <div class="dropdown-menu" id="account-menu" style="display: none;">
+                            <div class="dropdown-content">
+                            <a href="/WEB/usuario/perfil/perfil.html">Acceder Cuenta</a>
+                            <a href="#" id="logout-btn">Salir de la cuenta</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="icon-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn cart-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m2 2 3.6 7.8A1 1 0 0 0 6.5 11H19a1 1 0 0 0 .9-1.4L17 3H6.5"/>
+                            <path d="m9 13 1 6h4l1-6"/>
+                            <circle cx="9" cy="20" r="1"/>
+                            <circle cx="15" cy="20" r="1"/>
+                        </svg>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <!-- Navegación móvil -->
+                    <div id="mobile-nav" class="mobile-nav">
+                        <!-- Agregá links o lo que necesites acá -->
+                    </div>
+                    <!-- Botón para menú móvil -->
+                    <button class="mobile-menu icon-btn" aria-label="Menú móvil">
+                        <!-- Icono hamburguesa simple -->
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="alt-header mobile-header">
-    <div class="alt-header-inner">
-        <div class="logo">LOGO</div>
-        <button class="btn-search" aria-label="Buscar">🔍</button>
-        <button class="btn-cart" aria-label="Carrito">🛒</button>
-        <button class="btn-menu" aria-label="Menú">☰</button>
-        <a href="/WEB/usuario/login/login.html" class="cart-icon"> LOGIN</a>
-      </div>
-
-      <nav class="catalog-menu">
-        <ul>
-          <!-- etc -->
-        </ul>
-      </nav>
-    </div>
-  </header>
+    </header>
  <main class="main">
     <h1>Editar Perfil</h1>
 
@@ -156,9 +198,7 @@
     </section>
   </main>
 
-
+  <script src="../../api.js"></script>
   <script src="perfil.js"></script>
-  <script src="/WEB/categorias-index.js"></script>
-  <script src="/WEB/auth-utils.js"></script>
 </body>
 </html>

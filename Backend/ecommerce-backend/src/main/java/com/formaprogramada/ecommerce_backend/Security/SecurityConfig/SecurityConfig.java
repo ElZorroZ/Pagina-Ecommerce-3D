@@ -47,9 +47,11 @@ public class SecurityConfig {
                                 "/api/auth/refresh", "/api/usuario/confirmar-email",
                                 "/api/auth/reset-password-request",
                                 "/api/auth/reset-password/confirm").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/categoria/combo").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categoria").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/completo").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN")
 
@@ -76,7 +78,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5500", "http://127.0.0.1:5500"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:5501", "http://127.0.0.1:5501"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of("*"));

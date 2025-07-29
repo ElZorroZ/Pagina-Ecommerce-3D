@@ -51,6 +51,7 @@ public class CacheInitializer {
         productoCacheService.precargarCacheProductosTodos(PageRequest.of(0, 20));
         productoCacheProxyService.precargarProductosDestacados();
         productoCacheProxyService.precargarProductosResumen();
+        productoCacheService.precargarUltimoProducto();
         // Precargar cache de productosPorCategoria para todas las categorías con bucle
         List<Integer> categoriasIds = jpaCategoriaRepository.findAllIds();
         for (Integer categoriaId : categoriasIds) {

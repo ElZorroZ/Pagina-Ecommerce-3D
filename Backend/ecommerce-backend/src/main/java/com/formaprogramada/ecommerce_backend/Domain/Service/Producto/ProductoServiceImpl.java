@@ -6,9 +6,6 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.*;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Categoria.CategoriaEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Categoria.JpaCategoriaRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.*;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.ProductoAprobado.JpaProductoAprobacionRepository;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.ProductoAprobado.JpaProductoColorAprobacionRepository;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.ProductoAprobado.JpaProductoDetalleAprobacionRepository;
 import com.formaprogramada.ecommerce_backend.Mapper.Producto.ArchivoMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Producto.ProductoDTOMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Producto.ProductoMapper;
@@ -196,6 +193,7 @@ public class ProductoServiceImpl implements ProductoService {
             }
 
             productoCacheService.refrescarCacheProducto(productoGuardado.getId());
+            productoCacheService.precargarUltimoProducto();
 
             return new ProductoResponse(productoGuardado, detalle, coloresGuardados);
         } catch (Exception e) {
@@ -420,6 +418,8 @@ public class ProductoServiceImpl implements ProductoService {
                     cacheProductos.put("productos", actualizados);
                 }
             }
+            productoCacheService.precargarUltimoProducto();
+
             return productoActualizado;
         } catch (Exception e) {
             logger.error("Error actualizando producto", e);
@@ -430,6 +430,7 @@ public class ProductoServiceImpl implements ProductoService {
     @Cacheable(value = "producto", key = "#id")
     @Override
     public ProductoEntity obtenerProductoPorId(Integer id) {
+        System.out.println("⚠️ Consultando base de datos: ObtenerProductoPorId");
         return productoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
     }
@@ -554,6 +555,7 @@ public class ProductoServiceImpl implements ProductoService {
     @Cacheable(value = "productos", key = "'productos'")
     @Override
     public List<ProductoResponseConDestacado> listarProductos() {
+        System.out.println("⚠️ Consultando base de datos: listarProductos");
         return productoRepository.findAll()
                 .stream()
                 .map(producto -> {
@@ -562,11 +564,11 @@ public class ProductoServiceImpl implements ProductoService {
                 })
                 .collect(Collectors.toList());
     }
+
     @Cacheable("productosIds")
     public List<Integer> obtenerTodosLosIds() {
-        return productoRepository.findAll().stream()
-                .map(ProductoEntity::getId)
-                .collect(Collectors.toList());
+        System.out.println("⚠️ Consultando base de datos: obtenerTodosLosIds");
+        return productoRepository.findAllIds();
     }
 
     @Cacheable(value = "productosDestacados", key = "'destacados'")
@@ -695,6 +697,8 @@ public class ProductoServiceImpl implements ProductoService {
                 }
             }
 
+            productoCacheService.precargarUltimoProducto();
+
         } catch (Exception e) {
             logger.error("❌ Error eliminando producto con ID " + id, e);
             throw new RuntimeException("No se pudo eliminar el producto. Ver logs para más detalles.");
@@ -719,6 +723,7 @@ public class ProductoServiceImpl implements ProductoService {
     }
     @Transactional(readOnly = true)
     public List<ProductoResponseDTO> listarProductosPorCategoriaSP(Integer categoriaId, Pageable pageable) {
+        System.out.println("⚠️ Consultando base de datos: listarProductosPorCategoriaSP");
         int offset = pageable.getPageNumber() * pageable.getPageSize();
         int limit = pageable.getPageSize();
 
@@ -757,12 +762,21 @@ public class ProductoServiceImpl implements ProductoService {
     public List<ProductoConArchivoPrincipalYColoresDTO> obtenerTodosLosProductosSinPaginado() {
         System.out.println("⚠️ Consultando base de datos: obtenerTodosLosProductosSinPaginado");
 
+        System.out.println("⚠️ Antes de llamar a obtenerProductosCompletosSP()");
         List<Object[]> resultados = productoRepository.obtenerProductosCompletosSP();
+        System.out.println("⚠️ Resultado del SP: " + (resultados == null ? "null" : resultados.size() + " filas"));
 
         Map<Integer, ProductoConArchivoPrincipalYColoresDTO> mapaProductos = new HashMap<>();
+        Map<Integer, Set<String>> coloresPorProducto = new HashMap<>();
 
+        int filaContador = 0;
         for (Object[] fila : resultados) {
+            filaContador++;
+            System.out.println("⚠️ Procesando fila #" + filaContador);
+
             Integer productoId = ((Number) fila[0]).intValue();
+            System.out.println("   productoId: " + productoId);
+
             String nombre = (String) fila[1];
             String descripcion = (String) fila[2];
             Float precio = fila[3] != null ? ((Number) fila[3]).floatValue() : null;
@@ -772,6 +786,7 @@ public class ProductoServiceImpl implements ProductoService {
 
             ProductoConArchivoPrincipalYColoresDTO dto = mapaProductos.get(productoId);
             if (dto == null) {
+                System.out.println("   Nuevo DTO para productoId: " + productoId);
                 ProductoDTO productoDTO = new ProductoDTO();
                 productoDTO.setId(productoId);
                 productoDTO.setNombre(nombre);
@@ -784,10 +799,12 @@ public class ProductoServiceImpl implements ProductoService {
                 dto.setArchivoPrincipal(null);
 
                 mapaProductos.put(productoId, dto);
+                coloresPorProducto.put(productoId, new HashSet<>());
             }
 
-            if (color != null && !dto.getColores().contains(color)) {
-                dto.getColores().add(color);
+            if (color != null) {
+                coloresPorProducto.get(productoId).add(color);
+                System.out.println("   Agregado color: " + color);
             }
 
             if (orden != null && (dto.getArchivoPrincipal() == null || orden < dto.getArchivoPrincipal().getOrden())) {
@@ -795,11 +812,27 @@ public class ProductoServiceImpl implements ProductoService {
                 archivoDTO.setLinkArchivo(linkArchivo);
                 archivoDTO.setOrden(orden);
                 dto.setArchivoPrincipal(archivoDTO);
+                System.out.println("   Seteado archivo principal con orden: " + orden);
             }
         }
 
+        System.out.println("⚠️ Terminada la lectura de filas, asignando colores a DTOs");
+
+        // Asignar lista de colores sin duplicados a cada DTO
+        for (Integer productoId : mapaProductos.keySet()) {
+            Set<String> coloresSet = coloresPorProducto.get(productoId);
+            List<String> coloresList = new ArrayList<>(coloresSet);
+            mapaProductos.get(productoId).setColores(coloresList);
+            System.out.println("   Producto " + productoId + " tiene colores: " + coloresList);
+        }
+
+        System.out.println("⚠️ Finalizado procesamiento de productos, cantidad total: " + mapaProductos.size());
+
         return new ArrayList<>(mapaProductos.values());
     }
+
+
+
 
 
 
@@ -814,6 +847,34 @@ public class ProductoServiceImpl implements ProductoService {
         return new PageImpl<>(sublist, pageable, listaCompleta.size());
     }
 
+    @Cacheable(value = "ultimoProducto", key = "'ultimo'")
+    public ProductoConArchivoPrincipalYColoresDTO obtenerUltimoProducto() {
+        ProductoEntity productoEntity = productoRepository.findTopByOrderByIdDesc()
+                .orElseThrow(() -> new NoSuchElementException("No se encontró ningún producto"));
+
+        ProductoResponseDTO responseDTO = ProductoMapper.toDTO(productoEntity);
+        return convertirAProductoConArchivoYColores(responseDTO);
+    }
+
+
+    public ProductoConArchivoPrincipalYColoresDTO convertirAProductoConArchivoYColores(ProductoResponseDTO responseDTO) {
+        ProductoDTO producto = new ProductoDTO();
+        producto.setId(responseDTO.getId());
+        producto.setNombre(responseDTO.getNombre());
+        producto.setPrecio(responseDTO.getPrecio());
+
+        ArchivoDTO archivoPrincipal = null;
+        if (responseDTO.getArchivos() != null && !responseDTO.getArchivos().isEmpty()) {
+            archivoPrincipal = responseDTO.getArchivos().get(0);
+        }
+
+        ProductoConArchivoPrincipalYColoresDTO dto = new ProductoConArchivoPrincipalYColoresDTO();
+        dto.setProducto(producto);
+        dto.setArchivoPrincipal(archivoPrincipal);
+        dto.setColores(responseDTO.getColores());
+
+        return dto;
+    }
 
 }
 

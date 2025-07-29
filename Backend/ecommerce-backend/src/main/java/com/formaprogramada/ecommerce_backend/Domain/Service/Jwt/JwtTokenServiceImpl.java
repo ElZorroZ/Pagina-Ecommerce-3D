@@ -41,26 +41,36 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         String username = userDetails.getUsername();
 
         String accessToken = jwtService.generateAccessToken(claims, username);
-        String refreshToken = jwtService.generateRefreshToken(claims, username);
+        String refreshTokenNuevo = jwtService.generateRefreshToken(claims, username);
 
         Usuario usuario = usuarioRepository.buscarPorGmail(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
         UsuarioEntity usuarioEntity = usuarioMapper.toEntity(usuario);
 
-        // 🔥 Eliminar tokens válidos anteriores
         List<RefreshTokenEntity> tokensActivos = jpaRefreshTokenRepository.findAllByUsuarioIdAndEstado(usuarioEntity.getId(), "VALID");
-        jpaRefreshTokenRepository.deleteAll(tokensActivos);
 
-        // Crear y guardar nuevo refresh token
-        LocalDateTime fechaExpiracion = LocalDateTime.now().plusSeconds(7 * 24 * 60 * 60);
-        RefreshTokenEntity rtEntity = new RefreshTokenEntity(refreshToken, usuarioEntity, fechaExpiracion);
-        rtEntity.setEstado("VALID");
+        if (!tokensActivos.isEmpty()) {
+            RefreshTokenEntity rtEntity = tokensActivos.get(0);
+            rtEntity.setToken(refreshTokenNuevo);
+            rtEntity.setFechaExpiracion(LocalDateTime.now().plusSeconds(7 * 24 * 60 * 60));
+            rtEntity.setEstado("VALID");
+            jpaRefreshTokenRepository.save(rtEntity);
+        } else {
+            RefreshTokenEntity rtEntity = new RefreshTokenEntity(refreshTokenNuevo, usuarioEntity, LocalDateTime.now().plusSeconds(7 * 24 * 60 * 60));
+            rtEntity.setEstado("VALID");
+            jpaRefreshTokenRepository.save(rtEntity);
+        }
 
-        jpaRefreshTokenRepository.save(rtEntity);
+        // Print de los tokens nuevos
+        System.out.println("Tokens generados:");
+        System.out.println("Access Token: " + accessToken);
+        System.out.println("Refresh Token: " + refreshTokenNuevo);
 
-        return new AuthResponse(accessToken, refreshToken);
+        return new AuthResponse(accessToken, refreshTokenNuevo);
     }
+
+
 
 
     @Override

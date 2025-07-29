@@ -41,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = jwtService.generateRefreshToken(Map.of(), usuario.getGmail());
 
         return AuthResponse.builder()
-                .token(token)
+                .accessToken(token)
                 .refreshToken(refreshToken)
                 .build();
     }
@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = jwtService.generateRefreshToken(claims, usuario.getGmail());
 
         return AuthResponse.builder()
-                .token(token)
+                .accessToken(token)
                 .refreshToken(refreshToken)
                 .build();
     }
@@ -103,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
         String newRefreshToken = jwtService.generateRefreshToken(claims, usuario.getGmail());
 
         return AuthResponse.builder()
-                .token(newToken)
+                .accessToken(newToken)
                 .refreshToken(newRefreshToken)
                 .build();
     }

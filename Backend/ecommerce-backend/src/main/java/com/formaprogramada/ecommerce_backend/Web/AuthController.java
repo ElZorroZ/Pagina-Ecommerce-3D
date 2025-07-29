@@ -22,6 +22,7 @@ import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioRegistroMappe
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -112,6 +114,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        log.info("Refresh token recibido: {}", request.getRefreshToken());
         try {
             AuthResponse tokens = jwtTokenService.refrescarTokens(request.getRefreshToken());
             return ResponseEntity.ok(tokens);
@@ -119,6 +122,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+
 
 
     @PostMapping("/reset-password-request")

@@ -23,7 +23,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
     }
 
     const data = await response.json();
-    localStorage.setItem("accessToken", data.token);
+    localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
 
 

@@ -63,7 +63,7 @@ public class EmailServiceImpl implements EmailService {
         String token = tokenService.crearTokenParaUsuario(usuarioEntity).getToken();
 
         // URL del frontend
-        String frontendUrl = "http://localhost:5500";
+        String frontendUrl = "http://localhost:5501";
         String link = frontendUrl + "/WEB/usuario/validacion/validar-email.html?token=" + token;
 
         // Variables para la plantilla

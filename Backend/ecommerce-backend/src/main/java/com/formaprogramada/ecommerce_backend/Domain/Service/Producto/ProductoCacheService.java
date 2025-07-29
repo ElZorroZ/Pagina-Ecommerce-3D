@@ -62,4 +62,13 @@ public class ProductoCacheService {
     public void precargarOtrosCaches() {
         productoService.listarProductos(); // cachea "productos"
     }
+
+
+    public void precargarUltimoProducto() {
+        // Limpia la entrada actual para que se recargue
+        cacheManager.getCache("ultimoProducto").evict("ultimo");
+
+        // Fuerza la recarga del caché llamando al método cacheado
+        productoService.obtenerUltimoProducto();
+    }
 }

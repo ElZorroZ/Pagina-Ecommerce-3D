@@ -3,120 +3,235 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
   background: #f4f7fc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
-  padding: 20px;
+  padding: 0; /* ← esto */
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    line-height: 1.6;
+}
+/* Design system colors - warm cream and earth tones */
+:root {
+    /* Light mode */
+    --background: hsl(33, 12%, 96%);
+    --foreground: hsl(25, 15%, 20%);
+    --card: hsl(33, 12%, 98%);
+    --card-foreground: hsl(25, 15%, 20%);
+    --primary: hsl(158, 20%, 25%);
+    --primary-foreground: hsl(33, 12%, 96%);
+    --secondary: hsl(42, 15%, 88%);
+    --secondary-foreground: hsl(25, 15%, 20%);
+    --muted: hsl(35, 10%, 92%);
+    --muted-foreground: hsl(25, 10%, 45%);
+    --accent: hsl(35, 25%, 85%);
+    --accent-foreground: hsl(25, 15%, 20%);
+    --border: hsl(35, 8%, 88%);
+    --input: hsl(35, 8%, 88%);
+    --ring: hsl(158, 20%, 25%);
 }
 
-main-header.container {
-  width: 90%;
-  max-width: 1200px;
-  margin: auto;
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
-/* --- Header --- */
+/* Smooth transitions */
+.smooth-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
+/* Warm glow effect */
+.warm-glow {
+    box-shadow: 0 10px 40px -10px hsl(var(--primary) / 0.15);
+}
 
-.main-header {
-  position: fixed;
+.header {
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background-color: #fff;
-  border-bottom: 1px solid #eee;
-  padding: 20px 0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  background-color: rgba(252, 251, 249, 0.95);
+  border-bottom: 1px solid var(--border);
 }
 
-.header-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.announcement-bar {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.875rem;
 }
 
-.left-header {
-  display: flex;
-  align-items: center;
-  gap: 40px;
+.nav-container {
+    padding: 1rem;
 }
-
-.nav ul {
-  list-style: none;
-  display: flex;
-  gap: 20px;
-  padding: 0;
+.logo h1 {
   margin: 0;
-}
-
-.nav a {
-  text-decoration: none;
-  color: #333;
-  font-weight: bold;
-}
-
-.right-header {
+  font-size: 1.6rem; /* o lo que prefieras */
+  line-height: 1;
   display: flex;
   align-items: center;
-  gap: 15px;
+  height: 100%;
 }
 
-.right-header a {
-  text-decoration: none;
-  font-size: 18px;
-  color: #333;
+.nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.icons a {
-  margin-left: 15px;
-  text-decoration: none;
-  font-size: 18px;
-}
-.main-header .container.header-inner {
-  display: flex; /* o el display que uses */
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--foreground);
 }
 
-.main-header .alt-header.mobile-header {
-  display: none;
+.desktop-nav {
+    display: none;
+    align-items: center;
+    gap: 2rem;
 }
-/* Estilo del dropdown */
-.dropdown {
-  position: relative;
-  cursor: pointer;
+
+@media (min-width: 768px) {
+    .desktop-nav {
+        display: flex;
+    }
+}
+
+/* Dropdown styles */
+.nav-dropdown {
+    position: relative;
 }
 
 .dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: white;
-  border: 1px solid #ccc;
-  padding: 10px 0;
-  min-width: 150px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-  z-index: 2000;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    min-width: 200px;
 }
 
-.dropdown-menu li {
-  padding: 5px 20px;
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
-.dropdown-menu li:hover {
-  background-color: #eee;
+.dropdown-content {
+    padding: 1rem;
 }
 
-/* Ocultamos el menú por defecto */
-.dropdown-menu[style*="display: none"] {
-  display: none;
+.dropdown-category {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    color: var(--foreground);
+    text-decoration: none;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.dropdown-category:hover {
+    background-color: var(--accent);
+    color: var(--primary);
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--foreground);
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--primary);
+}
+
+.nav-icons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--foreground);
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    color: var(--primary);
+}
+
+.cart-btn {
+    position: relative;
+}
+
+.cart-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 0.75rem;
+    border-radius: 50%;
+    height: 20px;
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-menu {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .mobile-menu {
+        display: none;
+    }
+}
+
+.mobile-nav {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: white;
+    padding: 1rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    z-index: 100;
+}
+.mobile-nav.show {
+    display: block;
 }
 /* Contenedor principal */
-main .container {
+main.main {
   background: white;
   padding: 40px 50px;
   border-radius: 10px;
@@ -298,7 +413,11 @@ h1 {
   position: relative;
   box-sizing: border-box;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  
+  /* Agrego margen superior para que no quede pegado al header */
+  margin-top: 80px; /* Ajustá según la altura de tu header */
 }
+
 
 .modal-close {
   position: absolute;

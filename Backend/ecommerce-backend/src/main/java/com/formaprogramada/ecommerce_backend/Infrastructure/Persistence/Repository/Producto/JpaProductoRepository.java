@@ -27,6 +27,9 @@ public interface JpaProductoRepository extends JpaRepository<ProductoEntity, Int
             @Param("p_limit") Integer limit
     );
     long countByCategoriaId_Id(Integer categoriaId);
+    Optional<ProductoEntity> findTopByOrderByIdDesc();
+    @Query("SELECT p.id FROM ProductoEntity p")
+    List<Integer> findAllIds();
 
 }
 

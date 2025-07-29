@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -95,6 +96,20 @@ public class ProductoController {
         }
     }
 
+    @GetMapping("/ultimo")
+    public ResponseEntity<?> obtenerUltimoProducto() {
+        try {
+            ProductoConArchivoPrincipalYColoresDTO producto = productoService.obtenerUltimoProducto();
+            return ResponseEntity.ok(producto);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No hay productos disponibles");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al obtener el último producto: " + e.getMessage());
+        }
+    }
+
+
     @GetMapping("/todos")
     public ResponseEntity<?> obtenerTodosLosProductos(Pageable pageable) {
         try {
@@ -111,7 +126,7 @@ public class ProductoController {
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public ResponseEntity<?> obtenerProductoPorId(@PathVariable Integer id) {
         try {
             ProductoCompletoDTO productoCompleto = productoService.obtenerProductoCompleto(id);
