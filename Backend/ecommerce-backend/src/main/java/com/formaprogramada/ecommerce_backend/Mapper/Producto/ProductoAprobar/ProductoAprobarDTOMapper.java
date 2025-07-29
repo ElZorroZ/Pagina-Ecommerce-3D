@@ -19,11 +19,13 @@ public class ProductoAprobarDTOMapper {
         dto.setUsuarioId(responseDTO.getIdCreador());
         dto.setNombre(responseDTO.getNombre());
         dto.setDescripcion(responseDTO.getDescripcion());
-        dto.setCategoriaId(null); // si no está en ResponseDTO
+        dto.setCategoriaId(responseDTO.getCategoriaId()); // si no está en ResponseDTO
         dto.setPrecio(responseDTO.getPrecio());
         dto.setArchivo(responseDTO.getArchivos() != null && !responseDTO.getArchivos().isEmpty()
                 ? Arrays.toString(responseDTO.getArchivos().get(0).getArchivoImagen())
                 : null);
+        dto.setCodigoInicial(responseDTO.getCodigo());
+        dto.setArchivoStl(Arrays.toString(responseDTO.getArchivo()));
 
         return dto;
     }

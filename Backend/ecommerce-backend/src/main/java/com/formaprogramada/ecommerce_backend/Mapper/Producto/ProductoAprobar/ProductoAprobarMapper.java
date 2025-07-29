@@ -34,11 +34,16 @@ public class ProductoAprobarMapper {
 
         return new ProductoAprobacionResponseDTO(
                 entity.getId(),
+                entity.getUsuarioId().getId(),
                 entity.getNombre(),
                 entity.getDescripcion(),
                 entity.getPrecio(),
+                entity.getCategoriaId().getId(),
                 colores,
-                archivos
+                archivos,
+                entity.getCodigo(),
+                entity.getArchivo()
+
         );
     }
 }

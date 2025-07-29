@@ -88,5 +88,42 @@ public class ProductoAprobacionController {
         }
     }
 
+    @GetMapping("/VerProductos_de/{id}")
+    public ResponseEntity<?> verProductosDeX(@PathVariable int id)
+    {
+        try {
+            List<ProductoCompletoAprobacionDTO> productosList = productoAprobadoService.verProductosaAprobarDeX(id);
+            if (productosList.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No hay productos disponibles");
+            }
+            System.out.println(productosList);
+            return ResponseEntity.ok(productosList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al obtener los productos: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/VerProductoCompleto/{id}")
+    public ResponseEntity<?> verProductoAlCompleto(@PathVariable int id)
+    {
+        try {
+            List<ProductoCompletoAprobacionDTO> productosList = productoAprobadoService.verProductoCompleto(id);
+            if (productosList.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No hay productos disponibles");
+            }
+            System.out.println(productosList);
+            return ResponseEntity.ok(productosList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al obtener los productos: " + e.getMessage());
+        }
+    }
+
+
+
+
+
+
 
 }

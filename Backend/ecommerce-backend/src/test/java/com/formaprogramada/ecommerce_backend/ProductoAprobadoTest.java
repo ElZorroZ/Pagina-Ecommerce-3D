@@ -54,21 +54,21 @@ public class ProductoAprobadoTest {
     void testCrearUnProductoPorAprobar() throws Exception {
 
         UsuarioEntity usuario = new UsuarioEntity();
-        usuario.setId(1);
+        usuario.setId(2);
 
         ProductoAprobacionRequest request = new ProductoAprobacionRequest();
-        request.setNombre("Hola2");
-        request.setDescripcion("Hola2");
+        request.setNombre("Hola3");
+        request.setDescripcion("Hola3");
         request.setCreadorId(usuario);
         request.setCategoriaId(3);
-        request.setCodigoInicial("13ef2");
+        request.setCodigoInicial("13ef3");
         request.setPrecio(9002);
         request.setDimensionAlto(932);
         request.setDimensionAncho(922);
         request.setDimensionProfundidad(22);
-        request.setMaterial("Madera2");
-        request.setTecnica("Filar2");
-        request.setPeso("1kg2");
+        request.setMaterial("Madera3");
+        request.setTecnica("Filar3");
+        request.setPeso("1kg3");
         request.setColores(Collections.singletonList("verde"));
 
         // Solo el JSON del DTO como multipart
@@ -121,5 +121,21 @@ public class ProductoAprobadoTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    void testVerProductos_OK2() throws Exception {
 
+        mockMvc.perform(get("/api/productosAprobacion/VerProductos_de/1") // ajustá si tenés prefijo distinto
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    void testVerProducto_OK() throws Exception {
+
+        mockMvc.perform(get("/api/productosAprobacion/VerProductoCompleto/4") // ajustá si tenés prefijo distinto
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 }

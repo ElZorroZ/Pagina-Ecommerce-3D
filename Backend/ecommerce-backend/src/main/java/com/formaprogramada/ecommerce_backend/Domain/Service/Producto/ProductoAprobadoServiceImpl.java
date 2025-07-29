@@ -240,6 +240,80 @@ public class ProductoAprobadoServiceImpl implements ProductoAprobadoService{
         return listaEnviar;
     }
 
+    @Override
+    public List<ProductoCompletoAprobacionDTO> verProductosaAprobarDeX(int id) {
+        List<ProductoAprobacionEntity> productosList = productoAprobacionRepository.findByUsuarioId_Id(id);
+        List<ProductoCompletoAprobacionDTO> listaEnviar = new ArrayList<>(List.of());
+
+        for (ProductoAprobacionEntity producto: productosList){
+            ProductoAprobacionResponseDTO responseDTO = ProductoAprobarMapper.toDTO(producto);
+            ProductoAprobacioDTO productoDTO = ProductoAprobarDTOMapper.fromResponseDTO(responseDTO);
+
+            List<String> colores = productoColorAprobacionRepository.findByProductoId(producto.getId())
+                    .stream()
+                    .map(ProductoColorAprobacionEntity::getColor)
+                    .collect(Collectors.toList());
+
+
+            ProductoAprobacionArchivoDTO archivoPrincipal = productoArchivoRepository.findByProductoIdOrderByOrdenAsc(producto.getId())
+                    .stream()
+                    .findFirst()
+                    .map(ArchivoAprobarMapper::toArchivoDTO)
+                    .orElse(null);
+
+
+            ProductoCompletoAprobacionDTO dto = new ProductoCompletoAprobacionDTO();
+            dto.setProducto(productoDTO);
+            dto.setColores(colores);
+            dto.setArchivos((List<ProductoAprobacionArchivoDTO>) archivoPrincipal);
+
+            listaEnviar.add(dto);
+
+        }
+        return listaEnviar;
+    }
+
+    @Override
+    public List<ProductoCompletoAprobacionDTO> verProductoCompleto(int id) {
+        ProductoAprobacionEntity producto = productoAprobacionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));;
+        List<ProductoCompletoAprobacionDTO> listaEnviar = new ArrayList<>(List.of());
+
+        ProductoAprobacionResponseDTO responseDTO = ProductoAprobarMapper.toDTO(producto);
+        ProductoAprobacioDTO productoDTO = ProductoAprobarDTOMapper.fromResponseDTO(responseDTO);
+
+        List<String> colores = productoColorAprobacionRepository.findByProductoId(producto.getId())
+                .stream()
+                .map(ProductoColorAprobacionEntity::getColor)
+                .collect(Collectors.toList());
+
+
+        ProductoAprobacionArchivoDTO archivoPrincipal = productoArchivoRepository.findByProductoIdOrderByOrdenAsc(producto.getId())
+                .stream()
+                .findFirst()
+                .map(ArchivoAprobarMapper::toArchivoDTO)
+                .orElse(null);
+
+
+        ProductoDetalleAprobacionEntity detalle=productoDetalleAprobacionRepository.findByProductoId(id);
+
+        String[] partes = detalle.getDimension().split("x");
+        productoDTO.setDimensionAlto(partes[0]);
+        productoDTO.setDimensionAncho(partes[1]);
+        productoDTO.setDimensionProfundidad(partes[2]);
+        productoDTO.setMaterial(detalle.getMaterial());
+        productoDTO.setTecnica(detalle.getTecnica());
+        productoDTO.setPeso(detalle.getPeso());
+        ProductoCompletoAprobacionDTO dto = new ProductoCompletoAprobacionDTO();
+        dto.setProducto(productoDTO);
+        dto.setColores(colores);
+        dto.setArchivos((List<ProductoAprobacionArchivoDTO>) archivoPrincipal);
+
+        listaEnviar.add(dto);
+
+        return listaEnviar;
+    }
+
 
     public ProductoCompletoAprobacionDTO obtenerProductoCompletoSinCache(Integer productoId) {
     try {

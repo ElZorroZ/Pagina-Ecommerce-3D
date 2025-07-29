@@ -18,6 +18,8 @@ public interface ProductoAprobadoService {
     Boolean aprobarProducto(Integer id,String codigoInicial,String versionStr,String seguimiento);
     void borrarProducto(Integer id);
     List<ProductoCompletoAprobacionDTO> verProductosaAprobar();
+    List<ProductoCompletoAprobacionDTO> verProductosaAprobarDeX(int id);
+    List<ProductoCompletoAprobacionDTO> verProductoCompleto(int id);
 
 }
 
