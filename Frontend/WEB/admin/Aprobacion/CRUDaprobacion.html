@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUD de Colaboradores</title>
+  <link rel="stylesheet" href="CRUDaprobacion_styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Gestión de Colaboradores</h1>
+
+    <!-- Tabla de productos existentes -->
+    <section>
+      <h2>Listado de Colaboradores</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody id="tabla-productos">
+          <!-- Filas dinámicas -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Formulario para agregar/editar -->
+    <section class="crud-productos">
+      <h2>Agregar Colaborador</h2>
+      <form id="form-producto">
+        <input type="hidden" id="colaborador-id" />
+
+        <label>Email:</label>
+        <input type="text" id="email" required placeholder="ejemplo@ejemplo.com" />
+
+        <!-- BOTONES: DEBAJO DEL PREVIEW, A LA IZQUIERDA -->
+        <div class="form-botones">
+            <button type="submit">Guardar Colaborador</button>
+            <button id="btn-editar-producto" class="btn-editar-azul" type="button" style="display: none;">Editar Producto</button>      
+        </div>
+      </form>
+    </section>
+  </div>
+  <script src="Create-Colaboracion.js"></script>
+  <script src="Get-Colaboracion.js"></script>
+
+</body>
+</html>

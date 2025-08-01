@@ -1,6 +1,7 @@
 package com.formaprogramada.ecommerce_backend;
 
 import com.formaprogramada.ecommerce_backend.Domain.Service.Categoria.CategoriaCacheProxy;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Colaborador.ColaboradorCacheProxyService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoCacheProxyService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoCacheService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Categoria.JpaCategoriaRepository;
@@ -25,6 +26,8 @@ public class CacheInitializer {
     private JpaCategoriaRepository jpaCategoriaRepository;
     @Autowired
     private CategoriaCacheProxy categoriaCacheProxyService;
+    @Autowired
+    private ColaboradorCacheProxyService colaboradorCacheProxyService;
 
     public CacheInitializer(ProductoCacheService productoCacheService) {
         this.productoCacheService = productoCacheService;
@@ -33,6 +36,9 @@ public class CacheInitializer {
     @EventListener(ContextRefreshedEvent.class)
     @Transactional// Este método ahora sí correrá dentro de una transacción
     public void cargarCacheAlIniciar() {
+        //Colaboradores
+        colaboradorCacheProxyService.precargarColaboradores();
+
         //Categorias
         // Precargar lista de categorías
         categoriaCacheProxyService.precargarCategoriasLista();

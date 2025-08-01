@@ -152,10 +152,6 @@ public class EmailServiceImpl implements EmailService {
         jpaUsuarioRepository.save(usuario);
     }
 
-    @Override
-    public Boolean modificarPermisoUsuario(int id, int permiso) {
-        usuarioRepository.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException("El usuario a modificar no existe"));
-        return usuarioRepository.modificarPermisoUsuario(id, permiso);
-    }
+
 
 }
