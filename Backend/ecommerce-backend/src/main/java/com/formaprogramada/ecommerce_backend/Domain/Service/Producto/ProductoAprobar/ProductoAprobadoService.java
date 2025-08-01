@@ -20,7 +20,7 @@ public interface ProductoAprobadoService {
     List<ProductoCompletoAprobacionDTO> verProductosaAprobar();
     List<ProductoCompletoAprobacionDTO> verProductosaAprobarDeX(int id);
     List<ProductoCompletoAprobacionDTO> verProductoCompleto(int id);
-    ProductoAprobacionEntity actualizarProductoCompleto(int id, ProductoCompletoAprobacionDTO productoCompletoDTO, List<MultipartFile> archivosNuevos, MultipartFile archivoStl)
+    ProductoAprobacionEntity actualizarProductoCompleto(int id, ProductoCompletoAprobacionDTO productoCompletoDTO, List<MultipartFile> archivosNuevos, MultipartFile archivoStl);
     List<Integer> obtenerTodosLosIds();
     ProductoAprobadoConArchivoPrincipalYColoresDTO obtenerUltimoProducto();
 }

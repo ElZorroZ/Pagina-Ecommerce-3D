@@ -1,4 +1,5 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Producto;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ProductoAprobadoConArchivoPrincipalYColoresDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.*;
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ImgBB.ImgBBData;
