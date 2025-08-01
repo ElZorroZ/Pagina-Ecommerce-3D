@@ -1,11 +1,14 @@
 package com.formaprogramada.ecommerce_backend.Web;
 
+import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoAprobar.ProductoAprobadoService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ProductoAprobacionRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ProductoAprobacionResponse;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ProductoAprobacionResponseDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ProductoCompletoAprobacionDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoAprobacionEntity;
+import com.formaprogramada.ecommerce_backend.Mapper.Producto.ProductoAprobar.ProductoAprobarMapper;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,9 +20,7 @@ import java.util.List;
 
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.*;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -121,7 +122,21 @@ public class ProductoAprobacionController {
     }
 
 
+    @PutMapping(value = "/ActualizarProductoAprobar/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> actualizarProducto(
+            @PathVariable Integer id,
+            @RequestPart("producto") ProductoCompletoAprobacionDTO productoCompletoDTO,
+            @RequestPart(value = "archivosNuevos", required = false) List<MultipartFile> archivosNuevos,
+            @RequestPart(value = "archivoComprimido", required = false) MultipartFile archivoStl) {
 
+        try {
+            ProductoAprobacionEntity actualizado = productoAprobadoService.actualizarProductoCompleto(id, productoCompletoDTO, archivosNuevos, archivoStl);
+            ProductoAprobacionResponseDTO dto = ProductoAprobarMapper.toDTO(actualizado);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
 
 
 

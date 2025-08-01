@@ -1,4 +1,4 @@
-package com.formaprogramada.ecommerce_backend.Domain.Service.Descuento;
+package com.formaprogramada.ecommerce_backend.Domain.Service.Carrito;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Carrito.CarritoRepository;

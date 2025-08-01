@@ -2,10 +2,7 @@ package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "producto_archivos_aprobacion")
@@ -13,6 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class ProductoArchivoAprobacionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

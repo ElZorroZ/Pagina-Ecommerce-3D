@@ -2,7 +2,7 @@ package com.formaprogramada.ecommerce_backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Carrito.CarritoRepository;
-import com.formaprogramada.ecommerce_backend.Domain.Service.Descuento.CarritoService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Carrito.CarritoService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoAgregarRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdatePedido;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Carrito.CarritoRepositoryImpl;
@@ -21,8 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
-@Rollback(false)
+
 public class CarritoServiceTest {
 
     @Autowired
@@ -37,8 +36,6 @@ public class CarritoServiceTest {
     @Autowired
     private CarritoRepositoryImpl descuentoRepositoryimpl;
 
-    @Autowired
-    private CarritoService carritoService;
 
     @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
     @Test
