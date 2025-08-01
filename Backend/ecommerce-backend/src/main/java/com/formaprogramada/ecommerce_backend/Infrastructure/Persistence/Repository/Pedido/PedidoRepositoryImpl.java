@@ -16,17 +16,18 @@ import java.util.List;
 @Repository
 @AllArgsConstructor
 public class PedidoRepositoryImpl implements PedidoRepository {
-    private PedidoMapper pedidoMapper;
+
     private JpaPedidoRepository jpaPedidoRepository;
     private JpaPedidoProductoRepository jpaPedidoProductoRepository;
+
     @Override
     public Pedido CrearPedido(List<PedidoProducto> lista, int id) {
-        Pedido pedido= PedidoMapper.toDomain2(lista, id);
-        PedidoEntity pedido1= PedidoMapper.toEntity(pedido);
-        PedidoEntity saved=jpaPedidoRepository.save(pedido1);
+        Pedido pedido = PedidoMapper.toDomain2(lista, id);
+        PedidoEntity pedido1 = PedidoMapper.toEntity(pedido);
+        PedidoEntity saved = jpaPedidoRepository.save(pedido1);
 
-        List<PedidoProductoEntity> lista2= PedidoMapper.toEntity(lista);
-        for (PedidoProductoEntity pedidoProducto: lista2){
+        List<PedidoProductoEntity> lista2 = PedidoMapper.toEntity(lista);
+        for (PedidoProductoEntity pedidoProducto : lista2) {
             pedidoProducto.setPedidoId(saved);
             jpaPedidoProductoRepository.save(pedidoProducto);
         }

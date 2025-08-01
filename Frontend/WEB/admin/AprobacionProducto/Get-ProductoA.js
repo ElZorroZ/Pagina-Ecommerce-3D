@@ -4,60 +4,39 @@ window.productoState = window.productoState || {
   archivosSeleccionados: []
 };
 let preview;
-  // Preview archivos
   function actualizarPreview() {
-    preview.innerHTML = "";
-    if (!window.productoState.archivosSeleccionados || window.productoState.archivosSeleccionados.length === 0) {
-      return; // No hay archivos, no mostramos nada
-    }
-    window.productoState.archivosSeleccionados.forEach((archivo, idx) => {
-      const div = document.createElement("div");
-      div.style.position = "relative";
-      div.style.display = "inline-block";
-      div.style.marginRight = "10px";
-
-      const img = document.createElement("img");
-      img.style.width = "80px";
-      img.style.height = "80px";
-      img.style.objectFit = "cover";
-      img.style.border = "1px solid #ccc";
-      img.style.borderRadius = "4px";
-      
-      if (archivo instanceof File) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(archivo);
-      } else {
-        img.src = archivo.linkArchivo || archivo.url || "ruta_default.jpg";
-      }
-
-      div.appendChild(img);
-
-      const btnEliminar = document.createElement("button");
-      btnEliminar.textContent = "X";
-      btnEliminar.style.position = "absolute";
-      btnEliminar.style.top = "0";
-      btnEliminar.style.right = "0";
-      btnEliminar.style.background = "rgba(255,0,0,0.7)";
-      btnEliminar.style.color = "white";
-      btnEliminar.style.border = "none";
-      btnEliminar.style.cursor = "pointer";
-      btnEliminar.style.borderRadius = "0 4px 0 4px";
-      btnEliminar.style.padding = "0 4px";
-      btnEliminar.title = "Eliminar imagen";
-      btnEliminar.addEventListener("click", () => {
-        if (confirm("¿Seguro que querés eliminar esta imagen?")) {
-          window.productoState.archivosSeleccionados.splice(idx, 1);
-          actualizarPreview();
-        }
-      });
-
-      div.appendChild(btnEliminar);
-      preview.appendChild(div);
-    });
+  preview.innerHTML = "";
+  if (!window.productoState.archivosSeleccionados || window.productoState.archivosSeleccionados.length === 0) {
+    return; // No hay archivos, no mostramos nada
   }
+  window.productoState.archivosSeleccionados.forEach((archivo) => {
+    const div = document.createElement("div");
+    div.style.position = "relative";
+    div.style.display = "inline-block";
+    div.style.marginRight = "10px";
+
+    const img = document.createElement("img");
+    img.style.width = "80px";
+    img.style.height = "80px";
+    img.style.objectFit = "cover";
+    img.style.border = "1px solid #ccc";
+    img.style.borderRadius = "4px";
+    
+    if (archivo instanceof File) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(archivo);
+    } else {
+      img.src = archivo.linkArchivo || archivo.url || "ruta_default.jpg";
+    }
+
+    div.appendChild(img);
+    preview.appendChild(div);
+  });
+}
+
 // Función para refrescar token (la dejé igual)
 async function refreshAccessToken() {
   const refreshToken = localStorage.getItem("refreshToken");
@@ -171,7 +150,7 @@ function mostrarArchivoComprimido(base64, nombre = 'archivo.zip') {
   btnEliminar.style.padding = '0 6px';
 
   btnEliminar.addEventListener('click', () => {
-    window.productoState.archivoComprimido = null;
+    window.productoState.archivo = null;
     document.getElementById('archivo-comprimido').value = "";
     preview.innerHTML = "";
     URL.revokeObjectURL(url);
@@ -184,151 +163,110 @@ function mostrarArchivoComprimido(base64, nombre = 'archivo.zip') {
 document.addEventListener("DOMContentLoaded", () => {
   const tablaBody = document.getElementById("tabla-productos");
   const listaColores = document.getElementById("lista-colores");
-  const btnAgregarColor = document.getElementById("btn-agregar-color");
-  const inputColor = document.getElementById("input-color");
-  const btnEditar = document.getElementById("btn-editar-producto");
   preview = document.getElementById("preview-imagenes");
-   const inputArchivos = document.getElementById("imagenes");
-    console.log("inputColor:", inputColor);
 
-  inputArchivos.addEventListener("change", (e) => {
-    const archivosNuevos = Array.from(e.target.files);
-    archivosNuevos.forEach(file => window.productoState.archivosSeleccionados.push(file));
-    actualizarPreview();
-    e.target.value = ""; // para poder subir más archivos luego
-  });
-  console.log("btnAgregarColor:", btnAgregarColor);
-
-  btnAgregarColor.addEventListener("click", () => {
-    console.log("Click detectado en btnAgregarColor");
-    const color = inputColor.value;
-    console.log("Valor inputColor:", `"${color}"`);
-    const colorTrim = color.trim();
-    console.log("Valor inputColor.trim():", `"${colorTrim}"`);
-
-    if (colorTrim && !window.productoState.coloresSeleccionados.includes(colorTrim)) {
-      window.productoState.coloresSeleccionados.push(colorTrim);
-      console.log("Colores seleccionados:", window.productoState.coloresSeleccionados);
-      actualizarListaColores();
-      inputColor.value = "";
-      inputColor.focus();
-    } else {
-      console.log("No se agregó el color. O estaba vacío o ya existe.");
-    }
-  });
   // Cargar productos y llenar tabla
   async function cargarProductos() {
-    try {
-      const response = await fetchConRefresh("http://localhost:8080/api/productos");
-      if (!response.ok) throw new Error("Error al obtener los productos");
-      const productos = await response.json();
-      tablaBody.innerHTML = "";
-      productos.forEach(producto => {
-        const fila = document.createElement("tr");
-        const estrella = producto.destacado ? "⭐" : "☆";
-        fila.innerHTML = `
-          <td>${producto.id}</td>
-          <td>${producto.nombre}</td>
-          <td>${producto.descripcion}</td>
-          <td>$${producto.precio.toFixed(2)}</td>
-          <td>
-              <button class="select">Seleccionar</button>
-              <button class="eliminar">Eliminar</button>
-              <button class="estrella">${estrella}</button>
-          </td>
-        `;
-        fila.querySelector(".select").addEventListener("click", () => selectProducto(producto.id));
-        fila.querySelector(".eliminar").addEventListener("click", () => eliminarProducto(producto.id));
-        fila.querySelector(".estrella").addEventListener("click", () => {
-          const yaEsDestacado = producto.destacado;
-          if (!yaEsDestacado) {
-            const destacadosActuales = [...document.querySelectorAll(".estrella")]
-              .filter(btn => btn.textContent === "⭐").length;
+  try {
+    const response = await fetchConRefresh("http://localhost:8080/api/productosAprobacion/VerProductos");
+    if (!response.ok) throw new Error("Error al obtener los productos");
 
-            if (destacadosActuales >= 10) {
-              alert("No se pueden destacar más de 10 productos.");
-              return;
-            }
-          }
-          toggleDestacado(producto.id);
-        });
-        tablaBody.appendChild(fila);
-      });
-    } catch (error) {
-      console.error("Error al cargar productos:", error.message);
-      alert("No se pudieron cargar los productos");
-    }
-    window.cargarProductos = cargarProductos;
+    const productos = await response.json();
+    tablaBody.innerHTML = "";
+
+    productos.forEach(wrapper => {
+      const producto = wrapper.producto; // ProductoAprobacioDTO
+
+      const fila = document.createElement("tr");
+
+      fila.innerHTML = `
+        <td>${producto.id}</td>
+        <td>${producto.nombre}</td>
+        <td>${producto.descripcion}</td>
+        <td>$${producto.precio.toFixed(2)}</td>
+        <td>
+            <button class="select">Seleccionar</button>
+            <button class="eliminar">Eliminar</button>
+        </td>
+      `;
+
+      fila.querySelector(".select").addEventListener("click", () => selectProducto(producto.id));
+      fila.querySelector(".eliminar").addEventListener("click", () => eliminarProducto(producto.id));
+
+      tablaBody.appendChild(fila);
+    });
+
+  } catch (error) {
+    console.error("Error al cargar productos:", error.message);
+    alert("No se pudieron cargar los productos");
   }
+}
+
+window.cargarProductos = cargarProductos;
+
 
   cargarProductos();
 
-  async function toggleDestacado(productoId) {
-  try {
-    const token = localStorage.getItem("accessToken");
-    const res = await fetch(`http://localhost:8080/api/productos/${productoId}/destacado`, {
-      method: "POST", // puede ser POST o PUT según cómo lo manejes
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
-    });
-    if (!res.ok) throw new Error("No se pudo cambiar el estado de destacado");
-    cargarProductos(); // refrescá la tabla
-  } catch (error) {
-    alert("Error: " + error.message);
-  }
-}
   // Seleccionar producto y cargar en formulario + preview
   async function selectProducto(productoId) {
     try {
-      const token = localStorage.getItem("accessToken");
-      const res = await fetch(`http://localhost:8080/api/productos/${productoId}`, {
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch(`http://localhost:8080/api/productosAprobacion/VerProductoCompleto/${productoId}`, {
         headers: { "Authorization": `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error("No se pudo cargar el producto");
-      const data = await res.json();
-      console.log('ProductoCompletoDTO recibido:', data);
-      window.productoState.coloresSeleccionados = Array.isArray(data.colores)
-      ? [...data.colores]  // si es array (vacío o con elementos), actualiza
-      : [];                // si no es array, limpiar (opcional)
-      window.productoState.archivosSeleccionados = Array.isArray(data.archivos) && data.archivos.length > 0
-      ? data.archivos.map(a => ({
-          id: a.id,
-          linkArchivo: a.linkArchivo || a.url,
-          orden: a.orden
-        }))
-      : []; 
+        });
 
-      cargarProductoEnFormulario(data.producto, window.productoState.coloresSeleccionados, window.productoState.archivosSeleccionados);
-      actualizarListaColores();
-      actualizarPreview();
-      cargarProductoPreview(data.producto, window.productoState.coloresSeleccionados, window.productoState.archivosSeleccionados)
-      btnEditar.style.display = "block";
-      localStorage.setItem("productoId", productoId);
-      await cargarCategoriasYSeleccionar(data.producto.categoriaId);
-    } catch (error) {
-      console.error(error);
-      alert("Error al cargar producto");
-    }
-  }
+        if (!res.ok) throw new Error("No se pudo cargar el producto");
 
-  // Actualizar lista colores en UI
-  function actualizarListaColores() {
-    listaColores.innerHTML = "";
-    window.productoState.coloresSeleccionados.forEach((color, index) => {
-      const li = document.createElement("li");
-      li.textContent = color + " ";
-      const btnBorrar = document.createElement("button");
-      btnBorrar.textContent = "x";
-      btnBorrar.style.marginLeft = "8px";
-      btnBorrar.addEventListener("click", () => {
-        window.productoState.coloresSeleccionados.splice(index, 1);
+        const dataList = await res.json();
+
+        if (!Array.isArray(dataList) || dataList.length === 0) {
+        alert("Producto no encontrado");
+        return;
+        }
+
+        const data = dataList[0]; // El único producto devuelto
+        console.log('ProductoCompletoAprobacionDTO recibido:', data);
+
+        // Colores
+        window.productoState.coloresSeleccionados = Array.isArray(data.colores)
+        ? [...data.colores]
+        : [];
+
+        // Archivos: convertir los base64 en URLs
+        window.productoState.archivosSeleccionados = Array.isArray(data.archivos)
+        ? data.archivos.map((a, index) => ({
+            id: a.id,
+            orden: a.orden ?? index,
+            linkArchivo: `data:image/png;base64,${a.archivoImagen}` // asumimos imagen PNG
+            }))
+        : [];
+
+        // Cargar datos en formulario y previews
+        cargarProductoEnFormulario(data.producto, window.productoState.coloresSeleccionados, window.productoState.archivosSeleccionados);
         actualizarListaColores();
-      });
-      li.appendChild(btnBorrar);
-      listaColores.appendChild(li);
+        actualizarPreview();
+
+        // Mostrar botón editar y guardar productoId
+        localStorage.setItem("productoId", productoId);
+
+        // Seleccionar categoría
+        await cargarCategoriasYSeleccionar(data.producto.categoriaId);
+    } catch (error) {
+        console.error(error);
+        alert("Error al cargar producto");
+    }
+    }
+
+
+    function actualizarListaColores() {
+    listaColores.innerHTML = "";
+    window.productoState.coloresSeleccionados.forEach((color) => {
+        const li = document.createElement("li");
+        li.textContent = color;
+        listaColores.appendChild(li);
     });
-  }
+    }
+
    
 
 
@@ -378,204 +316,46 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
 
   document.getElementById("material").value = producto.material || "";
   document.getElementById("tecnica").value = producto.tecnica || "";
-  document.getElementById("peso").value = producto.peso || "";
+    // Limpia la unidad si viene como string tipo "1kg", "2.5 kg", etc.
+    const pesoLimpio = parseFloat(producto.peso?.toString().replace(/[^\d.]/g, "")) || "";
+    document.getElementById("peso").value = pesoLimpio;
 
-  // STL preview (si querés mostrarlo como enlace para descargar)
-  if (producto.archivoComprimido) {
-    console.log("Base64 recibido:", producto.archivoComprimido);
-    mostrarArchivoComprimido(producto.archivoComprimido);
-  } else {
+    //Archivo ZIP
+    if (producto.archivo) {
+    console.log("Archivo comprimido base64 recibido:", producto.archivo);
+    mostrarArchivoComprimido(producto.archivo); // función que vos definiste
+    } else {
     document.getElementById('comprimido-preview').innerHTML = "";
-  }
-
-}
-
-  // Función para actualizar producto
-  async function actualizarProducto() {
-    const id = document.getElementById("producto-id").value;
-    const nombre = document.getElementById("nombre").value.trim();
-    const descripcion = document.getElementById("descripcion").value.trim();
-    const precio = parseFloat(document.getElementById("precio").value);
-    const categoriaId = parseInt(document.getElementById("categoria").value);
-    
-    if (!nombre || isNaN(precio)) {
-      alert("Completa los campos obligatorios correctamente.");
-      return;
     }
-    const archivosExistentes = window.productoState.archivosSeleccionados
-    .filter(a => !(a instanceof File))
-    .map(a => ({
-      id: a.id,
-      linkArchivo: a.linkArchivo || a.url
-    }));
-
-    const archivosNuevos = window.productoState.archivosSeleccionados
-      .filter(a => a instanceof File);
-    const productoCompletoDTO = {
-       producto: {
-        nombre,
-        descripcion,
-        precio,
-        categoriaId,
-        codigoInicial: document.getElementById("codigo-inicial").value.trim(),
-        version: document.getElementById("version").value.trim(),
-        seguimiento: document.getElementById("seguimiento").value.trim(),
-        dimensionAlto: document.getElementById("dimension-alto").value.trim(),
-        dimensionAncho: document.getElementById("dimension-ancho").value.trim(),
-        dimensionProfundidad: document.getElementById("dimension-profundidad").value.trim(),
-        material: document.getElementById("material").value.trim(),
-        peso: document.getElementById("peso").value.trim(),
-        tecnica: document.getElementById("tecnica").value.trim(),
-        archivoComprimido: null, // explícitamente null para evitar confusión
-      },
-      colores: window.productoState.coloresSeleccionados,
-      archivos: archivosExistentes  // acá solo los links o IDs
-    };
-
-    // armar FormData
-    const formData = new FormData();
-    formData.append(
-      "producto",
-      new Blob([JSON.stringify(productoCompletoDTO)], { type: "application/json" })
-    );
-
-    archivosNuevos.forEach(file => {
-      formData.append("archivosNuevos", file);
-    });
-    const archivoComprimidoInput = document.getElementById("archivo-comprimido");
-      if (archivoComprimidoInput) {
-        console.log("Archivos en archivo-comprimido input:", archivoComprimidoInput.files);
-        if (archivoComprimidoInput.files.length > 0) {
-          console.log("Agregando archivoComprimido al formData:", archivoComprimidoInput.files[0]);
-          formData.append("archivoComprimido", archivoComprimidoInput.files[0]);
-        }
-      }
-
-    try {
-      console.log("Colores antes de enviar:", window.productoState.coloresSeleccionados);
-      console.log("Archivos antes de enviar:", window.productoState.archivosSeleccionados);
-
-      for (const pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-      console.log("DTO que envío:", productoCompletoDTO);
-      const res = await fetchConRefresh(`http://localhost:8080/api/productos/${id}`, {
-        method: "PUT",
-        body: formData,
-      });
-      if (!res.ok) {
-        let errorMessage = "Error actualizando producto";
-        try {
-          const errorData = await res.json();
-          if (errorData.message) errorMessage = errorData.message;
-        } catch {}
-        throw new Error(errorMessage);
-      }
-      alert("Producto actualizado correctamente");
-      // Opcional: recargar lista o limpiar formulario
-      cargarProductos();
-    } catch (error) {
-      alert("Error: " + error.message);
-    }
-  }
-
-  if (btnEditar) {
-    btnEditar.addEventListener("click", e => {
-      e.preventDefault();
-      actualizarProducto();
-    });
-  }
 
 
-
-function cargarProductoPreview(producto, colores, archivos) {
-  console.log("👉 Ejecutando cargarProductoPreview", { producto, colores, archivos });
-    console.log("Producto:", producto);
-  console.log("Colores:", colores);
-  console.log("Archivos:", archivos);
-
-  document.getElementById("prev-nombre").textContent = producto.nombre || "";
-  document.getElementById("prev-desc").textContent = producto.descripcion || "";
-  document.getElementById("prev-precio").textContent = `$${(producto.precio || 0).toFixed(2)}`;
-
-  const mainImage = document.getElementById("main-image");
-  const miniaturasDiv = document.getElementById("miniaturas");
-  miniaturasDiv.innerHTML = "";
-
-  // Buscar imágenes válidas (con linkArchivo o si es File)
-  const imagenesValidas = archivos
-    .filter(a => a instanceof File || a.linkArchivo || a.url);
-
-  if (imagenesValidas.length > 0) {
-    const primeraSrc = imagenesValidas[0] instanceof File
-      ? URL.createObjectURL(imagenesValidas[0])
-      : imagenesValidas[0].linkArchivo || imagenesValidas[0].url;
-
-    mainImage.src = primeraSrc;
-
-    imagenesValidas.forEach((archivo) => {
-      const src = archivo instanceof File
-        ? URL.createObjectURL(archivo)
-        : archivo.linkArchivo || archivo.url;
-
-      const thumb = document.createElement("img");
-      thumb.src = src;
-      thumb.className = "thumbnail-image";
-      thumb.onclick = () => mainImage.src = thumb.src;
-      miniaturasDiv.appendChild(thumb);
-    });
-  } else {
-    mainImage.src = "ruta_default.jpg"; // imagen por defecto
-  }
-
-  // Formatos (hardcoded)
-  const formatos = ["STL", "OBJ", "AMF"];
-  const formatoDiv = document.getElementById("option-formato");
-  formatoDiv.innerHTML = "";
-  formatos.forEach((formato, i) => {
-    const id = `formato-${i}`;
-    formatoDiv.innerHTML += `
-      <label for="${id}">
-        <input type="radio" name="formato" id="${id}" value="${formato}" ${i === 0 ? "checked" : ""} />
-        ${formato}
-      </label>
-    `;
-  });
-
-  // Colores
-  const colorDiv = document.getElementById("option-color");
-  colorDiv.innerHTML = "";
-  if (colores && colores.length > 0) {
-    colores.forEach((color, i) => {
-      const id = `color-${i}`;
-      colorDiv.innerHTML += `
-        <label for="${id}">
-          <input type="radio" name="color" id="${id}" value="${color}" ${i === 0 ? "checked" : ""} />
-          ${color}
-        </label>
-      `;
-    });
-  } else {
-    colorDiv.textContent = "No hay colores disponibles";
-  }
 }
 
 async function eliminarProducto(id) {
   if (!confirm("¿Seguro que querés eliminar este producto?")) return;
+
   try {
     const token = localStorage.getItem("accessToken");
-    const res = await fetch(`http://localhost:8080/api/productos/${id}`, {
+
+    const url = new URL("http://localhost:8080/api/productosAprobacion/BorrarProducto");
+    url.searchParams.append("id", id);
+
+    const res = await fetch(url, {
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`
       }
     });
+
     if (!res.ok) throw new Error("Error al eliminar producto");
+
     alert("Producto eliminado correctamente");
     cargarProductos(); // refrescar la tabla
+
   } catch (error) {
     alert("Error: " + error.message);
   }
 }
+
 
 });

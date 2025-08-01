@@ -147,6 +147,7 @@ public class ProductoAprobadoServiceImpl implements ProductoAprobadoService{
     @Override
     @Transactional
     public Boolean aprobarProducto(Integer id, String codigoInicial, String versionStr, String seguimiento) {
+        System.out.println("Intentando aprobar producto con id = " + id);
         ProductoAprobacionEntity producto = productoAprobacionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
@@ -155,17 +156,14 @@ public class ProductoAprobadoServiceImpl implements ProductoAprobadoService{
 
         CategoriaEntity categoriaId = producto.getCategoriaId();
         if (categoriaId.getId() == null) {
-            // Si la categoría es nueva, guárdala
             categoriaId = categoriaRepository.save(categoriaId);
         } else {
-            // Verificar si la categoría existe en la base de datos
             categoriaId = categoriaRepository.findById(categoriaId.getId())
                     .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
         }
 
-        // Configurar el DTO
         ProductoRequestConColores dto = new ProductoRequestConColores();
-        dto.setCategoriaId(categoriaId.getId()); // Usar el ID de la categoría persistida
+        dto.setCategoriaId(categoriaId.getId());
         List<String> color = new ArrayList<>();
         for (ProductoColorAprobacionEntity colorAprobacionEntity : colorAprobacionEntities) {
             color.add(colorAprobacionEntity.getColor());
@@ -182,7 +180,7 @@ public class ProductoAprobadoServiceImpl implements ProductoAprobadoService{
         dto.setDimensionAlto(Integer.parseInt(partes[0]));
         dto.setDimensionAncho(Integer.parseInt(partes[1]));
         dto.setDimensionProfundidad(Integer.parseInt(partes[2]));
-        dto.setVersion(versionStr); // Asegúrate de que versionStr sea válido, ej. "1.0"
+        dto.setVersion(versionStr);
         dto.setSeguimiento(seguimiento);
         dto.setPrecio(producto.getPrecio());
 
@@ -196,11 +194,26 @@ public class ProductoAprobadoServiceImpl implements ProductoAprobadoService{
 
         try {
             productoService.crearProducto(dto, multipartFile);
+
+            // --- BORRAR DATOS DE APROBACION ---
+            // Primero borrar colores aprobacion
+            productoColorAprobacionRepository.deleteAll(colorAprobacionEntities);
+
+            // Borrar detalle aprobacion
+            productoDetalleAprobacionRepository.delete(detalleAprobacionEntity);
+
+            // Borrar archivo aprobado (si tienes repositorio para eso)
+            productoArchivoRepository.deleteByProductoId(id);
+
+            // Borrar producto aprobacion
+            productoAprobacionRepository.delete(producto);
+
             return true;
         } catch (IOException e) {
             throw new RuntimeException("Error al crear el producto", e);
         }
     }
+
 
     @Override
     @Transactional
@@ -232,8 +245,8 @@ public class ProductoAprobadoServiceImpl implements ProductoAprobadoService{
 
             ProductoCompletoAprobacionDTO dto = new ProductoCompletoAprobacionDTO();
             dto.setProducto(productoDTO);
-            dto.setColores(colores);
-            dto.setArchivos((List<ProductoAprobacionArchivoDTO>) archivoPrincipal);
+            //dto.setColores(colores);
+            //dto.setArchivos((List<ProductoAprobacionArchivoDTO>) archivoPrincipal);
 
             listaEnviar.add(dto);
 
@@ -273,30 +286,53 @@ public class ProductoAprobadoServiceImpl implements ProductoAprobadoService{
         }
         return listaEnviar;
     }
-
     @Override
     public List<ProductoCompletoAprobacionDTO> verProductoCompleto(int id) {
         ProductoAprobacionEntity producto = productoAprobacionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));;
-        List<ProductoCompletoAprobacionDTO> listaEnviar = new ArrayList<>(List.of());
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        List<ProductoCompletoAprobacionDTO> listaEnviar = new ArrayList<>();
 
         ProductoAprobacionResponseDTO responseDTO = ProductoAprobarMapper.toDTO(producto);
         ProductoAprobacioDTO productoDTO = ProductoAprobarDTOMapper.fromResponseDTO(responseDTO);
+
+        // Código desglosado en codigoInicial, version y seguimiento
+        String codigo = producto.getCodigo();
+        if (codigo != null && codigo.length() >= 7) {
+            productoDTO.setCodigoInicial(codigo.substring(0, 3));
+
+            String versionString = codigo.substring(3, 7);
+            if (versionString.matches("\\d+")) {
+                productoDTO.setVersion(versionString);
+            } else {
+                System.err.println("Versión inválida: " + versionString);
+                productoDTO.setVersion("0");
+            }
+
+            if (codigo.length() > 7) {
+                productoDTO.setSeguimiento(codigo.substring(7));
+            }
+        }
+
+        // Convertir byte[] archivo a base64 String y setear en DTO (archivo principal)
+        if (producto.getArchivo() != null) {
+            String base64Archivo = Base64.getEncoder().encodeToString(producto.getArchivo());
+            productoDTO.setArchivo(base64Archivo);
+            System.out.println("Archivo size: " + producto.getArchivo().length);
+        } else {
+            productoDTO.setArchivo(null);
+        }
 
         List<String> colores = productoColorAprobacionRepository.findByProductoId(producto.getId())
                 .stream()
                 .map(ProductoColorAprobacionEntity::getColor)
                 .collect(Collectors.toList());
 
-
-        ProductoAprobacionArchivoDTO archivoPrincipal = productoArchivoRepository.findByProductoIdOrderByOrdenAsc(producto.getId())
+        List<ProductoAprobacionArchivoDTO> archivos = productoArchivoRepository.findByProductoIdOrderByOrdenAsc(producto.getId())
                 .stream()
-                .findFirst()
                 .map(ArchivoAprobarMapper::toArchivoDTO)
-                .orElse(null);
+                .collect(Collectors.toList());
 
-
-        ProductoDetalleAprobacionEntity detalle=productoDetalleAprobacionRepository.findByProductoId(id);
+        ProductoDetalleAprobacionEntity detalle = productoDetalleAprobacionRepository.findByProductoId(id);
 
         String[] partes = detalle.getDimension().split("x");
         productoDTO.setDimensionAlto(partes[0]);
@@ -305,10 +341,11 @@ public class ProductoAprobadoServiceImpl implements ProductoAprobadoService{
         productoDTO.setMaterial(detalle.getMaterial());
         productoDTO.setTecnica(detalle.getTecnica());
         productoDTO.setPeso(detalle.getPeso());
+
         ProductoCompletoAprobacionDTO dto = new ProductoCompletoAprobacionDTO();
         dto.setProducto(productoDTO);
         dto.setColores(colores);
-        dto.setArchivos((List<ProductoAprobacionArchivoDTO>) archivoPrincipal);
+        dto.setArchivos(archivos);
 
         listaEnviar.add(dto);
 

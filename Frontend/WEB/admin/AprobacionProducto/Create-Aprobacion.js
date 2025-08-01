@@ -77,7 +77,6 @@ async function fetchConRefresh(url, options = {}) {
 }
 
 (() => {
-  const inputImagenes = document.getElementById('imagenes');
   const preview = document.getElementById('preview-imagenes'); // ✅ agregado
 
   // Estado global
@@ -85,19 +84,6 @@ async function fetchConRefresh(url, options = {}) {
   window.productoState.coloresSeleccionados = window.productoState.coloresSeleccionados || [];
   window.productoState.archivosSeleccionados = window.productoState.archivosSeleccionados || [];
 
-  inputImagenes.addEventListener('change', () => {
-    const files = Array.from(inputImagenes.files);
-
-    files.forEach(file => {
-      if (window.productoState.archivosSeleccionados.length < 5) {
-        const existe = window.productoState.archivosSeleccionados.some(f => f.name === file.name && f.size === file.size);
-        if (!existe) window.productoState.archivosSeleccionados.push(file);
-      }
-    });
-
-    actualizarPreview();
-    inputImagenes.value = "";
-  });
 
   async function cargarCategorias() {
     try {
@@ -148,88 +134,72 @@ async function fetchConRefresh(url, options = {}) {
   }
 
   const form = document.getElementById("form-producto");
-  const inputColor = document.getElementById("input-color");
-  const btnAgregarColor = document.getElementById("btn-agregar-color");
   const listaColores = document.getElementById("lista-colores");
 
-  btnAgregarColor.addEventListener("click", () => {
-    const color = inputColor.value.trim();
-    if (color && !window.productoState.coloresSeleccionados.includes(color)) {
-      window.productoState.coloresSeleccionados.push(color);
-      actualizarListaColores();
-      inputColor.value = "";
-      inputColor.focus();
+  
+    function actualizarListaColores() {
+    listaColores.innerHTML = "";
+    window.productoState.coloresSeleccionados.forEach((color) => {
+        const li = document.createElement("li");
+        li.textContent = color;
+        listaColores.appendChild(li);
+    });
+    }
+async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
+  const url = new URL('http://localhost:8080/api/productosAprobacion/AprobarProducto');
+  url.searchParams.append('id', id);
+  url.searchParams.append('codigoInicial', codigoInicial);
+  url.searchParams.append('versionStr', versionStr);
+  url.searchParams.append('seguimiento', seguimiento);
+
+  const token = localStorage.getItem('accessToken');
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
     }
   });
 
-  function actualizarListaColores() {
-    listaColores.innerHTML = "";
-    window.productoState.coloresSeleccionados.forEach((color, index) => {
-      const li = document.createElement("li");
-      li.textContent = color + " ";
-
-      const btnBorrar = document.createElement("button");
-      btnBorrar.textContent = "x";
-      btnBorrar.style.marginLeft = "8px";
-      btnBorrar.addEventListener("click", () => {
-        window.productoState.coloresSeleccionados.splice(index, 1);
-        actualizarListaColores();
-      });
-
-      li.appendChild(btnBorrar);
-      listaColores.appendChild(li);
-    });
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || 'Error al aprobar producto');
   }
+}
 
-  function actualizarPreview() {
-    preview.innerHTML = "";
-    if (!window.productoState.archivosSeleccionados || window.productoState.archivosSeleccionados.length === 0) return;
 
-    window.productoState.archivosSeleccionados.forEach((archivo, idx) => {
-      const div = document.createElement("div");
-      div.style.position = "relative";
-      div.style.display = "inline-block";
-      div.style.marginRight = "10px";
+ function actualizarPreview() {
+  preview.innerHTML = "";
+  if (!window.productoState.archivosSeleccionados || window.productoState.archivosSeleccionados.length === 0) return;
 
-      const img = document.createElement("img");
-      img.style.width = "80px";
-      img.style.height = "80px";
-      img.style.objectFit = "cover";
-      img.style.border = "1px solid #ccc";
-      img.style.borderRadius = "4px";
+  window.productoState.archivosSeleccionados.forEach((archivo) => {
+    const div = document.createElement("div");
+    div.style.position = "relative";
+    div.style.display = "inline-block";
+    div.style.marginRight = "10px";
 
-      if (archivo instanceof File) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(archivo);
-      } else {
-        img.src = archivo.linkArchivo || archivo.url || "ruta_default.jpg";
-      }
+    const img = document.createElement("img");
+    img.style.width = "80px";
+    img.style.height = "80px";
+    img.style.objectFit = "cover";
+    img.style.border = "1px solid #ccc";
+    img.style.borderRadius = "4px";
 
-      const btnEliminar = document.createElement("button");
-      btnEliminar.textContent = "X";
-      btnEliminar.style.position = "absolute";
-      btnEliminar.style.top = "0";
-      btnEliminar.style.right = "0";
-      btnEliminar.style.background = "rgba(255,0,0,0.7)";
-      btnEliminar.style.color = "white";
-      btnEliminar.style.border = "none";
-      btnEliminar.style.cursor = "pointer";
-      btnEliminar.style.borderRadius = "0 4px 0 4px";
-      btnEliminar.style.padding = "0 4px";
-      btnEliminar.title = "Eliminar imagen";
-      btnEliminar.addEventListener("click", () => {
-        window.productoState.archivosSeleccionados.splice(idx, 1);
-        actualizarPreview();
-      });
+    if (archivo instanceof File) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(archivo);
+    } else {
+      img.src = archivo.linkArchivo || archivo.url || "ruta_default.jpg";
+    }
 
-      div.appendChild(img);
-      div.appendChild(btnEliminar);
-      preview.appendChild(div);
-    });
-  }
+    div.appendChild(img);
+    preview.appendChild(div);
+  });
+}
+
   cargarCategorias();
   const inputArchivoComprimido = document.getElementById("archivo-comprimido");
   const previewComprimido = document.getElementById("comprimido-preview");
@@ -246,46 +216,28 @@ async function fetchConRefresh(url, options = {}) {
     }
   });
 
-  function actualizarPreviewComprimido() {
-    previewComprimido.innerHTML = "";
-    const archivo = window.productoState.archivoComprimido;
-    if (!archivo) return;
+ function actualizarPreviewComprimido() {
+  previewComprimido.innerHTML = "";
+  const archivo = window.productoState.archivoComprimido;
+  if (!archivo) return;
 
-    const div = document.createElement("div");
-    div.style.position = "relative";
-    div.style.display = "inline-block";
-    div.style.marginRight = "10px";
-    div.style.padding = "6px 10px";
-    div.style.border = "1px solid #ccc";
-    div.style.borderRadius = "4px";
-    div.style.background = "#f9f9f9";
-    div.style.fontFamily = "monospace";
+  const div = document.createElement("div");
+  div.style.position = "relative";
+  div.style.display = "inline-block";
+  div.style.marginRight = "10px";
+  div.style.padding = "6px 10px";
+  div.style.border = "1px solid #ccc";
+  div.style.borderRadius = "4px";
+  div.style.background = "#f9f9f9";
+  div.style.fontFamily = "monospace";
 
-    const nombreArchivo = document.createElement("span");
-    nombreArchivo.textContent = archivo.name;
+  const nombreArchivo = document.createElement("span");
+  nombreArchivo.textContent = archivo.name;
 
-    const btnEliminar = document.createElement("button");
-    btnEliminar.textContent = "X";
-    btnEliminar.style.position = "absolute";
-    btnEliminar.style.top = "0";
-    btnEliminar.style.right = "0";
-    btnEliminar.style.background = "rgba(255,0,0,0.7)";
-    btnEliminar.style.color = "white";
-    btnEliminar.style.border = "none";
-    btnEliminar.style.cursor = "pointer";
-    btnEliminar.style.borderRadius = "0 4px 0 4px";
-    btnEliminar.style.padding = "0 4px";
-    btnEliminar.title = "Eliminar archivo STL";
-    btnEliminar.addEventListener("click", () => {
-      window.productoState.archivoComprimido = null;
-      inputArchivoComprimido.value = "";
-      actualizarPreviewComprimido();
-    });
+  div.appendChild(nombreArchivo);
+  previewComprimido.appendChild(div);
+}
 
-    div.appendChild(nombreArchivo);
-    div.appendChild(btnEliminar);
-    previewComprimido.appendChild(div);
-  }
 
   form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -330,74 +282,32 @@ async function fetchConRefresh(url, options = {}) {
     alert("Seleccioná una categoría");
     return;
   }
+  const productoId = document.getElementById("producto-id").value;
 
   try {
-    // Armar FormData para enviar JSON + archivo
-    const formData = new FormData();
+  const backendBase = "http://localhost:8080/api/productosAprobacion/AprobarProducto";
 
-    // Crear el objeto JSON con los datos
-    const productoPayload = {
-      nombre,
-      descripcion,
-      precio,
-      categoriaId,
-      colores: window.productoState.coloresSeleccionados, // ✅ colores
-      codigoInicial,
-      version,
-      seguimiento,
-      dimensionAlto,
-      dimensionAncho,
-      dimensionProfundidad,
-      material,
-      peso,
-      tecnica
-    };
+  const url = new URL(backendBase);
+  url.searchParams.append('id', productoId); // Reemplazar por el ID real
+  url.searchParams.append('codigoInicial', codigoInicial);
+  url.searchParams.append('versionStr', version);
+  url.searchParams.append('seguimiento', seguimiento);
 
-    // El JSON va como string en una parte llamada "producto" (podés cambiar el nombre si querés)
-    formData.append("producto", new Blob([JSON.stringify(productoPayload)], { type: "application/json" }));
+  const res = await fetchConRefresh(url, {
+    method: "POST",
+  });
 
-    // Agregar archivo STL (input con id "archivo-stl")
-    const archivoComprimidoInput = document.getElementById("archivo-comprimido");
-    if (archivoComprimidoInput && archivoComprimidoInput.files.length > 0) {
-      formData.append("archivo", archivoComprimidoInput.files[0]);
-    }
-
-    const backendBase = "http://localhost:8080/api/productos";
-
-    const resProducto = await fetchConRefresh(backendBase, {
-      method: "POST",
-      // NO seteamos Content-Type, fetch lo hará automáticamente con boundary correcto
-      body: formData,
-    });
-
-    if (!resProducto.ok) {
-      let errorText = await resProducto.text();
-      try {
-        const json = JSON.parse(errorText);
-        errorText = json.message || JSON.stringify(json);
-      } catch {}
-      throw new Error(errorText || "Error al guardar el producto");
-    }
-
-    const productoCreado = await resProducto.json();
-
-    // Subir imágenes normales (si las hay)
-    if (window.productoState.archivosSeleccionados.length > 0) {
-      for (let i = 0; i < Math.min(window.productoState.archivosSeleccionados.length, 5); i++) {
-        await subirArchivoBackend(productoCreado.id, window.productoState.archivosSeleccionados[i], i);
-      }
-    }
-
-    alert("Producto, colores, archivo Comprimido y imagenes guardados con éxito!");
-    form.reset();
-    window.productoState.coloresSeleccionados = [];
-    window.productoState.archivosSeleccionados = [];
-    actualizarListaColores();
-    actualizarPreview();
-    cargarProductos();
-  } catch (error) {
-    alert("Error: " + error.message);
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Error al aprobar producto");
   }
+
+  alert("Producto aprobado con éxito!");
+
+} catch (error) {
+  alert("Error: " + error.message);
+}
+
 });
 
 })();
