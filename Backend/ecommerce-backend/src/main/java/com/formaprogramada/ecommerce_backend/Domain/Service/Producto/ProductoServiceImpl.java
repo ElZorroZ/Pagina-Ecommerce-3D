@@ -84,6 +84,7 @@ public class ProductoServiceImpl implements ProductoService {
             producto.setNombre(dto.getNombre());
             producto.setDescripcion(dto.getDescripcion());
             producto.setPrecio(dto.getPrecio());
+            producto.setPrecioDigital(dto.getPrecioDigital());
             producto.setCodigo(codigo);
 
             if (archivoComprimido != null && !archivoComprimido.isEmpty()) {
@@ -228,6 +229,7 @@ public class ProductoServiceImpl implements ProductoService {
             producto.setNombre(dto.getProducto().getNombre());
             producto.setDescripcion(dto.getProducto().getDescripcion());
             producto.setPrecio(dto.getProducto().getPrecio());
+            producto.setPrecioDigital(dto.getProducto().getPrecioDigital());
             if (dto.getProducto().getCategoriaId() != null) {
                 CategoriaEntity categoria = categoriaRepository.findById(dto.getProducto().getCategoriaId())
                         .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
@@ -471,6 +473,7 @@ public class ProductoServiceImpl implements ProductoService {
                 prod.setDescripcion(rsProducto.getString("descripcion"));
                 prod.setCategoriaId(rsProducto.getInt("categoriaId"));
                 prod.setPrecio(rsProducto.getFloat("precio"));
+                prod.setPrecioDigital(rsProducto.getFloat("precioDigital"));
                 prod.setArchivoComprimido(rsProducto.getString("archivo"));
 
                 String codigo = rsProducto.getString("codigo");

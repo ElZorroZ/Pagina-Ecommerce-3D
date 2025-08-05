@@ -293,6 +293,8 @@ async function fetchConRefresh(url, options = {}) {
   const nombre = document.getElementById("nombre").value.trim();
   const descripcion = document.getElementById("descripcion").value.trim();
   const precio = parseFloat(document.getElementById("precio").value);
+  const precioDigital = parseFloat(document.getElementById("precioDigital").value);
+
   const codigoInicial = document.getElementById("codigo-inicial").value.trim();
   const versionInput = document.getElementById('version');
   const versionValue = versionInput.value.trim();
@@ -340,6 +342,7 @@ async function fetchConRefresh(url, options = {}) {
       nombre,
       descripcion,
       precio,
+      precioDigital,
       categoriaId,
       colores: window.productoState.coloresSeleccionados, // ✅ colores
       codigoInicial,

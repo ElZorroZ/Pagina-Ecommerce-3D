@@ -13,6 +13,7 @@ public class ProductoDTO {
     private String descripcion;
     private Integer categoriaId;
     private Float precio;
+    private Float precioDigital;
     private String archivo;
     private String archivoComprimido; // nuevo campo para archivo comprimido
     private String codigoInicial;

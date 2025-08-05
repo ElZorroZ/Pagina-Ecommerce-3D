@@ -366,6 +366,7 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
   document.getElementById("nombre").value = producto.nombre || "";
   document.getElementById("descripcion").value = producto.descripcion || "";
   document.getElementById("precio").value = producto.precio || "";
+  document.getElementById("precioDigital").value = producto.precioDigital || "";
 
   // Nuevos campos
   document.getElementById("codigo-inicial").value = producto.codigoInicial || "";
@@ -396,6 +397,7 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
     const nombre = document.getElementById("nombre").value.trim();
     const descripcion = document.getElementById("descripcion").value.trim();
     const precio = parseFloat(document.getElementById("precio").value);
+    const precioDigital = parseFloat(document.getElementById("precioDigital").value);
     const categoriaId = parseInt(document.getElementById("categoria").value);
     
     if (!nombre || isNaN(precio)) {
@@ -416,6 +418,7 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
         nombre,
         descripcion,
         precio,
+        precioDigital,
         categoriaId,
         codigoInicial: document.getElementById("codigo-inicial").value.trim(),
         version: document.getElementById("version").value.trim(),

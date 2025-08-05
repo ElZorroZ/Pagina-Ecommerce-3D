@@ -21,6 +21,8 @@ public class ProductoRequestConColores {
 
     private float precio;
 
+    private float precioDigital;
+
     // Colores
     private List<String> colores;
 

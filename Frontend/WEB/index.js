@@ -182,7 +182,7 @@ function handleClicks(e) {
         const productCard = e.target.closest('.product-card');
         const productId = productCard.dataset.productId;
         if (productId) {
-            window.location.href = `producto.html?id=${productId}`;
+            window.location.href = `/WEB/producto.html?id=${productId}`;
         }
     }
     
@@ -193,7 +193,7 @@ function handleClicks(e) {
     
     // Handle explore all products button - navigate to products page
     if (e.target.classList.contains('featured-btn')) {
-        window.location.href = `/categoria.html?categoria=all`;
+        window.location.href = `/WEB/categoria.html?categoria=all`;
     }
     
     // Handle category clicks in dropdown

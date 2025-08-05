@@ -34,9 +34,11 @@ public class ProductoEntity {
 
     private float precio;
 
+    private float precioDigital;
+
     @Lob
     @Column(name = "archivo", columnDefinition = "LONGBLOB")
-    private byte[] archivo;  // STL
+    private byte[] archivo;  // ZIP
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductoArchivoEntity> archivos;

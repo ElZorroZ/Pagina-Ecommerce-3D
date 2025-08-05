@@ -17,6 +17,7 @@ public class ProductoResponse {
     private String nombre;
     private String descripcion;
     private float precio;
+    private float precioDigital;
     private Integer categoriaId;
     private List<String> colores;
     private boolean destacado;
@@ -38,6 +39,7 @@ public class ProductoResponse {
         this.nombre = producto.getNombre();
         this.descripcion = producto.getDescripcion();
         this.precio = producto.getPrecio();
+        this.precioDigital = producto.getPrecioDigital();
         this.categoriaId = producto.getCategoriaId() != null ? producto.getCategoriaId().getId() : null;
         this.colores = colores;
         this.destacado = isDestacado();
