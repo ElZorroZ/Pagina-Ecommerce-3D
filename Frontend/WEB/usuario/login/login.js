@@ -23,8 +23,18 @@ document.getElementById("login-form").addEventListener("submit", async function 
     }
 
     const data = await response.json();
+  console.log("Respuesta del login:", data);
+
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
+
+    if (data.usuarioId !== undefined) {
+      localStorage.setItem("usuarioId", data.usuarioId.toString());
+
+      alert("Usuario ID guardado: " + data.usuarioId);
+    } else {
+      alert("No se recibió usuarioId en la respuesta");
+    }
 
 
     const lastPage = localStorage.getItem("lastPage");

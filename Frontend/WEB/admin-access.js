@@ -1,44 +1,3 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const accountBtn = document.getElementById('account-btn');
-    const accountMenu = document.getElementById('account-menu');
-    const adminDropdown = document.getElementById("admin-dropdown");
-    const adminOptions = document.getElementById("admin-options");
-    const logoutBtn = document.getElementById('logout-btn');
-    let hoverTimeout;
-
-    if (!accountBtn || !accountMenu) {
-        console.warn('No se encontraron accountBtn o accountMenu. Se detiene el script.');
-        return;
-    }
-
-    const ocultarDropdownConDelay = () => {
-        hoverTimeout = setTimeout(() => {
-            accountMenu.classList.remove('show');
-        }, 200);
-    };
-
-    const cancelarOcultamiento = () => clearTimeout(hoverTimeout);
-
-    accountMenu.addEventListener('mouseleave', ocultarDropdownConDelay);
-    accountMenu.addEventListener('mouseenter', cancelarOcultamiento);
-    accountBtn.addEventListener('mouseleave', ocultarDropdownConDelay);
-    accountBtn.addEventListener('mouseenter', cancelarOcultamiento);
-
-    document.addEventListener('click', (event) => {
-        if (!accountMenu.contains(event.target) && !accountBtn.contains(event.target)) {
-            accountMenu.classList.remove('show');
-        }
-    });
-
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            location.reload();
-        });
-    }
-
     async function validarToken() {
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
@@ -85,6 +44,48 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch {
             return true;
         }
+    }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const accountBtn = document.getElementById('account-btn');
+    const accountMenu = document.getElementById('account-menu');
+    const adminDropdown = document.getElementById("admin-dropdown");
+    const adminOptions = document.getElementById("admin-options");
+    const logoutBtn = document.getElementById('logout-btn');
+    let hoverTimeout;
+
+    if (!accountBtn || !accountMenu) {
+        console.warn('No se encontraron accountBtn o accountMenu. Se detiene el script.');
+        return;
+    }
+
+    const ocultarDropdownConDelay = () => {
+        hoverTimeout = setTimeout(() => {
+            accountMenu.classList.remove('show');
+        }, 200);
+    };
+
+    const cancelarOcultamiento = () => clearTimeout(hoverTimeout);
+
+    accountMenu.addEventListener('mouseleave', ocultarDropdownConDelay);
+    accountMenu.addEventListener('mouseenter', cancelarOcultamiento);
+    accountBtn.addEventListener('mouseleave', ocultarDropdownConDelay);
+    accountBtn.addEventListener('mouseenter', cancelarOcultamiento);
+
+    document.addEventListener('click', (event) => {
+        if (!accountMenu.contains(event.target) && !accountBtn.contains(event.target)) {
+            accountMenu.classList.remove('show');
+        }
+    });
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('usuarioId');  
+            location.reload();
+        });
     }
 
     async function verificarAccesoAdmin() {

@@ -2,6 +2,7 @@
 let currentProduct = null;
 let selectedColor = null;
 let selectedWiring = 'cordless';
+let selectedFormat = 'fisico';
 let currentRating = 0;
 const categoriesDropdown = document.getElementById('categories-dropdown');
 
@@ -62,12 +63,12 @@ function displayProduct(product) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, '-');
 
-    document.getElementById('breadcrumb-category').href = `categoria.html?categoria=${encodeURIComponent(categoriaSlug)}`;
+    document.getElementById('breadcrumb-category').href = `/WEB/categoria.html?categoria=${encodeURIComponent(categoriaSlug)}`;
     document.getElementById('breadcrumb-product').textContent = product.nombre;
 
     // Update product info
     document.getElementById('product-title').textContent = product.nombre;
-    document.getElementById('product-price').textContent = formatPrice(product.precio);
+    updateProductPrice(product);
     document.getElementById('product-description').textContent = product.descripcion || 'Sin descripción disponible';
 
     // Display images
@@ -75,6 +76,9 @@ function displayProduct(product) {
 
     // Generate mock product details
     generateProductDetails(product);
+
+    // Initialize format options
+    initializeFormatOptions();
 
     // Initialize color options (mock colors)
     initializeColorOptions();
@@ -144,6 +148,41 @@ function generateProductDetails(product) {
     document.getElementById('product-tecnica').textContent = product.tecnica || 'N/A'; // si querés mostrar "técnica"
 }
 
+
+// Update product price based on selected format
+function updateProductPrice(product) {
+    const basePrice = product.precio || 0;
+    const digitalPrice = product.precioDigital; 
+    
+    const currentPrice = selectedFormat === 'digital' ? digitalPrice : basePrice;
+    document.getElementById('product-price').textContent = formatPrice(currentPrice);
+}
+
+// Initialize format options
+function initializeFormatOptions() {
+    const formatButtons = document.querySelectorAll('.format-option');
+    
+    formatButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            formatButtons.forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            selectedFormat = button.dataset.format;
+            
+            // Update price when format changes
+            if (currentProduct) {
+                updateProductPrice(currentProduct);
+            }
+            
+            // Update color options visibility (only show for physical format)
+            const colorSelector = document.getElementById('color-selector');
+            if (selectedFormat === 'digital') {
+                colorSelector.style.display = 'none';
+            } else {
+                colorSelector.style.display = 'block';
+            }
+        });
+    });
+}
 
 // Initialize color options
 function initializeColorOptions() {
@@ -441,44 +480,63 @@ function initializeModal() {
         }
     });
 }
-
-// Add to cart functionality
 function initializeAddToCart() {
     const addToCartBtn = document.getElementById('add-to-cart-btn');
-    
-    addToCartBtn.addEventListener('click', () => {
+
+    addToCartBtn.addEventListener('click', async () => {
+        const token = await validarToken(); // ✅ Validar el token antes de continuar
+        if (!token) {
+            window.location.href = '/usuario/login/login.html'; // 🔁 Redirigir al login
+            return;
+        }
+
         if (!currentProduct) return;
-        
-        const cartItem = {
-            id: currentProduct.id,
-            name: currentProduct.nombre,
-            price: currentProduct.precio,
-            color: selectedColor,
-            wiring: selectedWiring,
-            image: currentProduct.imagenes?.[0]?.url || 'https://via.placeholder.com/100x100',
-            quantity: 1
+
+        const basePrice = currentProduct.precio || 0;
+        const digitalPrice = currentProduct.precioDigital || (basePrice * 0.7);
+        const currentPrice = selectedFormat === 'digital' ? digitalPrice : basePrice;
+
+        const carritoRequest = {
+            productoId: currentProduct.id,
+            usuarioId: localStorage.getItem('usuarioId'), // <-- Aquí usamos localStorage
+            cantidad: 1,
+            precioUnitario: currentPrice,
+            precioTotal: currentPrice,
+            esDigital: selectedFormat === 'digital' ? 1 : 0
         };
-        
-        // Add to cart (in a real app, this would update the cart state)
-        console.log('Adding to cart:', cartItem);
-        
-        // Update cart count (mock)
+
+        try {
+            await API.agregarProductoACarrito(carritoRequest);
+        } catch (error) {
+            if (error.message.includes('ya existe') || error.message.includes('409')) {
+                try {
+                    const idCarrito = await obtenerIdCarrito(currentProduct.id, carritoRequest.usuarioId, carritoRequest.esDigital);
+                    await API.sumarCantidadCarrito(idCarrito, 1);
+                } catch (e) {
+                    console.error('Error al sumar cantidad:', e);
+                }
+            } else {
+                console.error('Error al agregar al carrito:', error);
+            }
+        }
+
         const cartCount = document.querySelector('.cart-count');
         if (cartCount) {
             const currentCount = parseInt(cartCount.textContent) || 0;
             cartCount.textContent = currentCount + 1;
         }
-        
-        // Show success message
+
         addToCartBtn.textContent = '✓ AGREGADO';
         addToCartBtn.style.background = '#059669';
-        
         setTimeout(() => {
             addToCartBtn.textContent = 'AGREGAR AL CARRITO';
             addToCartBtn.style.background = '#059669';
         }, 2000);
+        actualizarCantidadCarrito();
     });
 }
+
+
 
 // Scroll functionality for sticky sidebar
 function initializeScrollBehavior() {
@@ -534,7 +592,7 @@ function handleClicks(e) {
         const categoryId = e.target.dataset.categoryId;
         const categoryName = e.target.textContent.toLowerCase().replace(/ /g, '-');
         if (categoryId) {
-            window.location.href = `/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
+            window.location.href = `/WEB/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
         }
     }
 
@@ -569,4 +627,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeDropdown();
     loadCategories();
     document.addEventListener('click', handleClicks);
+    const cartBtn = document.querySelector('.cart-btn');
+  if (cartBtn) {
+    cartBtn.addEventListener('click', () => {
+      window.location.href = '/WEB/carrito.html';
+    });
+  }
 });

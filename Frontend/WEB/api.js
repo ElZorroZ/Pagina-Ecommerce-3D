@@ -111,6 +111,145 @@ const API = {
             return [];
         }
     },
+    agregarProductoACarrito: async (data) => {
+    const token = localStorage.getItem("accessToken"); // o como lo hayas llamado
 
-    
+    const response = await fetch(`${API_BASE_URL}/api/carrito/agregarProductoaCarrito`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // ✅ importante
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Error al agregar al carrito");
+    }
+
+    return response.json();
+},
+
+sumarCantidadCarrito: async (id, cantidad) => {
+    const token = localStorage.getItem("accessToken");
+
+    const response = await fetch(`${API_BASE_URL}/api/carrito/sumarCantidad/${id}/${cantidad}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}` // ✅ también acá si está protegido
+        }
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Error al sumar cantidad");
+    }
+
+    return response.json();
+},
+
+     // Aquí la función obtenerCarrito corregida y agregada al objeto API
+  async obtenerCarrito() {
+    const usuarioId = localStorage.getItem('usuarioId');
+    const token = localStorage.getItem('accessToken');
+
+    if (!usuarioId || !token) {
+      throw new Error('No hay usuarioId o token en localStorage');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/carrito/verCarritoConImagen/${usuarioId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener carrito: ${response.statusText}`);
+    }
+
+    const carrito = await response.json();
+    return carrito;
+  },
+  async sumarCantidad(id, cantidad) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/carrito/sumarCantidad/${id}/${cantidad}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // si el endpoint requiere auth
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error en sumarCantidad: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error en sumarCantidad API:', error);
+      throw error;
+    }
+  },
+  async borrarProductoCarrito(id) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/carrito/borrarProductoaCarrito/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+      }
+    });
+
+    if (!response.ok) {
+      // Si la respuesta tiene contenido (texto o JSON), intenta leerlo para dar mejor error
+      let errorMsg = response.statusText;
+      try {
+        errorMsg = await response.text();
+      } catch {}
+
+      throw new Error(`Error en borrarProductoCarrito: ${errorMsg}`);
+    }
+
+    // No hagas response.json() porque no hay body
+    return true;
+
+  } catch (error) {
+    console.error('Error en borrarProductoCarrito API:', error);
+    throw error;
+  }
+},
+async vaciarCarrito() {
+  const usuarioId = localStorage.getItem('usuarioId');
+  if (!usuarioId) {
+    throw new Error('No se encontró usuarioId en localStorage');
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/carrito/vaciarCarrito/${usuarioId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // si usás auth
+      }
+    });
+
+    if (!response.ok) {
+      let errorMsg = response.statusText;
+      try {
+        errorMsg = await response.text();
+      } catch {}
+      throw new Error(`Error al vaciar carrito: ${errorMsg}`);
+    }
+
+    return true; // o lo que devuelva el backend si querés manejarlo
+
+  } catch (error) {
+    console.error('Error en vaciarCarrito API:', error);
+    throw error;
+  }
+}
+
+
 };
+window.API = API;

@@ -1,9 +1,11 @@
 package com.formaprogramada.ecommerce_backend;
 
+import com.formaprogramada.ecommerce_backend.Domain.Service.Carrito.CarritoCacheProxyService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Categoria.CategoriaCacheProxy;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Colaborador.ColaboradorCacheProxyService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoCacheProxyService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoCacheService;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Carrito.JpaCarritoRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Categoria.JpaCategoriaRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,11 @@ public class CacheInitializer {
     private CategoriaCacheProxy categoriaCacheProxyService;
     @Autowired
     private ColaboradorCacheProxyService colaboradorCacheProxyService;
+    @Autowired
+    private CarritoCacheProxyService carritoCacheProxyService;
+    @Autowired
+    private JpaCarritoRepository carritoRepository;
+
 
     public CacheInitializer(ProductoCacheService productoCacheService) {
         this.productoCacheService = productoCacheService;
@@ -39,6 +46,10 @@ public class CacheInitializer {
         //Colaboradores
         colaboradorCacheProxyService.precargarColaboradores();
 
+        //Carrito
+        List<Integer> usuariosConCarrito = carritoRepository.obtenerIdsUsuariosConCarrito();
+        carritoCacheProxyService.precargarTodosLosCarritos(usuariosConCarrito);
+        carritoCacheProxyService.precargarTodosLosCarritosCompletos(usuariosConCarrito);
         //Categorias
         // Precargar lista de categorías
         categoriaCacheProxyService.precargarCategoriasLista();

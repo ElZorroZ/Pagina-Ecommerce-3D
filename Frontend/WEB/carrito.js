@@ -1,20 +1,43 @@
 // Cart management
 class CartManager {
     constructor() {
-        this.cart = this.loadCart();
-        this.init();
+            this.cart = [];  // Inicialmente vacío
+
     }
     
-    init() {
+   async init() {
+      await this.loadCart();
         this.renderCart();
         this.updateCartCount();
         this.bindEvents();
     }
 
-    loadCart() {
-        const saved = localStorage.getItem('cart');
-        return saved ? JSON.parse(saved) : [];
+  async loadCart() {
+    try {
+      const carritoData = await window.API.obtenerCarrito();
+
+      if (!Array.isArray(carritoData)) {
+        console.warn('Respuesta no es array, asignando []');
+        this.cart = [];
+      } else {
+        this.cart = carritoData.map(item => ({
+          id: item.id,  // Usar id del carrito (registro en tabla carrito)
+          nombre: item.nombre || 'Producto sin nombre',
+          cantidad: item.cantidad || 1,
+          precio: item.precioUnitario || 0,
+          precioTotal: item.precioTotal || 0,
+          esDigital: item.esDigital ?? false,
+          linkArchivo: item.linkArchivo || null
+        }));
+      }
+    } catch (error) {
+      console.error('Error cargando carrito:', error);
+      this.cart = [];
     }
+  }
+
+
+
 
     saveCart() {
         localStorage.setItem('cart', JSON.stringify(this.cart));
@@ -26,126 +49,200 @@ class CartManager {
             this.proceedToCheckout();
         });
 
+        // Clear cart button
+        document.getElementById('clear-cart-btn')?.addEventListener('click', () => {
+            this.clearCart();
+        });
+
         // Update cart count in header
         this.updateCartCount();
     }
 
-    renderCart() {
-        const cartItemsContainer = document.getElementById('cart-items');
-        const emptyCart = document.getElementById('empty-cart');
-        const cartSummary = document.getElementById('cart-summary');
+renderCart() {
+  const cartItemsContainer = document.getElementById('cart-items');
+  const emptyCart = document.getElementById('empty-cart');
+  const cartSummary = document.getElementById('cart-summary');
+  const clearCartContainer = document.getElementById('clear-cart-container');
 
-        if (this.cart.length === 0) {
-            emptyCart.style.display = 'block';
-            cartSummary.style.display = 'none';
-            cartItemsContainer.innerHTML = '';
-            return;
+  if (!this.cart || this.cart.length === 0) {
+    emptyCart.style.display = 'block';
+    cartSummary.style.display = 'none';
+    clearCartContainer.style.display = 'none';
+    cartItemsContainer.innerHTML = '';
+    return;
+  }
+
+  // Eliminar duplicados por id
+  this.cart = this.cart.filter((item, index, self) =>
+    index === self.findIndex((t) => t.id === item.id)
+  );
+
+  emptyCart.style.display = 'none';
+  cartSummary.style.display = 'block';
+  clearCartContainer.style.display = 'block';
+
+cartItemsContainer.innerHTML = this.cart.map(item => {
+  const imagen = item.linkArchivo ? item.linkArchivo : '/api/placeholder/80/80';
+
+  return `
+    <tr data-cart-id="${item.id}">
+      <td>
+        <div class="product-info">
+          <img src="${imagen}" alt="${item.nombre}" class="product-image-cart">
+          <div class="product-details">
+            <div class="product-name">${item.nombre}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="price">$${item.precio.toFixed(2)}</span></td>
+      
+      <td>
+        ${
+          item.esDigital
+            ? '<span class="digital-product">Digital</span>'
+            : `
+              <div class="quantity-controls">
+                <button class="quantity-btn" onclick="cartManager.updateQuantity(${item.id}, -1)" ${item.cantidad <= 1 ? 'disabled' : ''}>−</button>
+                <input
+                  type="number"
+                  value="${item.cantidad}"
+                  min="1"
+                  max="99"
+                  class="quantity-input"
+                  onchange="cartManager.updateQuantity(${item.id}, this.value - ${item.cantidad})"
+                />
+                <button class="quantity-btn" onclick="cartManager.updateQuantity(${item.id}, 1)">+</button>
+              </div>
+            `
         }
+      </td>
 
-        emptyCart.style.display = 'none';
-        cartSummary.style.display = 'block';
+      <td><span class="price">$${(item.precio * item.cantidad).toFixed(2)}</span></td>
+      
+      <td>
+        <button class="remove-btn" onclick="cartManager.removeItem(${item.id})" title="Eliminar producto">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+            <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </td>
+    </tr>
+  `;
+}).join('');
 
-        cartItemsContainer.innerHTML = this.cart.map(item => `
-            <tr data-product-id="${item.id}">
-                <td>
-                    <div class="product-info">
-                        <img src="${item.imagen || '/api/placeholder/80/80'}" 
-                             alt="${item.nombre}" 
-                             class="product-image-cart">
-                        <div class="product-details">
-                            <div class="product-name">${item.nombre}</div>
-                            <div class="product-variant">${item.color || 'Color por defecto'}</div>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <span class="price">$${item.precio}</span>
-                </td>
-                <td>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn" onclick="cartManager.updateQuantity(${item.id}, ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>
-                            −
-                        </button>
-                        <input type="number" 
-                               value="${item.quantity}" 
-                               min="1" 
-                               max="99"
-                               class="quantity-input"
-                               onchange="cartManager.updateQuantity(${item.id}, this.value)">
-                        <button class="quantity-btn" onclick="cartManager.updateQuantity(${item.id}, ${item.quantity + 1})">
-                            +
-                        </button>
-                    </div>
-                </td>
-                <td>
-                    <span class="price">$${(item.precio * item.quantity).toFixed(2)}</span>
-                </td>
-                <td>
-                    <button class="remove-btn" onclick="cartManager.removeItem(${item.id})" title="Eliminar producto">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3,6 5,6 21,6"></polyline>
-                            <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
 
-        this.updateSummary();
-    }
 
-    updateQuantity(productId, newQuantity) {
-        newQuantity = parseInt(newQuantity);
-        
-        if (newQuantity < 1) {
-            this.removeItem(productId);
-            return;
-        }
 
-        if (newQuantity > 99) {
-            newQuantity = 99;
-        }
+  console.log("Carrito sin duplicados:", this.cart);
 
-        const item = this.cart.find(item => item.id === productId);
-        if (item) {
-            item.quantity = newQuantity;
-            this.saveCart();
-            this.renderCart();
-            this.updateCartCount();
-        }
-    }
+  this.updateSummary();
+}
 
-    removeItem(productId) {
-        if (confirm('¿Estás seguro de que quieres eliminar este producto del carrito?')) {
-            this.cart = this.cart.filter(item => item.id !== productId);
-            this.saveCart();
-            this.renderCart();
-            this.updateCartCount();
-        }
-    }
+async updateQuantity(carritoId, cantidadCambio) {
+  cantidadCambio = parseInt(cantidadCambio);
 
-    updateSummary() {
-        const subtotal = this.cart.reduce((sum, item) => sum + (item.precio * item.quantity), 0);
-        const shipping = subtotal > 50 ? 0 : 5.99; // Free shipping over $50
-        const taxRate = 0.08; // 8% tax
-        const taxes = subtotal * taxRate;
-        const total = subtotal + shipping + taxes;
+  // Encontrar el item para saber la cantidad actual
+  const item = this.cart.find(item => item.id === carritoId);
+  if (!item) return;
 
-        document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-        document.getElementById('shipping').textContent = shipping === 0 ? 'Gratis' : `$${shipping.toFixed(2)}`;
-        document.getElementById('taxes').textContent = `$${taxes.toFixed(2)}`;
-        document.getElementById('total').textContent = `$${total.toFixed(2)}`;
-    }
+  const nuevaCantidad = item.cantidad + cantidadCambio;
 
-    updateCartCount() {
-        const count = this.cart.reduce((sum, item) => sum + item.quantity, 0);
+  // Validar que nueva cantidad sea >= 1
+  if (nuevaCantidad < 1) {
+    this.removeItem(carritoId);
+    return;
+  }
+
+  // Limitar máximo si querés
+  if (nuevaCantidad > 99) {
+    cantidadCambio = 99 - item.cantidad;
+  }
+
+  try {
+    console.log("Sumando cantidad:", { carritoId, cantidadCambio });
+    // Enviar solo el delta al backend
+    await window.API.sumarCantidad(carritoId, cantidadCambio);
+
+    // Actualizar localmente
+    item.cantidad += cantidadCambio;
+    this.saveCart();
+    this.renderCart();
+    this.updateCartCount();
+
+  } catch (error) {
+    console.error('Error actualizando cantidad en el servidor:', error);
+    alert('No se pudo actualizar la cantidad, intente nuevamente.');
+  }
+}
+
+
+ async removeItem(carritoId) {
+  if (!confirm('¿Estás seguro de que quieres eliminar este producto del carrito?')) return;
+
+  try {
+    await window.API.borrarProductoCarrito(carritoId);
+    this.cart = this.cart.filter(item => item.id !== carritoId);
+    this.saveCart();
+    this.renderCart();
+    this.updateCartCount();
+  } catch (error) {
+    // Mostrar error detallado
+    alert(`No se pudo eliminar el producto, intente nuevamente.\nDetalle: ${error.message || error}`);
+    console.log('Error en removeItem:', error);
+  }
+}
+
+async clearCart() {
+  if (!confirm('¿Estás seguro de que quieres vaciar todo el carrito?')) return;
+
+  try {
+    await window.API.vaciarCarrito();
+    this.cart = [];
+    this.saveCart();
+    this.renderCart();
+    this.updateCartCount();
+    alert('Carrito vaciado exitosamente');
+  } catch (error) {
+    alert(`No se pudo vaciar el carrito, intente nuevamente.\nDetalle: ${error.message || error}`);
+    console.log('Error en clearCart:', error);
+  }
+}
+
+
+
+updateSummary() {
+    const subtotal = this.cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    const total = subtotal;
+
+    document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById('shipping').textContent = '-';  // o vacío
+    document.getElementById('taxes').textContent = '-';    // o vacío
+    document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+}
+
+
+
+   async updateCartCount() {
+    try {
+        // Llamar a la API para obtener el carrito actualizado
+        const carritoData = await window.API.obtenerCarrito();
+
+        // Sumar las cantidades
+        const count = carritoData.reduce((sum, item) => sum + item.cantidad, 0);
+
         const cartCountElement = document.getElementById('cart-count');
         if (cartCountElement) {
             cartCountElement.textContent = count;
         }
+    } catch (error) {
+        console.error('Error actualizando contador de carrito:', error);
     }
+}
+
 
     proceedToCheckout() {
         if (this.cart.length === 0) {
@@ -201,7 +298,7 @@ function handleClicks(e) {
         const categoryId = e.target.dataset.categoryId;
         const categoryName = e.target.textContent.toLowerCase().replace(/ /g, '-');
         if (categoryId) {
-            window.location.href = `/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
+            window.location.href = `/WEB/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
         }
     }
 
@@ -240,13 +337,14 @@ function initializeMobileMenu() {
     }
 }
 
-// Initialize cart manager and other functionality
-let cartManager;
 
-document.addEventListener('DOMContentLoaded', () => {
+
+document.addEventListener('DOMContentLoaded', async () => {
     cartManager = new CartManager();
+    await cartManager.init();
     initializeMobileMenu();
     initializeDropdown();
     loadCategories();
     document.addEventListener('click', handleClicks);
+    
 });

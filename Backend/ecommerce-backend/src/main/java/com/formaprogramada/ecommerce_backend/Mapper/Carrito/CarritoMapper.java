@@ -4,11 +4,13 @@ import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoAgregarRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 import org.springframework.stereotype.Component;
-
 @Component
 public class CarritoMapper {
+
+    // Convierte desde request (DTO) a dominio
     public static Carrito toDomain(CarritoAgregarRequest request) {
         Carrito carrito = new Carrito();
+        // Aquí no seteamos el id porque es nuevo
         carrito.setProductoId(request.getProductoId());
         carrito.setUsuarioId(request.getUsuarioId());
         carrito.setCantidad(request.getCantidad());
@@ -18,33 +20,37 @@ public class CarritoMapper {
         return carrito;
     }
 
-    public Carrito toDomain2(CarritoEntity request) {
+    // Convierte desde entidad JPA a dominio (aquí sí seteamos id)
+    public Carrito toDomain2(CarritoEntity entity) {
+        if (entity == null) return null;
+
         Carrito carrito = new Carrito();
-        carrito.setProductoId(request.getProductoId());
-        carrito.setUsuarioId(request.getUsuarioId());
-        carrito.setCantidad(request.getCantidad());
-        carrito.setPrecioTotal(request.getPrecioTotal());
-        carrito.setPrecioUnitario(request.getPrecioUnitario());
+        carrito.setId(entity.getId());                    // <-- importante!
+        carrito.setProductoId(entity.getProductoId());
+        carrito.setUsuarioId(entity.getUsuarioId());
+        carrito.setCantidad(entity.getCantidad());
+        carrito.setPrecioTotal(entity.getPrecioTotal());
+        carrito.setPrecioUnitario(entity.getPrecioUnitario());
+        carrito.setEsDigital(entity.isEsDigital());       // agregalo también para consistencia
         return carrito;
     }
 
+    // Convierte desde dominio a entidad JPA
     public CarritoEntity toEntity(Carrito carrito) {
-        if ( carrito == null ) {
+        if (carrito == null) {
             return null;
         }
 
-        CarritoEntity.CarritoEntityBuilder carritoEntity = CarritoEntity.builder();
+        CarritoEntity.CarritoEntityBuilder builder = CarritoEntity.builder();
 
-        carritoEntity.id( carrito.getId() );
-        carritoEntity.productoId( carrito.getProductoId() );
-        carritoEntity.usuarioId( carrito.getUsuarioId() );
-        carritoEntity.cantidad( carrito.getCantidad());
-        carritoEntity.precioTotal( carrito.getPrecioTotal());
-        carritoEntity.precioUnitario( carrito.getPrecioUnitario());
-        carritoEntity.esDigital(carrito.isEsDigital());
+        builder.id(carrito.getId());                      // importante para update
+        builder.productoId(carrito.getProductoId());
+        builder.usuarioId(carrito.getUsuarioId());
+        builder.cantidad(carrito.getCantidad());
+        builder.precioTotal(carrito.getPrecioTotal());
+        builder.precioUnitario(carrito.getPrecioUnitario());
+        builder.esDigital(carrito.isEsDigital());
 
-
-
-        return carritoEntity.build();
+        return builder.build();
     }
 }

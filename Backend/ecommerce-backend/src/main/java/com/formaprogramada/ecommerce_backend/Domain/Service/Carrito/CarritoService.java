@@ -1,6 +1,7 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Carrito;
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoCompletoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 
 import java.util.List;
@@ -12,5 +13,5 @@ public interface CarritoService {
     Boolean BorrarProductoCarrito(int id);
     Boolean VaciarCarrito(int id);
     List<CarritoEntity> LeerUnCarrito(int id);
-
+    List<CarritoCompletoDTO> LeerUnCarritoCompleto(Integer usuarioId) ;
 }

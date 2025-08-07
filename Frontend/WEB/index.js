@@ -202,7 +202,7 @@ function handleClicks(e) {
         const categoryId = e.target.dataset.categoryId;
         const categoryName = e.target.textContent.toLowerCase().replace(/ /g, '-');
         if (categoryId) {
-            window.location.href = `/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
+            window.location.href = `/WEB/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
         }
     }
 

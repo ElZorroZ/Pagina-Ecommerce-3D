@@ -96,7 +96,6 @@ public class AuthController {
 
         return ResponseEntity.ok("Usuario validado correctamente.");
     }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
@@ -105,7 +104,20 @@ public class AuthController {
             var userDetails = (UserDetails) auth.getPrincipal();
 
             AuthResponse tokens = jwtTokenService.generarTokens(userDetails);
-            return ResponseEntity.ok(tokens);
+
+            Optional<Usuario> usuarioOpt = usuarioService.buscarPorGmail(request.getGmail());
+            if (usuarioOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
+            }
+
+            Usuario usuario = usuarioOpt.get();
+
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("accessToken", tokens.getAccessToken());
+            responseBody.put("refreshToken", tokens.getRefreshToken());
+            responseBody.put("usuarioId", usuario.getId());
+
+            return ResponseEntity.ok(responseBody);
 
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");

@@ -94,85 +94,84 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="cart-main">
-        <div class="container">
-            <div class="cart-header">
-                <h1 class="cart-title">Carrito de Compras</h1>
-                <p class="cart-subtitle">Revisa tus productos antes de proceder al pago</p>
-            </div>
+  <div class="container">
+    <div class="cart-header">
+      <h1 class="cart-title">Carrito de Compras</h1>
+      <p class="cart-subtitle">Revisa tus productos antes de proceder al pago</p>
+    </div>
 
-            <div class="cart-content">
-                <!-- Cart Table -->
-                <div class="cart-table-container">
-                    <div class="cart-table-wrapper">
-                        <table class="cart-table">
-                            <thead>
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Precio</th>
-                                    <th>Cantidad</th>
-                                    <th>Total</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody id="cart-items">
-                                <!-- Cart items will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Empty cart message -->
-                    <div class="empty-cart" id="empty-cart" style="display: none;">
-                        <div class="empty-cart-icon">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <circle cx="9" cy="21" r="1"></circle>
-                                <circle cx="20" cy="21" r="1"></circle>
-                                <path d="m1 1 4 4 5.68 13.68a2 2 0 0 0 2 1.32H19"></path>
-                            </svg>
-                        </div>
-                        <h3>Tu carrito está vacío</h3>
-                        <p>Agrega algunos productos para comenzar</p>
-                        <button class="continue-shopping-btn" onclick="window.history.back()">
-                            Continuar Comprando
-                        </button>
-                    </div>
-                </div>
+    <div class="cart-layout">
+      <!-- Lado izquierdo: tabla + botón -->
+      <div class="cart-left">
+        <div class="cart-table-container">
+          <div class="cart-table-wrapper">
+            <table class="cart-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Precio</th>
+                  <th>Cantidad</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="cart-items"></tbody>
+            </table>
+          </div>
 
-                <!-- Cart Summary -->
-                <div class="cart-summary" id="cart-summary">
-                    <h3 class="summary-title">Resumen de Compra</h3>
-                    <div class="summary-row">
-                        <span>Subtotal:</span>
-                        <span id="subtotal">$0.00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Envío:</span>
-                        <span id="shipping">$0.00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Impuestos:</span>
-                        <span id="taxes">$0.00</span>
-                    </div>
-                    <hr class="summary-divider">
-                    <div class="summary-row total-row">
-                        <span>Total:</span>
-                        <span id="total">$0.00</span>
-                    </div>
-                    
-                    <div class="cart-actions">
-                        <button class="continue-shopping-btn" onclick="window.history.back()">
-                            Continuar Comprando
-                        </button>
-                        <button class="checkout-btn" id="checkout-btn">
-                            Proceder al Pago
-                        </button>
-                    </div>
-                </div>
+          <div class="empty-cart" id="empty-cart" style="display: none;">
+            <div class="empty-cart-icon">
+              <!-- SVG -->
             </div>
+            <h3>Tu carrito está vacío</h3>
+            <p>Agrega algunos productos para comenzar</p>
+            <button class="continue-shopping-btn" onclick="window.history.back()">
+              Continuar Comprando
+            </button>
+          </div>
         </div>
-    </main>
+
+        <!-- ✅ Botón debajo de la tabla -->
+        <div class="clear-cart-container" id="clear-cart-container" style="display: none;">
+          <button class="clear-cart-btn" id="clear-cart-btn">
+            <!-- SVG -->
+            Vaciar Carrito
+          </button>
+        </div>
+      </div>
+
+      <!-- Lado derecho: resumen -->
+      <div class="cart-summary" id="cart-summary">
+        <h3 class="summary-title">Resumen de Compra</h3>
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span id="subtotal">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Envío:</span>
+          <span id="shipping">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Impuestos:</span>
+          <span id="taxes">$0.00</span>
+        </div>
+        <hr class="summary-divider" />
+        <div class="summary-row total-row">
+          <span>Total:</span>
+          <span id="total">$0.00</span>
+        </div>
+        <div class="cart-actions">
+          <button class="continue-shopping-btn" onclick="window.history.back()">Continuar Comprando</button>
+          <button class="checkout-btn" id="checkout-btn">Proceder al Pago</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
     <script src="api.js"></script>
+    <script src="carrito-visual.js"></script>
     <script src="carrito.js"></script>
 </body>
 </html>

@@ -57,6 +57,7 @@ public class SecurityConfig {
 
                         // Permitir PUT solo en /api/usuario a CLIENTE
                         .requestMatchers(HttpMethod.PUT, "/api/usuario/**").hasAnyRole("CLIENTE", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/carrito/**").hasAnyRole("CLIENTE", "ADMIN")
 
 
                         // Los demás PUT solo para ADMIN
