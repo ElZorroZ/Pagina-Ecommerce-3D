@@ -53,6 +53,8 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/completo").permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/api/pedido/verPedido").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN")
 
                         // Permitir PUT solo en /api/usuario a CLIENTE
@@ -107,4 +109,6 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
 }

@@ -20,6 +20,7 @@ public class ProductoAprobacionResponse {
     private String nombre;
     private String descripcion;
     private float precio;
+    private float precioDigital;
     private Integer categoriaId;
     private List<String> colores;
     private boolean destacado;

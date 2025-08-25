@@ -32,6 +32,9 @@ public class CarritoEntity {
     @Column(length = 100, nullable = false)
     private double precioUnitario;
 
+    @Column(length = 100, nullable = true)
+    private int colorId;
+
     @Column(columnDefinition = "TINYINT")
     private boolean esDigital;
 

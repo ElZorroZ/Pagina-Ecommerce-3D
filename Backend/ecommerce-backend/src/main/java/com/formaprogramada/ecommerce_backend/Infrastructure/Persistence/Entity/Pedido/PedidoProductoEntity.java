@@ -34,6 +34,13 @@ public class PedidoProductoEntity {
     @Column(length = 100, nullable = false)
     private double precio;
 
+    @Column(length = 100, nullable = false)
+    private int colorId;
+
     @Column(length = 50, nullable = false)
     private Boolean esDigital;
+
+    @Column(length = 100, nullable = false)
+    private String nombre;
+
 }

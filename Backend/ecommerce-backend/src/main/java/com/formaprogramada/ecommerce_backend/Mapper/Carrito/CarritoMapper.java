@@ -17,6 +17,7 @@ public class CarritoMapper {
         carrito.setPrecioTotal(request.getPrecioTotal());
         carrito.setPrecioUnitario(request.getPrecioUnitario());
         carrito.setEsDigital(request.getEsDigital());
+        carrito.setColor(request.getColor());
         return carrito;
     }
 
@@ -31,7 +32,8 @@ public class CarritoMapper {
         carrito.setCantidad(entity.getCantidad());
         carrito.setPrecioTotal(entity.getPrecioTotal());
         carrito.setPrecioUnitario(entity.getPrecioUnitario());
-        carrito.setEsDigital(entity.isEsDigital());       // agregalo también para consistencia
+        carrito.setEsDigital(entity.isEsDigital());
+        carrito.setColor(entity.getColorId());// agregalo también para consistencia
         return carrito;
     }
 
@@ -50,6 +52,7 @@ public class CarritoMapper {
         builder.precioTotal(carrito.getPrecioTotal());
         builder.precioUnitario(carrito.getPrecioUnitario());
         builder.esDigital(carrito.isEsDigital());
+        builder.colorId(carrito.getColor());
 
         return builder.build();
     }
