@@ -2,10 +2,13 @@ package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Reposit
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.Pedido;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.PedidoProducto;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Pedido.PedidoRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoUsuarioDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.ProductoEnPedidoDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdatePedido;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido.PedidoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido.PedidoProductoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
@@ -29,25 +32,37 @@ public class PedidoRepositoryImpl implements PedidoRepository {
     private JpaProductoRepository jpaProductoRepository;
     private JpaUsuarioRepository jpaUsuarioRepository;
 
+
     @Override
     public Pedido CrearPedido(List<PedidoProducto> lista, int id) {
         Pedido pedido = PedidoMapper.toDomain2(lista, id);
         PedidoEntity pedido1 = PedidoMapper.toEntity(pedido);
-        PedidoEntity saved = jpaPedidoRepository.save(pedido1);
-
-        List<PedidoProductoEntity> lista2 = PedidoMapper.toEntity(lista);
-        for (PedidoProductoEntity pedidoProducto : lista2) {
-            pedidoProducto.setPedidoId(saved);
-            jpaPedidoProductoRepository.save(pedidoProducto);
+        try {
+            PedidoEntity saved = jpaPedidoRepository.save(pedido1);
+        }catch (Exception e){
+            throw new IllegalArgumentException("No se logró guardar el pedido");
         }
 
+        try {
+            List<PedidoProductoEntity> lista2 = PedidoMapper.toEntity(lista);
+            for (PedidoProductoEntity pedidoProducto : lista2) {
+                pedidoProducto.setPedidoId(saved);
+                jpaPedidoProductoRepository.save(pedidoProducto);
+            }
+        }catch (Exception e){
+            throw new RuntimeException("Error al momento de colocar un producto en el pedido");
+        }
 
         return pedido;
     }
 
     @Override
     public void BorrarPedido(int id) {
-        jpaPedidoRepository.deleteById(id);
+        try {
+            jpaPedidoRepository.deleteById(id);
+        }catch (Exception e){
+            throw new RuntimeException("No se logró borrar el pedido");
+    }
     }
 
     @Override
@@ -88,5 +103,15 @@ public class PedidoRepositoryImpl implements PedidoRepository {
 
 
         return  PedidoMapper.toDTO(lista);
+    }
+
+    @Override
+    public void ModificarPedido(UsuarioUpdatePedido usuario) {
+        if (jpaUsuarioRepository.existsByGmail(usuario.getGmail())){
+            jpaUsuarioRepository.actualizarUsuario(usuario.getGmail(), usuario.getNombre(), usuario.getApellido(), usuario.getDireccion(), usuario.getCp(), usuario.getCiudad(), usuario.getTelefono());
+        }
+        else{
+            throw new IllegalArgumentException("No existe un usuario con ese Gmail.");
+        }
     }
 }

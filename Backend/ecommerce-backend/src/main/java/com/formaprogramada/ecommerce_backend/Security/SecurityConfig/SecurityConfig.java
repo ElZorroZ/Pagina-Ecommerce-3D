@@ -53,7 +53,7 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/completo").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/pedido/verPedido").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/pedido/modificarPedido").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN")
 

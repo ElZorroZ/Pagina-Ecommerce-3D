@@ -34,4 +34,5 @@ public class UsuarioUpdate {
     @Pattern(regexp = "(^$|\\d{1,20})", message = "El teléfono debe contener hasta 20 dígitos")
     @Nullable
     private String telefono;
+
 }

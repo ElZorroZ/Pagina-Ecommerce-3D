@@ -8,6 +8,8 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoA
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoCompletoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoUsuarioDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdatePedido;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.Carrito.CarritoMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Pedido.PedidoMapper;
@@ -55,9 +57,10 @@ public class PedidoController {
     }
     }
 
-    @PostMapping("/modificarPedido")
-    public ResponseEntity<?> modificarPedido(){
+    @PutMapping("/modificarPedido")
+    public ResponseEntity<?> modificarPedido(@RequestBody UsuarioUpdatePedido usuarioCambios){
         try{
+            pedidoService.ModificarPedido(usuarioCambios);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             throw new RuntimeException(e);

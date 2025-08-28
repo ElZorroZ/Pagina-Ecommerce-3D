@@ -5,6 +5,8 @@ import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.PedidoProducto;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Pedido.PedidoRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoUsuarioDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdatePedido;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,5 +35,10 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     public List<PedidoDTO> verPedidos() {
         return pedidoRepository.verPedidos();
+    }
+
+    @Override
+    public void ModificarPedido(UsuarioUpdatePedido usuario) {
+        pedidoRepository.ModificarPedido(usuario);
     }
 }
