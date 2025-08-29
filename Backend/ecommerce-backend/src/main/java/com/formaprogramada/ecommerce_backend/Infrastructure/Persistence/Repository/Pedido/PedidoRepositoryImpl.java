@@ -37,11 +37,8 @@ public class PedidoRepositoryImpl implements PedidoRepository {
     public Pedido CrearPedido(List<PedidoProducto> lista, int id) {
         Pedido pedido = PedidoMapper.toDomain2(lista, id);
         PedidoEntity pedido1 = PedidoMapper.toEntity(pedido);
-        try {
+
             PedidoEntity saved = jpaPedidoRepository.save(pedido1);
-        }catch (Exception e){
-            throw new IllegalArgumentException("No se logró guardar el pedido");
-        }
 
         try {
             List<PedidoProductoEntity> lista2 = PedidoMapper.toEntity(lista);
@@ -102,6 +99,15 @@ public class PedidoRepositoryImpl implements PedidoRepository {
          List<PedidoEntity> lista= jpaPedidoRepository.findAll();
 
 
+
+
+        return  PedidoMapper.toDTO(lista);
+    }
+
+    @Override
+    public List<PedidoDTO> verPedidosDeUsuario(UsuarioEntity idUsuario) {
+        List<PedidoEntity> lista= jpaPedidoRepository.PedidosDeUsuario(idUsuario);
+        System.out.println(lista);
         return  PedidoMapper.toDTO(lista);
     }
 
@@ -114,4 +120,12 @@ public class PedidoRepositoryImpl implements PedidoRepository {
             throw new IllegalArgumentException("No existe un usuario con ese Gmail.");
         }
     }
+
+    @Override
+    public void CambiarEstado(String estado, int id) {
+        jpaPedidoRepository.modificarEstado(id,estado);
+
+    }
+
+
 }

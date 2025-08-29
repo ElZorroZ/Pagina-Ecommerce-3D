@@ -76,6 +76,17 @@ public class PedidoController {
         }
     }
 
+    @GetMapping("/verPedidosDeUsuario")
+    public ResponseEntity<List<PedidoDTO>> verPedidosDeUsuario(@RequestParam int id){
+        try{
+            return ResponseEntity.ok(pedidoService.verPedidosDeUsuario(id));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
     @GetMapping("/verPedido")
     public ResponseEntity<PedidoUsuarioDTO> verPedido(@RequestParam int id){
         try{
@@ -84,4 +95,18 @@ public class PedidoController {
             throw new RuntimeException(e);
         }
     }
+
+    @PutMapping("/CambiarEstado")
+    public ResponseEntity<?> cambiarEstado(@RequestParam String estado,@RequestParam int id) {
+        try {
+            pedidoService.CambiarEstado(estado, id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+
 }

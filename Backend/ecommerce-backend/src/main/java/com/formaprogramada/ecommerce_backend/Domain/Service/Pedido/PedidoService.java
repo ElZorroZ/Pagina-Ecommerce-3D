@@ -15,5 +15,7 @@ public interface PedidoService {
     void BorrarPedido(int id);
     PedidoUsuarioDTO verPedido(int id);
     List<PedidoDTO> verPedidos();
+    List<PedidoDTO> verPedidosDeUsuario(int id);
     void ModificarPedido(UsuarioUpdatePedido usuario);
+    void CambiarEstado(String estado,int id);
 }
