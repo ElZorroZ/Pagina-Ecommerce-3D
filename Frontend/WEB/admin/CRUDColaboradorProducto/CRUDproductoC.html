@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CRUD de Producto</title>
-  <link rel="stylesheet" href="CRUDproducto_styles.css" />
+  <link rel="stylesheet" href="CRUDproductoC_styles.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/>
 </head>
 <body>
@@ -47,13 +47,25 @@
           <option value="">Seleccionar categoría</option>
         </select>
 
-        <label>Precio:</label>
-        <input type="number" id="precio" min="0" step="0.01" required placeholder="Ej: 1234.56" />
+       <label>Precio:</label>
+      <input 
+          type="number" 
+          id="precio" 
+          min="0" 
+          step="1" 
+          required 
+          placeholder="Ej: 1234">
 
-        <label>Precio Digital:</label>
-        <input type="number" id="precioDigital" min="0" step="0.01" required placeholder="Ej: 1234.56" />
+      <label>Precio Digital:</label>
+      <input 
+          type="number" 
+          id="precioDigital" 
+          min="0" 
+          step="1" 
+          required 
+          placeholder="Ej: 1234">
 
-        
+
         <label>Colores:</label>
         <div class="color-input-container">
           <div class="color-picker" style="margin-top:5px;"></div>
@@ -65,7 +77,6 @@
         <!-- Contenedor donde Pickr mostrará la paleta -->
 
         <ul id="lista-colores"></ul>
-
 
         <label>Imágenes (máx. 5):</label>
         <input type="file" id="imagenes" multiple accept="image/*" />
@@ -91,8 +102,16 @@
 
 
 
-        <label for="seguimiento">Seguimiento (letras y números):</label>
-        <input type="text" id="seguimiento" pattern="[A-Za-z0-9]+" title="Solo letras y números" required />
+       <label for="seguimiento">Seguimiento (letras y números):</label>
+        <input 
+          type="text" 
+          id="seguimiento" 
+          pattern="[A-Za-z0-9]+" 
+          title="Solo letras y números (máximo 8 caracteres)" 
+          maxlength="8" 
+          required 
+        />
+
 
         <label>Dimensiones (cm):</label>
         <div style="display: flex; gap: 10px;">
@@ -108,7 +127,13 @@
         <input type="number" id="peso" min="0" step="0.01" required />
 
         <label for="tecnica">Técnica:</label>
-        <input type="text" id="tecnica" required />
+        <input 
+          type="text" 
+          id="tecnica" 
+          maxlength="100" 
+          required 
+        />
+
 
 
         <!-- BOTONES: DEBAJO DEL PREVIEW, A LA IZQUIERDA -->
@@ -160,8 +185,8 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
-  <script src="Create-Producto.js"></script>
-  <script src="Get-Producto.js"></script>
+  <script src="Create-ProductoC.js"></script>
+  <script src="Get-ProductoC.js"></script>
   <script src="pickr.js"></script>
 
 </body>

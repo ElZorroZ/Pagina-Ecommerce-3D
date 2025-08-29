@@ -5,8 +5,14 @@ import com.formaprogramada.ecommerce_backend.Domain.Service.Categoria.CategoriaC
 import com.formaprogramada.ecommerce_backend.Domain.Service.Colaborador.ColaboradorCacheProxyService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoCacheProxyService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoCacheService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoColaborador.ProductoColaboradorCacheService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoColaborador.ProductoColaboradorService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoColaborador.ProductoColaboradorServiceImpl;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ProductoCompletoAprobacionDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoAprobacionEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Carrito.JpaCarritoRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Categoria.JpaCategoriaRepository;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.ProductoAprobado.JpaProductoAprobacionRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -34,10 +40,17 @@ public class CacheInitializer {
     private CarritoCacheProxyService carritoCacheProxyService;
     @Autowired
     private JpaCarritoRepository carritoRepository;
+    @Autowired
+    private ProductoColaboradorCacheService cacheService;
+    @Autowired
+    private ProductoColaboradorService productoColaborador;
+    @Autowired
+    private JpaProductoAprobacionRepository productoAprobacionRepository;
 
-
-    public CacheInitializer(ProductoCacheService productoCacheService) {
+    public CacheInitializer(ProductoCacheService productoCacheService, ProductoColaboradorService productoColaborador, ProductoColaboradorCacheService cacheService) {
+        this.productoColaborador = productoColaborador;
         this.productoCacheService = productoCacheService;
+        this.cacheService = cacheService;
     }
 
     @EventListener(ContextRefreshedEvent.class)
@@ -45,6 +58,27 @@ public class CacheInitializer {
     public void cargarCacheAlIniciar() {
         //Colaboradores
         colaboradorCacheProxyService.precargarColaboradores();
+        //  los productos
+        List<ProductoAprobacionEntity> todosProductos = productoAprobacionRepository.findAll();
+        for (ProductoAprobacionEntity prod : todosProductos) {
+            // 1️⃣ Cache de lista general
+            cacheService.agregarAlCache(prod);
+
+            // 2️⃣ Cache por usuario (producto a aprobar)
+            try {
+                ProductoCompletoAprobacionDTO completo = productoColaborador.obtenerProductoCompletoSinCache(prod.getId());
+                if (completo != null && completo.getProducto() != null) {
+                    cacheService.agregarProductoAprobarAlCache(prod.getUsuarioId().getId(), completo);
+
+                    // 3️⃣ Cache por producto completo
+                    cacheService.agregarProductoCompletoAlCache(prod.getId(), completo);
+                }
+            } catch (Exception e) {
+                System.err.println("[CACHE INIT] Error cargando producto " + prod.getId() + ": " + e.getMessage());
+            }
+        }
+
+        System.out.println("[CACHE INIT] Precarga completada. Productos en cache: " + todosProductos.size());
 
         //Carrito
         List<Integer> usuariosConCarrito = carritoRepository.obtenerIdsUsuariosConCarrito();

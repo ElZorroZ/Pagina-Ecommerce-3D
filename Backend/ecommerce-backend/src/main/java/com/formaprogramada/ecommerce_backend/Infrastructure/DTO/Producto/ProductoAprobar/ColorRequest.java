@@ -7,11 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductoAprobacionArchivoDTO {
-    private Integer id;
-    private Integer productId;
-    private String archivoImagen;
-    private Integer orden;
-    private Boolean eliminado; // true si se marcó para borrar
-
+public class ColorRequest {
+    private String nombre;  // nombre opcional
+    private String hex;     // color en formato #RRGGBB o #RRGGBBAA
 }

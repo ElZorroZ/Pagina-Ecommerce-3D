@@ -7,6 +7,7 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.Product
 import lombok.*;
 
 import java.util.Arrays;
+import java.util.Base64;
 
 @Data
 
@@ -19,14 +20,21 @@ public class ProductoAprobarDTOMapper {
         dto.setUsuarioId(responseDTO.getIdCreador());
         dto.setNombre(responseDTO.getNombre());
         dto.setDescripcion(responseDTO.getDescripcion());
-        dto.setCategoriaId(responseDTO.getCategoriaId()); // si no está en ResponseDTO
+        dto.setCategoriaId(responseDTO.getCategoriaId());
+
         dto.setPrecio(responseDTO.getPrecio());
-        dto.setArchivo(responseDTO.getArchivos() != null && !responseDTO.getArchivos().isEmpty()
-                ? Arrays.toString(responseDTO.getArchivos().get(0).getArchivoImagen())
-                : null);
+
+        // Convertir byte[] a Base64 String para archivo ZIP/STL
+        if (responseDTO.getArchivo() != null) {
+            dto.setArchivo(Base64.getEncoder().encodeToString(responseDTO.getArchivo()));
+        } else {
+            dto.setArchivo(null);
+        }
+
         dto.setCodigoInicial(responseDTO.getCodigo());
-        dto.setArchivoStl(Arrays.toString(responseDTO.getArchivo()));
 
         return dto;
     }
+
 }
+

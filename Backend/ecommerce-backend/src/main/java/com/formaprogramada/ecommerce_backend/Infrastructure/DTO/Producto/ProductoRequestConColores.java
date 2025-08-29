@@ -1,5 +1,6 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto;
 
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ColorRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,7 @@ public class ProductoRequestConColores {
     private float precioDigital;
 
     // Colores
-    private List<String> colores;
+    private List<ColorRequest> colores;
 
     // Nuevos campos para código
     private String codigoInicial;  // 3 letras

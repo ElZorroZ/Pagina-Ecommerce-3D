@@ -1,4 +1,6 @@
+
 document.addEventListener("DOMContentLoaded", () => {
+
 // Función para refrescar el access token usando el refresh token
 async function refreshAccessToken() {
   const refreshToken = localStorage.getItem("refreshToken");
@@ -130,7 +132,7 @@ async function fetchConRefresh(url, options = {}) {
     formData.append("file", file);
     formData.append("orden", orden);
 
-    const res = await fetchConRefresh(`http://localhost:8080/api/productos/${productoId}/archivos`, {
+    const res = await fetchConRefresh(`http://localhost:8080/api/productosAprobacion/${productoId}/archivos`, {
       method: "POST",
       body: formData,
     });
@@ -148,7 +150,7 @@ async function fetchConRefresh(url, options = {}) {
   }
 
   const form = document.getElementById("form-producto");
-const inputColorText = document.getElementById("input-color-text");
+  const inputColorText = document.getElementById("input-color-text");
   const inputColorNombre = document.getElementById("input-color-nombre");
   const btnAgregarColor = document.getElementById("btn-agregar-color");
   const listaColores = document.getElementById("lista-colores");
@@ -325,7 +327,7 @@ actualizarListaColores();
     btnEliminar.style.cursor = "pointer";
     btnEliminar.style.borderRadius = "0 4px 0 4px";
     btnEliminar.style.padding = "0 4px";
-    btnEliminar.title = "Eliminar archivo STL";
+    btnEliminar.title = "Eliminar archivo ZIP";
     btnEliminar.addEventListener("click", () => {
       window.productoState.archivoComprimido = null;
       inputArchivoComprimido.value = "";
@@ -369,19 +371,22 @@ actualizarListaColores();
     alert("Por favor completa todos los campos obligatorios.");
     return;
   }
+const tieneArchivosDeOtroProducto = window.productoState.archivosSeleccionados
+  ?.filter(a => !a.eliminado) // aunque en crear no debería haber eliminados
+  .some(a => !(a instanceof File)) || false;
 
-  const tieneArchivosDeOtroProducto = window.productoState.archivosSeleccionados.some(a => !(a instanceof File));
+if (tieneArchivosDeOtroProducto) {
+  alert("Estás usando imágenes que pertenecen a otro producto. Por favor eliminá esas imágenes antes de guardar uno nuevo.");
+  return;
+}
 
-  if (tieneArchivosDeOtroProducto) {
-    alert("Estás usando imágenes que pertenecen a otro producto. Por favor eliminá esas imágenes antes de guardar uno nuevo.");
-    return;
-  }
 
   const categoriaId = parseInt(document.getElementById("categoria").value);
   if (!categoriaId) {
     alert("Seleccioná una categoría");
     return;
   }
+const usuarioLogueadoId = parseInt(localStorage.getItem("usuarioId"), 10);
 
   try {
     // Armar FormData para enviar JSON + archivo
@@ -403,20 +408,22 @@ actualizarListaColores();
       dimensionProfundidad,
       material,
       peso,
-      tecnica
+      tecnica,
+      creadorId: usuarioLogueadoId
     };
+    console.log("ProductoPayload a enviar:", productoPayload);
 
     // El JSON va como string en una parte llamada "producto" (podés cambiar el nombre si querés)
     formData.append("producto", new Blob([JSON.stringify(productoPayload)], { type: "application/json" }));
 
-    // Agregar archivo STL (input con id "archivo-stl")
+    // Agregar archivo ZIP (input con id "archivo-comprimido")
     const archivoComprimidoInput = document.getElementById("archivo-comprimido");
     if (archivoComprimidoInput && archivoComprimidoInput.files.length > 0) {
       formData.append("archivo", archivoComprimidoInput.files[0]);
     }
 
-    const backendBase = "http://localhost:8080/api/productos";
-
+    const backendBase = "http://localhost:8080/api/productosAprobacion/crearAprobacionProducto";
+    
     const resProducto = await fetchConRefresh(backendBase, {
       method: "POST",
       // NO seteamos Content-Type, fetch lo hará automáticamente con boundary correcto
@@ -434,12 +441,15 @@ actualizarListaColores();
 
     const productoCreado = await resProducto.json();
 
-    // Subir imágenes normales (si las hay)
-    if (window.productoState.archivosSeleccionados.length > 0) {
-      for (let i = 0; i < Math.min(window.productoState.archivosSeleccionados.length, 5); i++) {
-        await subirArchivoBackend(productoCreado.id, window.productoState.archivosSeleccionados[i], i);
+    // Filtrar solo los que sean instancias de File
+    const archivosValidos = window.productoState.archivosSeleccionados.filter(f => f instanceof File);
+
+    if (archivosValidos.length > 0) {
+      for (let i = 0; i < Math.min(archivosValidos.length, 5); i++) {
+        await subirArchivoBackend(productoCreado.id, archivosValidos[i], i);
       }
     }
+
 
     alert("Producto, colores, archivo Comprimido y imagenes guardados con éxito!");
     form.reset();

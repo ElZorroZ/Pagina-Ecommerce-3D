@@ -382,6 +382,24 @@ input[type="file"]::before {
 input[type="file"]:hover::before {
   background: #ddd;
 }
+/* --- INPUT ARCHIVO COMPRIMIDO --- */
+#archivo-comprimido::-webkit-file-upload-button {
+  visibility: hidden;
+}
+
+#archivo-comprimido::before {
+  content: "Seleccionar archivo comprimido   ";
+  display: inline-block;
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#archivo-comprimido:hover::before {
+  background: #ddd;
+}
 /* Botones debajo del preview */
 .form-botones {
   display: flex;

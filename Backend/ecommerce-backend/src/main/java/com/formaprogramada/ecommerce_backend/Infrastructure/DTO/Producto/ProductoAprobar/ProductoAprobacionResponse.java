@@ -22,7 +22,7 @@ public class ProductoAprobacionResponse {
     private float precio;
     private float precioDigital;
     private Integer categoriaId;
-    private List<String> colores;
+    private List<ColorRequest> colores; // <-- Cambiado a ColorRequest
     private boolean destacado;
     private String codigoInicial;
     private Integer version;
@@ -37,7 +37,7 @@ public class ProductoAprobacionResponse {
     private String tecnica;
     private String peso;
 
-    public ProductoAprobacionResponse(ProductoAprobacionEntity producto, ProductoDetalleAprobacionEntity detalle, List<String> colores) {
+    public ProductoAprobacionResponse(ProductoAprobacionEntity producto, ProductoDetalleAprobacionEntity detalle, List<ColorRequest> colores) {
         this.id = producto.getId();
         this.nombre = producto.getNombre();
         this.descripcion = producto.getDescripcion();

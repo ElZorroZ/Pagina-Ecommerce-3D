@@ -12,12 +12,13 @@ import java.util.List;
 public class ProductoAprobacionRequest {
 
     private Integer id; // para edición, si aplica
-    private UsuarioEntity creadorId;
+    private Integer creadorId;
     private String nombre;
     private String descripcion;
     private Integer categoriaId;
     private float precio;
-    private List<String> colores;
+    private float precioDigital;
+    private List<ColorRequest> colores;
     private String codigoInicial;  // 3 letras
     private String version;       // solo números
     private String seguimiento;    // letras y números

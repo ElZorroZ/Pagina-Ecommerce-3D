@@ -5,23 +5,37 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import jakarta.persistence.*;
+
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "producto_aprobacion")
-@ToString(exclude = {"archivos", "colores"})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"archivos", "colores", "usuarioId", "categoriaId"})
+@ToString(exclude = {"archivos", "colores"})
 public class ProductoAprobacionEntity {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idUsuarioCreador")  // el nombre de la columna FK en la tabla producto
+    @JoinColumn(name = "idUsuarioCreador")
     private UsuarioEntity usuarioId;
 
     @Column(length = 20, nullable = false)
@@ -34,19 +48,20 @@ public class ProductoAprobacionEntity {
     private String descripcion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoriaId")  // el nombre de la columna FK en la tabla producto
+    @JoinColumn(name = "categoriaId")
     private CategoriaEntity categoriaId;
 
     private float precio;
 
+    private float precioDigital;
+
     @Lob
     @Column(name = "archivo", columnDefinition = "LONGBLOB")
-    private byte[] archivo;  // STL
+    private byte[] archivo;
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductoArchivoAprobacionEntity> archivos;
+    private Set<ProductoArchivoAprobacionEntity> archivos = new HashSet<>();
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductoColorAprobacionEntity> colores = new ArrayList<>();
+    private Set<ProductoColorAprobacionEntity> colores = new HashSet<>();
 }
-
