@@ -53,13 +53,22 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/completo").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
 
                         // Permitir PUT solo en /api/usuario a CLIENTE
-                        .requestMatchers(HttpMethod.PUT, "/api/usuario/**").hasAnyRole("CLIENTE", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/carrito/**").hasAnyRole("CLIENTE", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/usuario/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/carrito/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
 
+                        // POST para aprobar productos → solo ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/productosAprobacion/AprobarProducto").hasRole("ADMIN")
 
+                        // POST para crear aprobación → solo COLABORADOR
+                        .requestMatchers(HttpMethod.POST, "/api/productosAprobacion/crearAprobacionProducto").hasRole("COLABORADOR")
+
+                        // GET, PUT, DELETE según tu necesidad
+                        .requestMatchers(HttpMethod.GET, "/api/productosAprobacion/**").hasAnyRole("COLABORADOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/productosAprobacion/**").hasRole("COLABORADOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/productosAprobacion/**").hasAnyRole("COLABORADOR", "ADMIN")
                         // Los demás PUT solo para ADMIN
                         .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMIN")
 

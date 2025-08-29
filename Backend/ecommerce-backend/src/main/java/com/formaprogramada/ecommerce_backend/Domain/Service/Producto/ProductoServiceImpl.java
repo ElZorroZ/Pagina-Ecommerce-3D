@@ -1,4 +1,5 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Producto;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ColorRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ProductoAprobadoConArchivoPrincipalYColoresDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.*;
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
@@ -110,13 +111,20 @@ public class ProductoServiceImpl implements ProductoService {
             productoDetalleRepository.save(detalle);
 
             productoColorRepository.deleteByProducto_Id(productoGuardado.getId());
-            List<String> colores = dto.getColores();
+
+            List<ColorRequest> colores = dto.getColores();
             if (colores != null && !colores.isEmpty()) {
                 List<ProductoColorEntity> coloresEntities = colores.stream()
-                        .map(color -> new ProductoColorEntity(0, productoGuardado, color))
+                        .map(color -> new ProductoColorEntity(
+                                0,
+                                productoGuardado,
+                                color.getNombre(),  // nombre o color
+                                color.getHex()      // hex
+                        ))
                         .toList();
                 productoColorRepository.saveAll(coloresEntities);
             }
+
 
             List<String> coloresGuardados = productoColorRepository.findByProductoId(productoGuardado.getId())
                     .stream()
@@ -285,13 +293,19 @@ public class ProductoServiceImpl implements ProductoService {
             productoColorRepository.deleteByProducto_Id(productoActualizado.getId());
 
             // 4. Guardar colores nuevos
-            List<String> colores = dto.getColores();
+            List<ColorRequest> colores = dto.getColores(); // O el nombre del getter que tenga hex
             if (colores != null && !colores.isEmpty()) {
                 List<ProductoColorEntity> coloresEntities = colores.stream()
-                        .map(color -> new ProductoColorEntity(0, productoActualizado, color))
+                        .map(color -> new ProductoColorEntity(
+                                0,
+                                productoActualizado,
+                                color.getNombre(), // nombre o color
+                                color.getHex()     // hex
+                        ))
                         .toList();
                 productoColorRepository.saveAll(coloresEntities);
             }
+
 
             // 5. Borrar imágenes antiguas (en BDD y en ImgBB)
             List<ProductoArchivoEntity> archivosExistentes = productoArchivoRepository.findByProductoIdOrderByOrdenAsc(productoActualizado.getId());
@@ -302,28 +316,40 @@ public class ProductoServiceImpl implements ProductoService {
 
             for (ProductoArchivoEntity archivo : archivosExistentes) {
                 if (!urlsQuePermanecen.contains(archivo.getLinkArchivo())) {
-                    // Borrar imagen de ImgBB
                     imgBBUploaderService.borrarImagenDeImgBB(archivo.getDeleteUrl());
-                    // Borrar de BDD
                     productoArchivoRepository.delete(archivo);
                 }
             }
 
+            // 🔄 REFRESCAR lista después de las eliminaciones
+            archivosExistentes = productoArchivoRepository.findByProductoIdOrderByOrdenAsc(productoActualizado.getId());
+
             // 6. Subir nuevas imágenes y guardar URLs en BDD
             if (archivosNuevos != null && !archivosNuevos.isEmpty()) {
-                int orden = 0;
+                int orden = archivosExistentes.isEmpty()
+                        ? 0
+                        : archivosExistentes.get(archivosExistentes.size() - 1).getOrden() + 1;
+
                 for (MultipartFile archivoNuevo : archivosNuevos) {
                     ImgBBData data = imgBBUploaderService.subirImagen(archivoNuevo);
 
-                    ProductoArchivoEntity nuevoArchivo = new ProductoArchivoEntity();
-                    nuevoArchivo.setProducto(productoActualizado);
-                    nuevoArchivo.setLinkArchivo(data.getUrl());
-                    nuevoArchivo.setDeleteUrl(data.getDelete_url());
-                    nuevoArchivo.setOrden(orden++);
-                    productoArchivoRepository.save(nuevoArchivo);
-                }
+                    boolean yaExiste = productoArchivoRepository
+                            .existsByProductoIdAndLinkArchivo(productoActualizado.getId(), data.getUrl());
 
+                    if (!yaExiste) {
+                        ProductoArchivoEntity nuevoArchivo = new ProductoArchivoEntity();
+                        nuevoArchivo.setProducto(productoActualizado);
+                        nuevoArchivo.setLinkArchivo(data.getUrl());
+                        nuevoArchivo.setDeleteUrl(data.getDelete_url());
+                        nuevoArchivo.setOrden(orden++);
+                        productoArchivoRepository.save(nuevoArchivo);
+                    }
+                }
             }
+
+
+
+
             // Convertir productoActualizado a DTO para cache
             ProductoResponseDTO responseDTO = ProductoMapper.toDTO(productoActualizado);
             ProductoDTO productoDTO = ProductoDTOMapper.fromResponseDTO(responseDTO);
@@ -509,15 +535,17 @@ public class ProductoServiceImpl implements ProductoService {
 
                 resultado.setProducto(prod);
 
-                // Colores
                 if (cs.getMoreResults()) {
                     ResultSet rsColores = cs.getResultSet();
-                    List<String> colores = new ArrayList<>();
+                    List<ColorRequest> colores = new ArrayList<>();
                     while (rsColores.next()) {
-                        colores.add(rsColores.getString("Color"));
+                        String color = rsColores.getString("Color");
+                        String hex = rsColores.getString("Hex"); // si tenés columna Hex, sino null
+                        colores.add(new ColorRequest(color, hex));
                     }
                     resultado.setColores(colores);
                 }
+
 
                 // Archivos
                 if (cs.getMoreResults()) {
@@ -853,12 +881,17 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Cacheable(value = "ultimoProducto", key = "'ultimo'")
     public ProductoConArchivoPrincipalYColoresDTO obtenerUltimoProducto() {
-        ProductoEntity productoEntity = productoRepository.findTopByOrderByIdDesc()
-                .orElseThrow(() -> new NoSuchElementException("No se encontró ningún producto"));
+        Optional<ProductoEntity> productoEntityOpt = productoRepository.findTopByOrderByIdDesc();
 
-        ProductoResponseDTO responseDTO = ProductoMapper.toDTO(productoEntity);
+        if (productoEntityOpt.isEmpty()) {
+            System.out.println("No hay productos en la base de datos.");
+            return null; // o manejar un valor por defecto
+        }
+
+        ProductoResponseDTO responseDTO = ProductoMapper.toDTO(productoEntityOpt.get());
         return convertirAProductoConArchivoYColores(responseDTO);
     }
+
 
 
     public ProductoConArchivoPrincipalYColoresDTO convertirAProductoConArchivoYColores(ProductoResponseDTO responseDTO) {

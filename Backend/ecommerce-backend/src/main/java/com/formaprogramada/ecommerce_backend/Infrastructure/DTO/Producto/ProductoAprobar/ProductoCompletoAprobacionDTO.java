@@ -12,6 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ProductoCompletoAprobacionDTO {
     private ProductoAprobacioDTO producto;
-    private List<String> colores;
+    private List<ColorRequest> colores;
     private List<ProductoAprobacionArchivoDTO> archivos;
 }

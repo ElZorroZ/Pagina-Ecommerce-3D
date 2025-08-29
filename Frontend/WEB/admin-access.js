@@ -109,11 +109,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <a href="/WEB/admin/CRUDProducto/CRUDproducto.html" class="dropdown-category">Gestionar productos</a>
                         <a href="/admin/pedidos.html" class="dropdown-category">Gestionar pedidos</a>
                         <a href="/WEB/admin/Aprobacion/CRUDaprobacion.html" class="dropdown-category">Gestionar colaboradores</a>
-                        <a href="/admin/productos-pendientes.html" class="dropdown-category">Gestionar productos sin aprobar</a>
+                        <a href="/WEB/admin/AprobacionProducto/CRUDaprobacionProducto.html" class="dropdown-category">Gestionar productos sin aprobar</a>
                     `;
                 } else {
                     adminOptions.innerHTML = `
-                        <a href="/admin/productos-pendientes.html" class="dropdown-category">Gestionar productos</a>
+                        <a href="/WEB/admin/CRUDColaboradorProducto/CRUDproductoC.html" class="dropdown-category">Gestionar productos</a>
                     `;
                 }
 

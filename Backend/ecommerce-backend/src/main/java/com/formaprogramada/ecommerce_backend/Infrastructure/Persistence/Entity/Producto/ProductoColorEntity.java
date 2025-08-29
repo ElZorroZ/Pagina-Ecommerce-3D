@@ -24,4 +24,7 @@ public class ProductoColorEntity {
 
     @Column(length = 500)
     private String color;
+
+    @Column(length = 9) // máximo #RRGGBB
+    private String hex;
 }

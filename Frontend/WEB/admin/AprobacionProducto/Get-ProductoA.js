@@ -207,39 +207,36 @@ window.cargarProductos = cargarProductos;
 
   cargarProductos();
 
-  // Seleccionar producto y cargar en formulario + preview
   async function selectProducto(productoId) {
     try {
         const token = localStorage.getItem("accessToken");
         const res = await fetch(`http://localhost:8080/api/productosAprobacion/VerProductoCompleto/${productoId}`, {
-        headers: { "Authorization": `Bearer ${token}` }
+            headers: { "Authorization": `Bearer ${token}` }
         });
 
         if (!res.ok) throw new Error("No se pudo cargar el producto");
 
-        const dataList = await res.json();
-
-        if (!Array.isArray(dataList) || dataList.length === 0) {
-        alert("Producto no encontrado");
-        return;
+        const data = await res.json(); // ya es un objeto, no un array
+        if (!data) {
+            alert("Producto no encontrado");
+            return;
         }
 
-        const data = dataList[0]; // El único producto devuelto
         console.log('ProductoCompletoAprobacionDTO recibido:', data);
 
         // Colores
         window.productoState.coloresSeleccionados = Array.isArray(data.colores)
-        ? [...data.colores]
-        : [];
+            ? [...data.colores]
+            : [];
 
         // Archivos: convertir los base64 en URLs
         window.productoState.archivosSeleccionados = Array.isArray(data.archivos)
-        ? data.archivos.map((a, index) => ({
-            id: a.id,
-            orden: a.orden ?? index,
-            linkArchivo: `data:image/png;base64,${a.archivoImagen}` // asumimos imagen PNG
-            }))
-        : [];
+            ? data.archivos.map((a, index) => ({
+                id: a.id,
+                orden: a.orden ?? index,
+                linkArchivo: `data:image/png;base64,${a.archivoImagen}` // asumimos imagen PNG
+              }))
+            : [];
 
         // Cargar datos en formulario y previews
         cargarProductoEnFormulario(data.producto, window.productoState.coloresSeleccionados, window.productoState.archivosSeleccionados);
@@ -251,21 +248,40 @@ window.cargarProductos = cargarProductos;
 
         // Seleccionar categoría
         await cargarCategoriasYSeleccionar(data.producto.categoriaId);
+
     } catch (error) {
         console.error(error);
         alert("Error al cargar producto");
     }
-    }
+}
 
 
-    function actualizarListaColores() {
-    listaColores.innerHTML = "";
-    window.productoState.coloresSeleccionados.forEach((color) => {
-        const li = document.createElement("li");
-        li.textContent = color;
-        listaColores.appendChild(li);
-    });
-    }
+
+    // Renderizar lista de colores
+function actualizarListaColores() {
+  listaColores.innerHTML = "";
+  window.productoState.coloresSeleccionados.forEach((colorObj, index) => {
+    const li = document.createElement("li");
+    li.style.backgroundColor = colorObj.hex;
+    li.style.color = "#fff";
+    li.style.padding = "5px 10px";
+    li.style.borderRadius = "4px";
+    li.style.display = "flex";
+    li.style.alignItems = "center";
+    li.style.justifyContent = "space-between";
+    li.style.marginBottom = "6px";
+    li.title = colorObj.nombre;
+
+    const span = document.createElement("span");
+    span.textContent = colorObj.hex;
+    li.appendChild(span);
+    listaColores.appendChild(li);
+  });
+}
+window.actualizarListaColores = actualizarListaColores;
+
+// Inicializar la lista si ya hay colores seleccionados
+actualizarListaColores();
 
    
 
@@ -304,6 +320,7 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
   document.getElementById("nombre").value = producto.nombre || "";
   document.getElementById("descripcion").value = producto.descripcion || "";
   document.getElementById("precio").value = producto.precio || "";
+  document.getElementById("precioDigital").value = producto.precioDigital || "";
 
   // Nuevos campos
   document.getElementById("codigo-inicial").value = producto.codigoInicial || "";
@@ -322,7 +339,6 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
 
     //Archivo ZIP
     if (producto.archivo) {
-    console.log("Archivo comprimido base64 recibido:", producto.archivo);
     mostrarArchivoComprimido(producto.archivo); // función que vos definiste
     } else {
     document.getElementById('comprimido-preview').innerHTML = "";

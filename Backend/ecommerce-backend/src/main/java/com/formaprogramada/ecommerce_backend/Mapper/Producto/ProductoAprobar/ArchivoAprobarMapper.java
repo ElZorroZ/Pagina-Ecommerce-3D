@@ -7,6 +7,8 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.Product
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoArchivoAprobacionEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoArchivoEntity;
 
+import java.util.Base64;
+
 public class ArchivoAprobarMapper {
 
     public static ProductoAprobacionArchivoResponse toResponseDTO(ProductoArchivoAprobacionEntity entity) {
@@ -17,11 +19,18 @@ public class ArchivoAprobarMapper {
 
     public static ProductoAprobacionArchivoDTO toArchivoDTO(ProductoArchivoAprobacionEntity entity) {
         if (entity == null) return null;
+
+        String archivoImagen = null;
+        if (entity.getArchivoImagen() != null) {
+            archivoImagen = Base64.getEncoder().encodeToString(entity.getArchivoImagen());
+        }
+
         return new ProductoAprobacionArchivoDTO(
                 entity.getId(),
                 entity.getProducto() != null ? entity.getProducto().getId() : null,
-                entity.getArchivoImagen(),
-                entity.getOrden()
+                archivoImagen, // aquí mandamos la imagen en base64
+                entity.getOrden(),
+                false
         );
     }
 

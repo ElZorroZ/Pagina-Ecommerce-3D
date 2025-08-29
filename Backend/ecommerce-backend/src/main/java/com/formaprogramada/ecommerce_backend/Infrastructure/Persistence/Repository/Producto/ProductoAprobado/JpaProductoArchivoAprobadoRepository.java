@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface JpaProductoArchivoAprobadoRepository extends JpaRepository<ProductoArchivoAprobacionEntity, Integer> {
     List<ProductoArchivoAprobacionEntity> findByProductoIdOrderByOrdenAsc(Integer productoId);
+    List<ProductoArchivoAprobacionEntity> findByProducto_IdOrderByOrdenAsc(Integer productoId);
+
     @Transactional
     @Modifying
     @Query("DELETE FROM ProductoArchivoAprobacionEntity p WHERE p.producto.id = :productoId")

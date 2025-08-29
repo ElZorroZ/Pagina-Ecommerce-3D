@@ -245,6 +245,7 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
   const nombre = document.getElementById("nombre").value.trim();
   const descripcion = document.getElementById("descripcion").value.trim();
   const precio = parseFloat(document.getElementById("precio").value);
+    const precioDigital = parseFloat(document.getElementById("precioDigital").value); // nuevo
   const codigoInicial = document.getElementById("codigo-inicial").value.trim();
   const versionInput = document.getElementById('version');
   const versionValue = versionInput.value.trim();
@@ -267,13 +268,6 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
 
   if (!nombre || isNaN(precio)) {
     alert("Por favor completa todos los campos obligatorios.");
-    return;
-  }
-
-  const tieneArchivosDeOtroProducto = window.productoState.archivosSeleccionados.some(a => !(a instanceof File));
-
-  if (tieneArchivosDeOtroProducto) {
-    alert("Estás usando imágenes que pertenecen a otro producto. Por favor eliminá esas imágenes antes de guardar uno nuevo.");
     return;
   }
 
@@ -303,9 +297,15 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
   }
 
   alert("Producto aprobado con éxito!");
-
+  form.reset();
+    window.productoState.coloresSeleccionados = [];
+    window.productoState.archivosSeleccionados = [];
+    actualizarListaColores();
+    actualizarPreview();
+    cargarProductos();
 } catch (error) {
   alert("Error: " + error.message);
+  console.log(error.message)
 }
 
 });
