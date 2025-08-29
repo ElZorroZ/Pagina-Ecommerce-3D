@@ -16,6 +16,7 @@ public class Carrito {
     private Integer cantidad;
     private double precioTotal;
     private double precioUnitario;
+    private int color;
     private boolean esDigital;
 
 }

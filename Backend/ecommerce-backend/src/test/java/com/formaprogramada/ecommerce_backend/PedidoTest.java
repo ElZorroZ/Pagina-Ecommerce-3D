@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -88,6 +89,17 @@ public class PedidoTest {
         mockMvc.perform(post("/api/pedido/crearPedido")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(lista)))
+                .andExpect(status().isOk());
+    }
+
+    @WithMockUser(username = "thiago2007crackz@gmail.com", roles = {"ADMIN"})
+    @Test
+    void testBorrarPedido() throws Exception {
+
+
+        mockMvc.perform(delete("/api/pedido/borrarPedido")
+                        .param("id", String.valueOf(9))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 

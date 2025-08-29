@@ -1,14 +1,14 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar;
 
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class ProductoAprobacionRequest {
 
     private Integer id; // para edición, si aplica
@@ -28,5 +28,4 @@ public class ProductoAprobacionRequest {
     private String material;
     private String peso;  // string para aceptar decimal
     private String tecnica;
-
 }

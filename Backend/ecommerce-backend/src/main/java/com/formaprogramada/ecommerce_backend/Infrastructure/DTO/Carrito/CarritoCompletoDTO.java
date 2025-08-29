@@ -13,12 +13,13 @@ public class CarritoCompletoDTO {
     private Integer cantidad;
     private Double precioTotal;     // Cambiado a Double
     private Double precioUnitario;  // Cambiado a Double
+    private int colorId;
     private Boolean esDigital; // Cambiado a Boolean
     private String nombre;
     private String linkArchivo;
 
     public CarritoCompletoDTO(Integer id, Integer productoId, Integer usuarioId, Integer cantidad,
-                              Double precioTotal, Double precioUnitario, Byte esDigital,
+                              Double precioTotal, Double precioUnitario,int colorId, Byte esDigital,
                               String nombre, String linkArchivo) {
         this.id = id;
         this.productoId = productoId;
@@ -29,6 +30,7 @@ public class CarritoCompletoDTO {
         this.esDigital = esDigital != null ? esDigital == 1 : null; // conversión a Boolean
         this.nombre = nombre;
         this.linkArchivo = linkArchivo;
+        this.colorId=colorId;
     }
 
 }

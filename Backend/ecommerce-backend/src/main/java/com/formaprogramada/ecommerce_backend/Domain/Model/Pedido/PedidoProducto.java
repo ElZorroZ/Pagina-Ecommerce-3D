@@ -12,9 +12,11 @@ import lombok.*;
 @Entity
 public class PedidoProducto {
     private Integer id;
+    private String nombre;
     private Integer pedidoId;
     private Integer productoId;
     private Integer cantidad;
     private Double precio;
+    private int colorId;
     private Boolean esDigital;
 }
