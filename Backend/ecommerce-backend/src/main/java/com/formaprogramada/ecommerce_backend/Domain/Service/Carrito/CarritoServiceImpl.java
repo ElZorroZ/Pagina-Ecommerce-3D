@@ -4,7 +4,9 @@ import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Carrito.CarritoRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoCompletoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoColorEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Carrito.JpaCarritoRepository;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoColorRepository;
 import com.formaprogramada.ecommerce_backend.Mapper.Carrito.CarritoMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -13,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +29,7 @@ public class CarritoServiceImpl implements CarritoService {
 
     private CarritoRepository carritoRepository;
     private JpaCarritoRepository jpaCarritoRepository;
+    private JpaProductoColorRepository productoColorRepository;
     private CarritoMapper carritoMapper;
     @Autowired
     private CacheManager cacheManager;
@@ -61,52 +66,60 @@ public class CarritoServiceImpl implements CarritoService {
 
     @Override
     public Carrito AgregarCarrito(Carrito carrito) {
-        System.out.println("⚠️ Consultando base de datos: AgregarProductoCarrito");
-        boolean existeOtroFormato = jpaCarritoRepository.existsByUsuarioIdAndProductoIdAndEsDigital(
-                carrito.getUsuarioId(),
-                carrito.getProductoId(),
-                !carrito.isEsDigital()
-        );
+        try {
+            System.out.println("=== AgregarCarrito llamado ===");
+            System.out.println("UsuarioId: " + carrito.getUsuarioId());
+            System.out.println("ProductoId: " + carrito.getProductoId());
+            System.out.println("ColorId: " + carrito.getColorId());
+            System.out.println("EsDigital: " + carrito.getEsDigital());
+            System.out.println("Cantidad: " + carrito.getCantidad());
 
-        if (existeOtroFormato) {
-            throw new IllegalArgumentException("No puede agregar el mismo producto en formato digital y físico al carrito.");
-        }
-
-        Optional<CarritoEntity> carritoEntityOpt = jpaCarritoRepository.findByUsuarioIdAndProductoIdAndEsDigital(
-                carrito.getUsuarioId(),
-                carrito.getProductoId(),
-                carrito.isEsDigital()
-        );
-
-        CarritoEntity savedEntity;
-
-        if (carritoEntityOpt.isPresent()) {
-            CarritoEntity carritoEntity = carritoEntityOpt.get();
-            Carrito existente = carritoMapper.toDomain2(carritoEntity);
-
-            if (carrito.isEsDigital()) {
-                throw new IllegalArgumentException("El producto digital ya está en el carrito. No puede agregar más unidades.");
+            // Convertir colorId a entidad, si existe
+            ProductoColorEntity colorEntity = null;
+            if (carrito.getColorId() != null && carrito.getColorId() != 0) {
+                colorEntity = productoColorRepository.findById(carrito.getColorId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Color no encontrado"));
             }
 
-            existente.setCantidad(existente.getCantidad() + carrito.getCantidad());
-            existente.setPrecioTotal(existente.getPrecioUnitario() * existente.getCantidad());
+            // Verificar si ya existe el producto con el mismo color
+            Optional<CarritoEntity> carritoExistenteOpt = jpaCarritoRepository
+                    .findByUsuarioIdAndProductoIdAndColor(
+                            carrito.getUsuarioId(),
+                            carrito.getProductoId(),
+                            colorEntity
+                    );
 
-            CarritoEntity actualizadoEntity = carritoMapper.toEntity(existente);
-            savedEntity = jpaCarritoRepository.save(actualizadoEntity);
-        } else {
-            if (carrito.isEsDigital() && carrito.getCantidad() > 1) {
-                throw new IllegalArgumentException("La compra digital no puede tener cantidad mayor a 1");
+            if (carritoExistenteOpt.isPresent()) {
+                System.out.println("Producto ya existe en carrito con mismo color. No se permite duplicado.");
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Ya existe este producto en el carrito con el mismo color"
+                );
             }
 
-            CarritoEntity entityNuevo = carritoMapper.toEntity(carrito);
-            savedEntity = jpaCarritoRepository.save(entityNuevo);
+            // No existe → crear nuevo registro
+            CarritoEntity nuevoEntity = carritoMapper.toEntity(carrito, productoColorRepository);
+            nuevoEntity.setColor(colorEntity);
+            CarritoEntity savedEntity = jpaCarritoRepository.save(nuevoEntity);
+
+            System.out.println("Producto agregado al carrito con ID: " + savedEntity.getId());
+
+            // Actualizar cache
+            actualizarCacheCarrito(carrito.getUsuarioId(), savedEntity);
+
+            System.out.println("=== AgregarCarrito finalizado ===");
+            return carritoMapper.toDomain2(savedEntity);
+
+        } catch (ResponseStatusException e) {
+            System.out.println("ResponseStatusException: " + e.getReason());
+            throw e;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor", e);
         }
-
-        // 🔄 Actualizar cache
-        actualizarCacheCarrito(carrito.getUsuarioId(), savedEntity);
-
-        return carritoMapper.toDomain2(savedEntity);
     }
+
+
 
     @Transactional
     @Override

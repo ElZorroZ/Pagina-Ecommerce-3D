@@ -8,11 +8,14 @@ import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoCac
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoColaborador.ProductoColaboradorCacheService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoColaborador.ProductoColaboradorService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Producto.ProductoColaborador.ProductoColaboradorServiceImpl;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Review.ReviewServiceImpl;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ProductoCompletoAprobacionDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoAprobacionEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Review.ReviewEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Carrito.JpaCarritoRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Categoria.JpaCategoriaRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.ProductoAprobado.JpaProductoAprobacionRepository;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Review.JpaReviewRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -46,16 +49,36 @@ public class CacheInitializer {
     private ProductoColaboradorService productoColaborador;
     @Autowired
     private JpaProductoAprobacionRepository productoAprobacionRepository;
+    @Autowired
+    private ReviewServiceImpl reviewService;
+    @Autowired
+    private JpaReviewRepository reviewRepository;
 
-    public CacheInitializer(ProductoCacheService productoCacheService, ProductoColaboradorService productoColaborador, ProductoColaboradorCacheService cacheService) {
+
+    public CacheInitializer(ProductoCacheService productoCacheService,
+                            ProductoColaboradorService productoColaborador,
+                            ProductoColaboradorCacheService cacheService
+             ) {
         this.productoColaborador = productoColaborador;
         this.productoCacheService = productoCacheService;
         this.cacheService = cacheService;
+
     }
 
     @EventListener(ContextRefreshedEvent.class)
     @Transactional// Este método ahora sí correrá dentro de una transacción
     public void cargarCacheAlIniciar() {
+        List<Integer> productIds = reviewRepository.findAll()
+                .stream()
+                .map(ReviewEntity::getProductId)
+                .distinct()
+                .toList();
+
+        for (Integer productId : productIds) {
+            reviewService.listarReviewsConRespuestas(productId); // esto llena el cache interno
+        }
+
+        System.out.println("[CACHE INIT] Precargadas " + productIds.size() + " listas de reviews en cache.");
         //Colaboradores
         colaboradorCacheProxyService.precargarColaboradores();
         //  los productos

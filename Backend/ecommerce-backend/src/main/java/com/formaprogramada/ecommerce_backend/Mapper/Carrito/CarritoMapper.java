@@ -3,6 +3,8 @@ package com.formaprogramada.ecommerce_backend.Mapper.Carrito;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoAgregarRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoColorEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoColorRepository;
 import org.springframework.stereotype.Component;
 @Component
 public class CarritoMapper {
@@ -17,7 +19,7 @@ public class CarritoMapper {
         carrito.setPrecioTotal(request.getPrecioTotal());
         carrito.setPrecioUnitario(request.getPrecioUnitario());
         carrito.setEsDigital(request.getEsDigital());
-        carrito.setColor(request.getColor());
+        carrito.setColorId(request.getColor());
         return carrito;
     }
 
@@ -33,27 +35,39 @@ public class CarritoMapper {
         carrito.setPrecioTotal(entity.getPrecioTotal());
         carrito.setPrecioUnitario(entity.getPrecioUnitario());
         carrito.setEsDigital(entity.isEsDigital());
-        carrito.setColor(entity.getColorId());// agregalo también para consistencia
+
+        // Obtenemos el colorId desde la relación, si existe
+        carrito.setColorId(entity.getColor() != null ? entity.getColor().getId() : null);
+
         return carrito;
     }
 
+
     // Convierte desde dominio a entidad JPA
-    public CarritoEntity toEntity(Carrito carrito) {
-        if (carrito == null) {
-            return null;
-        }
+    public CarritoEntity toEntity(Carrito carrito, JpaProductoColorRepository colorRepo) {
+        if (carrito == null) return null;
 
         CarritoEntity.CarritoEntityBuilder builder = CarritoEntity.builder();
 
-        builder.id(carrito.getId());                      // importante para update
+        builder.id(carrito.getId());
         builder.productoId(carrito.getProductoId());
         builder.usuarioId(carrito.getUsuarioId());
         builder.cantidad(carrito.getCantidad());
         builder.precioTotal(carrito.getPrecioTotal());
         builder.precioUnitario(carrito.getPrecioUnitario());
-        builder.esDigital(carrito.isEsDigital());
-        builder.colorId(carrito.getColor());
+        builder.esDigital(carrito.getEsDigital());
+
+        // Setear la relación color correctamente
+        if (carrito.getColorId() != null && carrito.getColorId() > 0) {
+            ProductoColorEntity colorEntity = colorRepo.findById(carrito.getColorId())
+                    .orElseThrow(() -> new IllegalArgumentException("Color no encontrado"));
+            builder.color(colorEntity); // esto ya guarda colorId en la DB
+        } else {
+            builder.color(null);
+        }
 
         return builder.build();
     }
+
+
 }

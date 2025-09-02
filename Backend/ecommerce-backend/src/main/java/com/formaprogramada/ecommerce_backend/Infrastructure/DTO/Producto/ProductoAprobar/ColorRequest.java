@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ColorRequest {
+    private int id;      // ← colorId
     private String nombre;  // nombre opcional
     private String hex;     // color en formato #RRGGBB o #RRGGBBAA
+    public ColorRequest(String nombre, String hex) {
+        this.nombre = nombre;
+        this.hex = hex;
+    }
+
 }

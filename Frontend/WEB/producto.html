@@ -259,21 +259,27 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="review-title">Título:</label>
-                            <input type="text" id="review-title" required>
-                        </div>
-                        <div class="form-group">
                             <label for="review-text">Reseña:</label>
                             <textarea id="review-text" rows="4" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="reviewer-name">Nombre:</label>
-                            <input type="text" id="reviewer-name" required>
                         </div>
                         <button type="submit">Publicar Reseña</button>
                     </form>
                 </div>
             </div>
+            <div id="reply-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h3>Responder comentario</h3>
+                <button class="close-modal" onclick="closeModal('reply-modal')">&times;</button>
+                </div>
+                <div class="form-group">
+                <label for="reply-textarea">Tu respuesta</label>
+                <textarea id="reply-textarea" rows="4"></textarea>
+                </div>
+                <button type="submit" class="write-review-btn" style="background-color:#3b82f6">Enviar respuesta</button>
+            </div>
+            </div>
+
         </div>
     </main>
 

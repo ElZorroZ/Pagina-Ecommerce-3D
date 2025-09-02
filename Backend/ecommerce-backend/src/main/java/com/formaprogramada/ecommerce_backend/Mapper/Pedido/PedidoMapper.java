@@ -27,8 +27,8 @@ public class PedidoMapper {
             pedidoProducto.setPedidoId(null);
             pedidoProducto.setProductoId(carrito.getProductoId());
             pedidoProducto.setCantidad(carrito.getCantidad());
-            pedidoProducto.setPrecio(carrito.getPrecioUnitario());
-            pedidoProducto.setEsDigital(carrito.getEsDigital());
+            pedidoProducto.setPrecio(carrito.getPrecioUnitario().doubleValue());
+            pedidoProducto.setEsDigital(carrito.getEsDigital() != null && carrito.getEsDigital() == 1);
             pedidoProducto.setColorId(carrito.getColorId());
             pedidoProducto.setNombre(carrito.getNombre());
 

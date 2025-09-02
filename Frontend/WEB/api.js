@@ -248,8 +248,120 @@ async vaciarCarrito() {
     console.error('Error en vaciarCarrito API:', error);
     throw error;
   }
+},
+async enviarReview(reviewData) {
+  const usuarioId = localStorage.getItem('usuarioId'); // opcional, depende si tu backend lo necesita
+  if (!usuarioId) {
+    throw new Error('No se encontró usuarioId en localStorage');
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/reviews`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // si usás auth
+      },
+      body: JSON.stringify(reviewData)
+    });
+
+    if (!response.ok) {
+      let errorMsg = response.statusText;
+      try {
+        errorMsg = await response.text();
+      } catch {}
+      throw new Error(`Error al enviar la reseña: ${errorMsg}`);
+    }
+
+    const result = await response.json();
+    return result; // devuelve el ReviewResponseDTO que retorna el backend
+
+  } catch (error) {
+    console.error('Error en enviarReview API:', error);
+    throw error;
+  }
+},
+async obtenerReviews(productId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/reviews/producto/${productId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+                // No enviamos Authorization porque es público
+            }
+        });
+
+        if (!response.ok) {
+            let errorMsg = response.statusText;
+            try {
+                errorMsg = await response.text();
+            } catch {}
+            throw new Error(`Error al obtener reviews: ${errorMsg}`);
+        }
+
+        const reviews = await response.json();
+        return reviews;
+    } catch (error) {
+        console.error('Error en obtenerReviews API:', error);
+        throw error;
+    }
+},
+async responderReview(reviewId, requestBody) {
+    try {
+        const token = localStorage.getItem('accessToken'); // tu JWT
+
+        const response = await fetch(`${API_BASE_URL}/api/reviews/${reviewId}/responder`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // necesario para COLABORADOR o ADMIN
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            let errorMsg = response.statusText;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.message) errorMsg = errorData.message;
+            } catch {}
+            throw new Error(`Error al responder review: ${errorMsg}`);
+        }
+
+        const result = await response.json();
+        return result; // ReviewResponseDTO
+    } catch (error) {
+        console.error('Error en responderReview API:', error);
+        throw error;
+    }
+    
+},
+async eliminarReview(reviewId) {
+    try {
+        const token = localStorage.getItem('accessToken'); // tu JWT
+
+        const response = await fetch(`${API_BASE_URL}/api/reviews/${reviewId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}` // necesario para ADMIN
+            }
+        });
+
+        if (!response.ok) {
+            let errorMsg = response.statusText;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.message) errorMsg = errorData.message;
+            } catch {}
+            throw new Error(`Error al eliminar review: ${errorMsg}`);
+        }
+
+        // El endpoint retorna 204 No Content, no hay body que parsear
+        return true;
+    } catch (error) {
+        console.error('Error en eliminarReview API:', error);
+        throw error;
+    }
 }
-
-
 };
 window.API = API;

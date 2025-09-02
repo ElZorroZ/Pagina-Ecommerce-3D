@@ -16,7 +16,7 @@ public class Carrito {
     private Integer cantidad;
     private double precioTotal;
     private double precioUnitario;
-    private int color;
-    private boolean esDigital;
-
+    private Integer colorId;   // para matchear con lo que envías
+    private Boolean esDigital; // 0 o 1
 }
+

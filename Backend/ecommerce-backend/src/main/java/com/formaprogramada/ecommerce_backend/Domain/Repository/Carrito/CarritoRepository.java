@@ -6,7 +6,6 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.C
 import java.util.List;
 
 public interface CarritoRepository {
-    Carrito CrearDescuento(Carrito carrito);
     Boolean SumarCantidad(int cantidad, int id);
     Boolean BorrarProductoCarrito(int id);
     Boolean VaciarCarrito(int id);

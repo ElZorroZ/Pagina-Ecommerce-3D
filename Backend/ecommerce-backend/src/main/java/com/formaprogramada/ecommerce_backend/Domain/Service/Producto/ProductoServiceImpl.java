@@ -539,9 +539,10 @@ public class ProductoServiceImpl implements ProductoService {
                     ResultSet rsColores = cs.getResultSet();
                     List<ColorRequest> colores = new ArrayList<>();
                     while (rsColores.next()) {
+                        int colorId = rsColores.getInt("id");          // ← este es el colorId
                         String color = rsColores.getString("Color");
                         String hex = rsColores.getString("Hex"); // si tenés columna Hex, sino null
-                        colores.add(new ColorRequest(color, hex));
+                        colores.add(new ColorRequest(colorId, color, hex));
                     }
                     resultado.setColores(colores);
                 }

@@ -14,12 +14,7 @@ import java.util.List;
 public class CarritoRepositoryImpl implements CarritoRepository {
     private CarritoMapper carritoMapper;
     private JpaCarritoRepository jpaCarritoRepository;
-    @Override
-    public Carrito CrearDescuento(Carrito carrito) {
-        CarritoEntity entity= carritoMapper.toEntity(carrito);
-        CarritoEntity savedentity= jpaCarritoRepository.save(entity);
-        return carritoMapper.toDomain2(savedentity);
-    }
+
 
     @Override
     public Boolean SumarCantidad(int cantidad, int id) {

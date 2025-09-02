@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 "/api/auth/reset-password-request",
                                 "/api/auth/reset-password/confirm").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categoria").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/**").permitAll()
 
@@ -58,6 +59,8 @@ public class SecurityConfig {
                         // Permitir PUT solo en /api/usuario a CLIENTE
                         .requestMatchers(HttpMethod.PUT, "/api/usuario/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
                         .requestMatchers(HttpMethod.PUT, "/api/carrito/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
+                        .requestMatchers(HttpMethod.POST, "/api/reviews").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/api/reviews/*/responder").hasAnyRole("COLABORADOR", "ADMIN")
 
                         // POST para aprobar productos → solo ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/productosAprobacion/AprobarProducto").hasRole("ADMIN")

@@ -1,5 +1,6 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito;
 
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoColorEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,11 +33,12 @@ public class CarritoEntity {
     @Column(length = 100, nullable = false)
     private double precioUnitario;
 
-    @Column(length = 100, nullable = true)
-    private int colorId;
-
     @Column(columnDefinition = "TINYINT")
     private boolean esDigital;
+
+    @ManyToOne
+    @JoinColumn(name = "colorId", referencedColumnName = "id", nullable = true)
+    private ProductoColorEntity color;
 
 
 }

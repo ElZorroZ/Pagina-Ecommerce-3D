@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +28,13 @@ public class CarritoController {
         try {
             var carrito = CarritoMapper.toDomain(carritoAgregarRequest);
             carrito = carritoService.AgregarCarrito(carrito);
-            List<Carrito> lista = new ArrayList<>();
-            lista.add(carrito);
-            return ResponseEntity.ok(lista);
+            return ResponseEntity.ok(List.of(carrito));
+        } catch (ResponseStatusException e) {
+            // Capturamos los errores lanzados por AgregarCarrito
+            return ResponseEntity
+                    .status(e.getStatusCode())  // <- corregido
+                    .body(Map.of("error", e.getReason()));
         } catch (IllegalArgumentException e) {
-            // Capturamos la excepción personalizada y devolvemos mensaje legible
             return ResponseEntity
                     .badRequest()
                     .body(Map.of("error", e.getMessage()));
@@ -42,6 +45,8 @@ public class CarritoController {
                     .body(Map.of("error", "Error interno del servidor"));
         }
     }
+
+
 
 
     @PutMapping("/sumarCantidad/{id}/{cantidad}")
