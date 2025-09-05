@@ -100,14 +100,46 @@ const API = {
     },
 
 
-    // Search products
     async searchProducts(query) {
+    try {
+        console.log('🔹 fetch simple:', `${API_BASE_URL}/api/productos/busqueda/simple?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`${API_BASE_URL}/api/productos/busqueda/simple?q=${encodeURIComponent(query)}`);
+        const products = await response.json();
+        console.log('🔹 response simple:', products);
+        return products || [];  // ya es lista de ProductoSimpleDTO
+    } catch (error) {
+        console.error('Error searching products:', error);
+        return [];
+    }
+},
+
+
+    async searchProductsAdvanced(filtros, ordenarPor = 'relevancia', page = 0, size = 20) {
         try {
-            const response = await fetch(`${API_BASE_URL}/products/search?q=${encodeURIComponent(query)}`);
-            const products = await response.json();
-            return products;
+            console.log('🔹 fetch avanzada:', `${API_BASE_URL}/api/productos/busqueda/avanzada?page=${page}&size=${size}&ordenarPor=${ordenarPor}`);
+            const response = await fetch(`${API_BASE_URL}/api/productos/busqueda/avanzada?page=${page}&size=${size}&ordenarPor=${ordenarPor}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(filtros),
+            });
+            const data = await response.json();
+            console.log('🔹 response avanzada:', data);
+            return data.content || [];
         } catch (error) {
-            console.error('Error searching products:', error);
+            console.error('Error searching products advanced:', error);
+            return [];
+        }
+    },
+
+    async getSuggestions(query) {
+        try {
+            console.log('🔹 fetch sugerencias:', `${API_BASE_URL}/api/productos/busqueda/sugerencias?q=${encodeURIComponent(query)}`);
+            const response = await fetch(`${API_BASE_URL}/api/productos/busqueda/sugerencias?q=${encodeURIComponent(query)}`);
+            const suggestions = await response.json();
+            console.log('🔹 response sugerencias:', suggestions);
+            return suggestions || [];
+        } catch (error) {
+            console.error('Error fetching suggestions:', error);
             return [];
         }
     },

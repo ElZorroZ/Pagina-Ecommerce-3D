@@ -126,47 +126,22 @@
                             </div>
                         </div>
 
-                        <!-- Price Filter -->
+                        <!-- Price Filter (Rango) -->
                         <div class="filter-group">
                             <h4 class="filter-group-title">Precio</h4>
                             <div class="filter-options">
                                 <label class="filter-option">
-                                    <input type="radio" name="price" value="all" checked>
-                                    <span>Todos</span>
+                                    <span>Mínimo</span>
+                                    <input type="number" id="price-min" placeholder="0">
                                 </label>
                                 <label class="filter-option">
-                                    <input type="radio" name="price" value="under-50">
-                                    <span>Menos de $50</span>
+                                    <span>Máximo</span>
+                                    <input type="number" id="price-max" placeholder="9999">
                                 </label>
-                                <label class="filter-option">
-                                    <input type="radio" name="price" value="50-100">
-                                    <span>$50 - $100</span>
-                                </label>
-                                <label class="filter-option">
-                                    <input type="radio" name="price" value="over-100">
-                                    <span>Más de $100</span>
-                                </label>
+                                <button id="apply-price-filter">Aplicar</button>
                             </div>
                         </div>
-
-                        <!-- Status Filter -->
-                        <div class="filter-group">
-                            <h4 class="filter-group-title">Estado</h4>
-                            <div class="filter-options">
-                                <label class="filter-option">
-                                    <input type="radio" name="status" value="all" checked>
-                                    <span>Todos</span>
-                                </label>
-                                <label class="filter-option">
-                                    <input type="radio" name="status" value="new">
-                                    <span>Nuevos</span>
-                                </label>
-                                <label class="filter-option">
-                                    <input type="radio" name="status" value="bestsellers">
-                                    <span>Más vendidos</span>
-                                </label>
-                            </div>
-                        </div>
+                    
                     </div>
                 </aside>
 

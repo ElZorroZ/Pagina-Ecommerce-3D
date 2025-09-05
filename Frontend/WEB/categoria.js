@@ -168,26 +168,14 @@ class CategoryPage {
     applyFilters() {
     this.filteredProducts = this.allProducts.filter(product => {
         // No filtrar por categoría porque ya lo hace el backend
-        // Filtro precio
-        if (this.filters.price !== 'all') {
-            const price = parseFloat(product.precio);
-            switch (this.filters.price) {
-                case 'under-50':
-                    if (price >= 50) return false;
-                    break;
-                case '50-100':
-                    if (price < 50 || price > 100) return false;
-                    break;
-                case 'over-100':
-                    if (price <= 100) return false;
-                    break;
-            }
-        }
 
-        // Filtro estado (si lo agregás después)
-        if (this.filters.status !== 'all') {
-            // lógica para estado
-        }
+        // Filtro precio por rango
+        const price = parseFloat(product.precio);
+
+        const min = this.filters.priceMin != null ? this.filters.priceMin : 0;
+        const max = this.filters.priceMax != null ? this.filters.priceMax : Infinity;
+
+        if (price < min || price > max) return false;
 
         return true;
     });
@@ -195,6 +183,8 @@ class CategoryPage {
     this.applySorting();
     this.renderProducts();
 }
+
+
 
 
     applySorting() {
@@ -257,32 +247,38 @@ class CategoryPage {
         });
     }
 
-
-    normalizeProductDTO(productDTO) {
-        if ('producto' in productDTO) {
-            // ProductoConArchivoPrincipalYColoresDTO
-            return {
-                id: productDTO.producto.id,
-                nombre: productDTO.producto.nombre,
-                descripcion: productDTO.producto.descripcion,
-                precio: productDTO.producto.precio,
-                categoriaId: productDTO.producto.categoriaId,
-                archivos: productDTO.archivoPrincipal ? [productDTO.archivoPrincipal] : [],
-                colores: productDTO.colores || [],
-            };
-        } else {
-            // ProductoResponseDTO plano
-            return {
-                id: productDTO.id,
-                nombre: productDTO.nombre,
-                descripcion: productDTO.descripcion,
-                precio: productDTO.precio,
-                categoriaId: productDTO.categoriaId,
-                archivos: productDTO.archivos || [],
-                colores: productDTO.colores || [],
-            };
+normalizeProductDTO(productDTO) {
+    if ('producto' in productDTO) {
+        return {
+            id: productDTO.producto.id,
+            nombre: productDTO.producto.nombre,
+            descripcion: productDTO.producto.descripcion,
+            precio: productDTO.producto.precio,
+            categoriaId: productDTO.producto.categoriaId,
+            archivos: productDTO.archivoPrincipal ? [productDTO.archivoPrincipal] : [],
+            colores: productDTO.colores || [],
+        };
+    } else {
+        // ProductoSimpleDTO o ProductoResponseDTO del backend
+        let archivos = [];
+        if (productDTO.archivos && productDTO.archivos.length > 0) {
+            archivos = productDTO.archivos;
+        } else if (productDTO.linkArchivo) {
+            archivos = [{ linkArchivo: productDTO.linkArchivo }];
         }
+        return {
+            id: productDTO.id,
+            nombre: productDTO.nombre,
+            descripcion: '',
+            precio: productDTO.precio,
+            categoriaId: productDTO.categoriaId || null,
+            archivos,
+            colores: productDTO.colores || [],
+        };
     }
+}
+
+
 
 
     createProductCard(productDTO) {
@@ -364,9 +360,23 @@ class CategoryPage {
                 this.renderProducts();
             });
         }
+        const applyPriceBtn = document.getElementById('apply-price-filter');
+        const priceMinInput = document.getElementById('price-min');
+        const priceMaxInput = document.getElementById('price-max');
 
+        if (applyPriceBtn && priceMinInput && priceMaxInput) {
+            applyPriceBtn.addEventListener('click', () => {
+                const min = parseFloat(priceMinInput.value) || 0;
+                const max = parseFloat(priceMaxInput.value) || Infinity;
+
+                this.filters.priceMin = min;
+                this.filters.priceMax = max;
+                this.applyFilters();
+            });
+        }
         // Dropdown functionality
         this.initializeDropdown();
+
     }
 
 
@@ -445,9 +455,50 @@ function clearFilters() {
 }
 
 
-// Initialize when DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
     const categoryPage = new CategoryPage();
     window.categoryPage = categoryPage;
     await categoryPage.init();
+
+    // Revisar si hay query de búsqueda
+    const searchData = JSON.parse(localStorage.getItem('searchData'));
+    const searchQuery = localStorage.getItem('searchQuery');
+
+    if (searchData || searchQuery) {
+        try {
+            let productsResponse;
+
+            if (searchData) {
+                // Filtros avanzados
+                const filtros = {
+                    q: searchData.query || '',
+                    precioMin: searchData.minPrice || 0,
+                    precioMax: searchData.maxPrice || Infinity,
+                    categoriaId: searchData.category || null
+                };
+                productsResponse = await API.searchProductsAdvanced(filtros);
+            } else {
+                // Búsqueda simple
+                productsResponse = await API.searchProducts(searchQuery);
+            }
+
+            const products = productsResponse.map(p => categoryPage.normalizeProductDTO(p));
+
+            categoryPage.allProducts = products;
+            categoryPage.filteredProducts = [...products];
+
+            categoryPage.filters.category = 'all';
+            categoryPage.currentCategoryId = null;
+            categoryPage.currentCategoryObj = null;
+
+            categoryPage.updateCategoryInfo();
+            categoryPage.applyFilters();
+
+        } catch (error) {
+            console.error('Error buscando productos por query/filtros:', error);
+        }
+
+        localStorage.removeItem('searchData');
+        localStorage.removeItem('searchQuery');
+    }
 });

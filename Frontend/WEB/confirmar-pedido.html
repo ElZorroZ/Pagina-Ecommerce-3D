@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmar Pedido - Forma programada</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="confirmar-pedido.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        
+        <!-- Main navigation -->
+        <div class="nav-container">
+            <div class="nav-content">
+                <!-- Logo -->
+                <div class="logo">
+                    <h1><a href="/WEB/index.html" style="text-decoration: none; color: inherit;">Forma programada</a></h1>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <div class="nav-dropdown">
+                        <a href="#" class="nav-link" id="shop-trigger">Shop</a>
+                        <div class="dropdown-menu" id="categories-dropdown">
+                            <div class="dropdown-content">
+                                <!-- Categories will be loaded dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Panel de administración (dropdown) -->
+                    <div class="nav-dropdown hidden" id="admin-dropdown">
+                        <span class="nav-link" style="cursor: default;">Panel de administración</span>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-content" id="admin-options"></div>
+                        </div>
+                        </div>
+
+                </nav>
+
+                <!-- Right side icons -->
+                <div class="nav-icons">
+                    <!-- Contenedor de cuenta -->
+                    <div class="nav-dropdown" id="account-dropdown">
+                        <button class="icon-btn account-icon" id="account-btn" title="Cuenta" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown para cuenta (solo visible si hay JWT) -->
+                        <div class="dropdown-menu" id="account-menu" style="display: none;">
+                            <div class="dropdown-content">
+                            <a href="/WEB/usuario/perfil/perfil.html">Acceder Cuenta</a>
+                            <a href="#" id="logout-btn">Salir de la cuenta</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="icon-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn cart-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m2 2 3.6 7.8A1 1 0 0 0 6.5 11H19a1 1 0 0 0 .9-1.4L17 3H6.5"/>
+                            <path d="m9 13 1 6h4l1-6"/>
+                            <circle cx="9" cy="20" r="1"/>
+                            <circle cx="15" cy="20" r="1"/>
+                        </svg>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <!-- Navegación móvil -->
+                    <div id="mobile-nav" class="mobile-nav">
+                        <!-- Agregá links o lo que necesites acá -->
+                    </div>
+                    <!-- Botón para menú móvil -->
+                    <button class="mobile-menu icon-btn" aria-label="Menú móvil">
+                        <!-- Icono hamburguesa simple -->
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- Main Content -->
+    <main class="checkout-main">
+        <div class="container">
+            <!-- Header -->
+            <div class="checkout-header">
+                <h1 class="checkout-title">Confirmar Pedido</h1>
+                <p class="checkout-subtitle">Revisa tu información y completa tu compra</p>
+            </div>
+
+            <!-- Loading state -->
+            <div id="loading" class="loading hidden">
+                <div class="loading-spinner"></div>
+                <p>Cargando información del pedido...</p>
+            </div>
+
+            <!-- Checkout content -->
+            <div class="checkout-content" id="checkout-content">
+                <!-- User Information Section -->
+                <div class="checkout-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Información Personal</h2>
+                        <button class="edit-btn" id="edit-personal-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            Editar
+                        </button>
+                    </div>
+                    
+                    <div class="user-info-display" id="user-info-display">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Nombre:</label>
+                                <span id="display-nombre">Cargando...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Apellido:</label>
+                                <span id="display-apellido">Cargando...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Email:</label>
+                                <span id="display-email">Cargando...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Teléfono:</label>
+                                <span id="display-telefono">Cargando...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit form (hidden by default) -->
+                    <form class="user-info-form hidden" id="user-info-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="nombre">Nombre *</label>
+                                <input type="text" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="apellido">Apellido *</label>
+                                <input type="text" id="apellido" name="apellido" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="telefono">Teléfono *</label>
+                                <input type="tel" id="telefono" name="telefono" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" id="cancel-edit-btn">Cancelar</button>
+                            <button type="submit" class="btn-primary">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Shipping Information Section -->
+                <div class="checkout-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Información de Envío</h2>
+                        <button class="edit-btn" id="edit-shipping-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            Editar
+                        </button>
+                    </div>
+
+                    <div class="shipping-info-display" id="shipping-info-display">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Dirección:</label>
+                                <span id="display-direccion">No especificada</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Código Postal:</label>
+                                <span id="display-cp">No especificado</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Ciudad:</label>
+                                <span id="display-ciudad">No especificada</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping form (hidden by default) -->
+                    <form class="shipping-info-form hidden" id="shipping-info-form">
+                        <div class="form-grid">
+                            <div class="form-group form-group-full">
+                                <label for="direccion">Dirección *</label>
+                                <input type="text" id="direccion" name="direccion" required placeholder="Ej: Av. Corrientes 1234">
+                            </div>
+                            <div class="form-group">
+                                <label for="cp">Código Postal *</label>
+                                <input type="text" id="cp" name="cp" required placeholder="Ej: 1043">
+                            </div>
+                            <div class="form-group">
+                                <label for="ciudad">Ciudad *</label>
+                                <input type="text" id="ciudad" name="ciudad" required placeholder="Ej: Buenos Aires">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" id="cancel-shipping-btn">Cancelar</button>
+                            <button type="submit" class="btn-primary">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Order Summary Section -->
+                <div class="checkout-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Resumen del Pedido</h2>
+                        <a href="carrito.html" class="edit-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            Modificar
+                        </a>
+                    </div>
+
+                    <div class="order-items" id="order-items">
+                        <!-- Order items will be loaded dynamically -->
+                    </div>
+
+                    <div class="order-summary">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">$0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Envío:</span>
+                            <span id="shipping-cost">$0.00</span>
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-row total-row">
+                            <span>Total:</span>
+                            <span id="total">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Methods Section -->
+                <div class="checkout-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Método de Pago</h2>
+                    </div>
+
+                    <div class="payment-methods">
+                        <div class="payment-option">
+                            <input type="radio" id="mercadopago" name="payment-method" value="mercadopago" checked>
+                            <label for="mercadopago" class="payment-label">
+                                <div class="payment-info">
+                                    <img src="https://http2.mlstatic.com/storage/logos-api-admin/b5eb7f40-cc79-11ec-ae75-df2bef173be2-xl@2x.png" alt="Mercado Pago" class="payment-logo">
+                                    <div>
+                                        <h3>Mercado Pago</h3>
+                                        <p>Pagá con tarjeta de crédito, débito o dinero en cuenta</p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="payment-option">
+                            <input type="radio" id="transferencia" name="payment-method" value="transferencia">
+                            <label for="transferencia" class="payment-label">
+                                <div class="payment-info">
+                                    <div class="payment-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="1" y="3" width="22" height="18" rx="2" ry="2"/>
+                                            <line x1="1" y1="9" x2="23" y2="9"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3>Transferencia Bancaria</h3>
+                                        <p>Realizá una transferencia desde tu banco</p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final Actions -->
+                <div class="checkout-actions">
+                    <a href="carrito.html" class="btn-secondary">Volver al Carrito</a>
+                    <button class="btn-primary btn-large" id="confirm-order-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                        Confirmar Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div class="modal hidden" id="success-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="success-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                </div>
+                <h2>¡Pedido Confirmado!</h2>
+                <p>Tu pedido ha sido procesado exitosamente</p>
+            </div>
+            <div class="modal-body">
+                <div class="order-details">
+                    <p><strong>Número de pedido:</strong> <span id="order-number"></span></p>
+                    <p><strong>Total:</strong> <span id="order-total"></span></p>
+                    <p><strong>Método de pago:</strong> <span id="payment-method-selected"></span></p>
+                </div>
+                <p class="order-note">Recibirás un email de confirmación con los detalles de tu pedido.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-primary" onclick="window.location.href='index.html'">Continuar Comprando</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="confirmar-pedido.js"></script>
+</body>
+</html>

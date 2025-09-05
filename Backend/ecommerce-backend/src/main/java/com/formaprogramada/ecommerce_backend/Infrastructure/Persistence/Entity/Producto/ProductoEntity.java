@@ -45,5 +45,9 @@ public class ProductoEntity {
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductoColorEntity> colores = new ArrayList<>();
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductoDetalleEntity> detalles = new ArrayList<>();
+
 }
 

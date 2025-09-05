@@ -43,44 +43,34 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // ENDPOINTS PÚBLICOS
                         .requestMatchers("/api/auth/register", "/api/auth/validate", "/api/auth/login",
                                 "/api/auth/refresh", "/api/usuario/confirmar-email",
                                 "/api/auth/reset-password-request",
                                 "/api/auth/reset-password/confirm").permitAll()
+                        .requestMatchers("/api/productos/busqueda/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categoria").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
-
                         .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/**").permitAll()
-
                         .requestMatchers(HttpMethod.GET, "/completo").permitAll()
 
+                        // ENDPOINTS PROTEGIDOS
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
-
-                        // Permitir PUT solo en /api/usuario a CLIENTE
                         .requestMatchers(HttpMethod.PUT, "/api/usuario/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
                         .requestMatchers(HttpMethod.PUT, "/api/carrito/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
                         .requestMatchers(HttpMethod.POST, "/api/reviews").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/reviews/*/responder").hasAnyRole("COLABORADOR", "ADMIN")
-
-                        // POST para aprobar productos → solo ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/productosAprobacion/AprobarProducto").hasRole("ADMIN")
-
-                        // POST para crear aprobación → solo COLABORADOR
                         .requestMatchers(HttpMethod.POST, "/api/productosAprobacion/crearAprobacionProducto").hasRole("COLABORADOR")
-
-                        // GET, PUT, DELETE según tu necesidad
                         .requestMatchers(HttpMethod.GET, "/api/productosAprobacion/**").hasAnyRole("COLABORADOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/productosAprobacion/**").hasRole("COLABORADOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/productosAprobacion/**").hasAnyRole("COLABORADOR", "ADMIN")
-                        // Los demás PUT solo para ADMIN
                         .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMIN")
-
-                        // POST y DELETE solo para ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
-
                         .anyRequest().authenticated()
                 )
+
                 .authenticationProvider(daoAuthenticationProvider) // Login clásico
                 .authenticationProvider(jwtProvider)              // JWT
                 .cors(Customizer.withDefaults())
