@@ -36,6 +36,10 @@ public class PedidoController {
         try{
 
             var pedido= PedidoMapper.toDomain(lista);
+            int cantidad=0;
+            for(CarritoCompletoDTO carrito:lista){
+                cantidad+=carrito.getCantidad();
+            }
             int id=lista.get(0).getUsuarioId();
             Pedido pedidoFinal= pedidoService.CrearPedido(pedido,id);
 
