@@ -157,7 +157,7 @@ async function handleSearch() {
     const products = await API.searchProducts(query);
 
     if (products.length === 1) {
-        window.location.href = `/WEB/producto.html?id=${products[0].id}`; // usar directamente id
+        window.location.href = `/producto.html?id=${products[0].id}`; // usar directamente id
     } else if (products.length > 1) {
         localStorage.setItem('searchQuery', query);
         window.location.href = '/categoria.html';
@@ -197,7 +197,7 @@ function renderSuggestions(suggestions) {
         item.textContent = s.nombre; // mostramos el nombre
         item.className = 'suggestion-item';
         item.addEventListener('click', () => {
-            window.location.href = `/WEB/producto.html?id=${s.id}`; // ya no s.producto.id
+            window.location.href = `/producto.html?id=${s.id}`; // ya no s.producto.id
         });
 
         suggestionsBox.appendChild(item);
