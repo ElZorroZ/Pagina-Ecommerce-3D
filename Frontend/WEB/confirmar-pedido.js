@@ -50,29 +50,40 @@ class CheckoutManager {
         alert(message);
     }
 
-    async loadUserInfo() {
-        try {
-            // Simulate API call to get user information
-            // Replace this with actual API call
-            const simulatedUserData = {
-                nombre: 'Juan',
-                apellido: 'Pérez',
-                email: 'juan.perez@email.com',
-                telefono: '+54 11 1234-5678',
-                direccion: '', // Empty to show editing functionality
-                cp: '',
-                ciudad: ''
-            };
+ async loadUserInfo() {
+    try {
+        const token = localStorage.getItem('accessToken');
+        if (!token) throw new Error('No se encontró token de acceso');
 
-            // Simulate loading delay
-            await new Promise(resolve => setTimeout(resolve, 800));
-            
-            this.userInfo = { ...simulatedUserData };
-        } catch (error) {
-            console.error('Error loading user info:', error);
-            // Keep default empty values if API fails
-        }
+        // Decodificar JWT para obtener sub (gmail)
+        const payloadBase64 = token.split('.')[1];
+        const payloadJson = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
+        const payload = JSON.parse(payloadJson);
+        const gmail = payload.sub;
+
+        // Llamada a la API
+        const data = await window.API.obtenerUsuarioPorToken();
+
+        // Asignar userInfo, asegurándose de que email sea el gmail del token
+        this.userInfo = { 
+            ...data, 
+            email: gmail || data.email || '' 
+        };
+    } catch (error) {
+        console.error('Error loading user info:', error);
+        this.userInfo = {
+            nombre: '',
+            apellido: '',
+            email: localStorage.getItem('accessToken') 
+                   ? JSON.parse(atob(localStorage.getItem('accessToken').split('.')[1])).sub 
+                   : '',
+            telefono: '',
+            direccion: '',
+            cp: '',
+            ciudad: ''
+        };
     }
+}
 
     async loadCartData() {
         try {
@@ -133,45 +144,78 @@ class CheckoutManager {
         document.getElementById('ciudad').value = this.userInfo.ciudad;
     }
 
-    renderOrderSummary() {
-        const orderItemsContainer = document.getElementById('order-items');
-        orderItemsContainer.innerHTML = '';
+async renderOrderSummary() {
+    const orderItemsContainer = document.getElementById('order-items');
+    orderItemsContainer.innerHTML = '';
 
+    try {
+        this.cart = await window.API.obtenerCarrito();
+        // Mostrar cada item en consola
+        console.log("Carrito completo:", this.cart);
+        this.cart.forEach((item, index) => {
+            console.log(`Item ${index}:`, item);
+        });
         if (this.cart.length === 0) {
             orderItemsContainer.innerHTML = '<p class="empty-cart">No hay productos en el carrito</p>';
+            document.getElementById('subtotal').textContent = '$0';
+            document.getElementById('shipping-cost').textContent = 'Gratis';
+            document.getElementById('total').textContent = '$0';
             return;
         }
 
+        // Agrupar productos por nombre
+        const grouped = {};
+        this.cart.forEach(item => {
+            const key = item.nombre; // agrupamos por nombre
+            if (!grouped[key]) {
+                grouped[key] = {
+                    ...item,
+                    cantidadTotal: item.cantidad,
+                    linkArchivo: item.linkArchivo // podemos tomar el primer linkArchivo
+                };
+            } else {
+                grouped[key].cantidadTotal += item.cantidad;
+            }
+        });
+
         let subtotal = 0;
 
-        this.cart.forEach(item => {
-            const itemTotal = item.precio * item.cantidad;
+        Object.values(grouped).forEach(item => {
+            const itemTotal = item.precioTotal ?? item.precioUnitario * item.cantidadTotal;
             subtotal += itemTotal;
 
             const orderItem = document.createElement('div');
             orderItem.className = 'order-item';
             orderItem.innerHTML = `
-                <img src="${item.imagen}" alt="${item.nombre}" class="item-image">
+                ${item.linkArchivo ? `<img src="${item.linkArchivo}" alt="${item.nombre}" class="item-image">` : ''}
                 <div class="item-details">
                     <div class="item-name">${item.nombre}</div>
-                    <div class="item-variant">${item.variante}</div>
-                    <div class="item-quantity">Cantidad: ${item.cantidad}</div>
+                    <div class="item-quantity">Cantidad: ${item.cantidadTotal}</div>
                 </div>
                 <div class="item-price">$${itemTotal.toLocaleString()}</div>
             `;
             orderItemsContainer.appendChild(orderItem);
         });
 
-        // Calculate shipping (free for digital products, $500 for physical)
-        const hasPhysicalProducts = this.cart.some(item => item.tipo === 'fisico');
+        // Detectar productos físicos
+        const hasPhysicalProducts = Object.values(grouped).some(item => !item.linkArchivo);
         const shippingCost = hasPhysicalProducts ? 500 : 0;
         const total = subtotal + shippingCost;
 
-        // Update summary
         document.getElementById('subtotal').textContent = `$${subtotal.toLocaleString()}`;
         document.getElementById('shipping-cost').textContent = shippingCost > 0 ? `$${shippingCost.toLocaleString()}` : 'Gratis';
         document.getElementById('total').textContent = `$${total.toLocaleString()}`;
+
+    } catch (error) {
+        console.error('Error cargando el carrito:', error);
+        orderItemsContainer.innerHTML = '<p class="empty-cart">No se pudo cargar el carrito</p>';
+        document.getElementById('subtotal').textContent = '$0';
+        document.getElementById('shipping-cost').textContent = 'Gratis';
+        document.getElementById('total').textContent = '$0';
     }
+}
+
+
 
     bindEvents() {
         // Personal info editing
@@ -245,28 +289,34 @@ class CheckoutManager {
     async savePersonalInfo() {
         const formData = new FormData(document.getElementById('user-info-form'));
         
-        // Update local data
-        this.userInfo.nombre = formData.get('nombre');
-        this.userInfo.apellido = formData.get('apellido');
-        this.userInfo.email = formData.get('email');
-        this.userInfo.telefono = formData.get('telefono');
+        // Construir objeto de cambios
+        const cambios = {
+            nombre: formData.get('nombre'),
+            apellido: formData.get('apellido'),
+            telefono: formData.get('telefono'),
+            direccion: formData.get('direccion'),
+            cp: formData.get('cp'),
+            ciudad: formData.get('ciudad')
+        };
 
         try {
-            // Simulate API call to save user info
-            console.log('Saving user info:', this.userInfo);
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Update display and exit edit mode
+            await window.API.modificarPedido(cambios);
+
+            // Actualizar localmente
+            this.userInfo = { ...this.userInfo, ...cambios };
+
+            // Actualizar display y salir del modo edición
             this.renderUserInfo();
             this.togglePersonalEdit(false);
-            
-            // Show success feedback
+
+            // Mensaje de éxito
             this.showSuccessMessage('Información personal actualizada');
         } catch (error) {
             console.error('Error saving user info:', error);
             this.showError('Error al guardar la información personal');
         }
     }
+
 
     async saveShippingInfo() {
         const formData = new FormData(document.getElementById('shipping-info-form'));
@@ -307,40 +357,46 @@ class CheckoutManager {
     }
 
     async confirmOrder() {
-        // Validate required information
-        if (!this.validateOrderData()) {
+    if (!this.validateOrderData()) {
+        return;
+    }
+
+    const confirmBtn = document.getElementById('confirm-order-btn');
+    const originalText = confirmBtn.innerHTML;
+
+    confirmBtn.innerHTML = `
+        <div style="width: 20px; height: 20px; border: 2px solid transparent; border-top: 2px solid currentColor; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        Procesando...
+    `;
+    confirmBtn.disabled = true;
+
+    try {
+        const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+
+        // 1️⃣ Crear el pedido en backend
+        const pedidoCreado = await window.API.crearPedido(this.cart);
+        console.log("ID del pedido creado:", pedidoCreado.id);
+
+        // 2️⃣ Si es Mercado Pago → confirmarlo
+        if (paymentMethod === "mercadopago") {
+            const initPoint = await window.API.confirmarPedido(pedidoCreado, this.cart.length);
+            window.location.href = initPoint; // redirige al checkout
+
             return;
         }
 
-        const confirmBtn = document.getElementById('confirm-order-btn');
-        const originalText = confirmBtn.innerHTML;
-        
-        // Show loading state
-        confirmBtn.innerHTML = `
-            <div style="width: 20px; height: 20px; border: 2px solid transparent; border-top: 2px solid currentColor; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-            Procesando...
-        `;
-        confirmBtn.disabled = true;
+        // 3️⃣ Si es otro método → seguir con el flujo simulado
+        await this.processOrder(paymentMethod);
+        this.showSuccessModal(paymentMethod);
 
-        try {
-            // Get selected payment method
-            const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
-            
-            // Simulate order processing
-            await this.processOrder(paymentMethod);
-            
-            // Show success modal
-            this.showSuccessModal(paymentMethod);
-            
-        } catch (error) {
-            console.error('Error confirming order:', error);
-            this.showError('Error al procesar el pedido. Por favor, intenta nuevamente.');
-            
-            // Reset button
-            confirmBtn.innerHTML = originalText;
-            confirmBtn.disabled = false;
-        }
+    } catch (error) {
+        console.error('Error confirming order:', error);
+        this.showError('Error al procesar el pedido. Por favor, intenta nuevamente.');
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
     }
+}
+
 
     validateOrderData() {
         // Check required personal info
@@ -360,26 +416,26 @@ class CheckoutManager {
     }
 
     async processOrder(paymentMethod) {
-        const orderData = {
-            userInfo: this.userInfo,
-            cart: this.cart,
-            paymentMethod: paymentMethod,
-            timestamp: new Date().toISOString(),
-            orderId: this.generateOrderId()
-        };
+    const orderData = {
+        userInfo: this.userInfo,
+        cart: this.cart,
+        paymentMethod: paymentMethod,
+        timestamp: new Date().toISOString(),
+        orderId: this.generateOrderId()
+    };
 
-        console.log('Processing order:', orderData);
+    console.log('Processing order:', orderData);
 
-        // Simulate different payment processing times
-        const processingTime = paymentMethod === 'mercadopago' ? 2000 : 1500;
+    // Para métodos que no son Mercado Pago → simula demora
+    if (paymentMethod !== "mercadopago") {
+        const processingTime = 1500;
         await new Promise(resolve => setTimeout(resolve, processingTime));
-
-        // Here you would integrate with actual payment APIs:
-        // - Mercado Pago SDK for credit card payments
-        // - Bank transfer API for bank transfers
-        
-        return orderData;
     }
+
+    return orderData;
+}
+
+
 
     generateOrderId() {
         return 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();

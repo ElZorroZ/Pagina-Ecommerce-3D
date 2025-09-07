@@ -19,7 +19,7 @@ public class CarritoMapper {
         carrito.setPrecioTotal(request.getPrecioTotal());
         carrito.setPrecioUnitario(request.getPrecioUnitario());
         carrito.setEsDigital(request.getEsDigital());
-        carrito.setColorId(request.getColor());
+        carrito.setColorId(request.getColorId());
         return carrito;
     }
 

@@ -12,6 +12,6 @@ public interface CarritoService {
     Boolean SumarCantidad(int cantidad, int id);
     Boolean BorrarProductoCarrito(int id);
     Boolean VaciarCarrito(int id);
-    List<CarritoEntity> LeerUnCarrito(int id);
+    List<Integer> LeerUnCarrito(int usuarioId);
     List<CarritoCompletoDTO> LeerUnCarritoCompleto(Integer usuarioId) ;
 }

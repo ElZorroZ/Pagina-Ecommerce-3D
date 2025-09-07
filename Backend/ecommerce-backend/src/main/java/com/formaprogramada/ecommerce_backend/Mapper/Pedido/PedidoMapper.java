@@ -132,4 +132,26 @@ public class PedidoMapper {
         }
         return PEDto;
     }
+    // Convierte un solo PedidoProducto a PedidoProductoEntity
+    public static PedidoProductoEntity toEntity(PedidoProducto pedidoProducto) {
+        PedidoProductoEntity.PedidoProductoEntityBuilder builder = PedidoProductoEntity.builder();
+
+        builder.id(pedidoProducto.getId());
+
+        ProductoEntity producto = new ProductoEntity();
+        producto.setId(pedidoProducto.getProductoId());
+        builder.productoId(producto);
+
+        builder.cantidad(pedidoProducto.getCantidad());
+        builder.precio(pedidoProducto.getPrecio());
+        builder.esDigital(pedidoProducto.getEsDigital());
+        builder.colorId(pedidoProducto.getColorId());
+        builder.nombre(pedidoProducto.getNombre());
+
+        // Pedido se setea después, cuando ya se guarda
+        builder.pedidoId(null);
+
+        return builder.build();
+    }
+
 }

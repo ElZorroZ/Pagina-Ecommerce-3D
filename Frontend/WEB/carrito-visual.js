@@ -3,6 +3,7 @@ const cartCount = document.querySelector('.cart-count');
 function actualizarCantidadCarrito() {
   const usuarioId = localStorage.getItem('usuarioId');
   const token = localStorage.getItem('accessToken');
+  const cartCount = document.querySelector('#cart-count'); // Ajusta el selector a tu HTML
 
   if (!usuarioId || !token) {
     console.warn('No hay usuarioId o token en localStorage');
@@ -21,8 +22,8 @@ function actualizarCantidadCarrito() {
       return response.json();
     })
     .then(data => {
-      // Asumiendo que data es un array con los productos en carrito
-      const cantidad = data.reduce((total, item) => total + (item.cantidad || 1), 0);
+      // data ahora es un array de IDs, así que la cantidad es su longitud
+      const cantidad = data.length;
       if (cartCount) {
         cartCount.textContent = cantidad;
       }
@@ -31,6 +32,7 @@ function actualizarCantidadCarrito() {
       console.error('Error al cargar carrito:', error);
     });
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
   actualizarCantidadCarrito();

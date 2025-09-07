@@ -31,7 +31,7 @@ public class CarritoAgregarRequest {
     @DecimalMin(value = "0", inclusive = false)
     private int precioUnitario;
 
-    private int color;
+    private int colorId;
 
     @NotNull(message = "El saber si lo quiere digital o no es obligatorio")
     private Boolean esDigital;

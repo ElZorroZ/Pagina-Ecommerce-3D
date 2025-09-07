@@ -23,6 +23,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Repository
 @AllArgsConstructor
 public class PedidoRepositoryImpl implements PedidoRepository {
@@ -35,23 +37,32 @@ public class PedidoRepositoryImpl implements PedidoRepository {
 
     @Override
     public Pedido CrearPedido(List<PedidoProducto> lista, int id) {
+        // 1️⃣ Crear el Pedido desde la lista de productos
         Pedido pedido = PedidoMapper.toDomain2(lista, id);
-        PedidoEntity pedido1 = PedidoMapper.toEntity(pedido);
 
-            PedidoEntity saved = jpaPedidoRepository.save(pedido1);
+        // 2️⃣ Convertir a entidad
+        PedidoEntity pedidoEntity = PedidoMapper.toEntity(pedido);
+
+        // 3️⃣ Guardar la entidad para generar ID
+        PedidoEntity savedPedido = jpaPedidoRepository.save(pedidoEntity);
 
         try {
-            List<PedidoProductoEntity> lista2 = PedidoMapper.toEntity(lista);
-            for (PedidoProductoEntity pedidoProducto : lista2) {
-                pedidoProducto.setPedidoId(saved);
-                jpaPedidoProductoRepository.save(pedidoProducto);
+            // 4️⃣ Mapear la lista completa de productos a entidades y setear el pedido guardado
+            List<PedidoProductoEntity> productosEntities = PedidoMapper.toEntity(lista);
+            for (PedidoProductoEntity productoEntity : productosEntities) {
+                productoEntity.setPedidoId(savedPedido);
+                jpaPedidoProductoRepository.save(productoEntity);
             }
-        }catch (Exception e){
-            throw new RuntimeException("Error al momento de colocar un producto en el pedido");
+        } catch (Exception e) {
+            throw new RuntimeException("Error al momento de colocar un producto en el pedido", e);
         }
 
+        // 5️⃣ Devolver el Pedido ya con ID generado
+        pedido.setId(savedPedido.getId());
         return pedido;
     }
+
+
 
     @Override
     public void BorrarPedido(int id) {

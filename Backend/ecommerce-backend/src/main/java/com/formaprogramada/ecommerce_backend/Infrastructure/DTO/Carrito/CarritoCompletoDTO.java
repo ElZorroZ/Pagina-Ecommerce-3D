@@ -20,7 +20,60 @@ public class CarritoCompletoDTO {
     // Nuevos campos de color
     private String colorNombre;
     private String colorHex;
+    public CarritoCompletoDTO() {
+        // Constructor vacío necesario para Jackson
+    }
+    public CarritoCompletoDTO(Integer id, Integer productoId, String nombre,
+                              Integer usuarioId, Integer cantidad, Double precioTotal,
+                              Double precioUnitario, Integer colorId, Object esDigital,
+                              String linkArchivo, String colorNombre) {
+        this.id = id;
+        this.productoId = productoId;
+        this.nombre = nombre;
+        this.usuarioId = usuarioId;
+        this.cantidad = cantidad;
+        this.precioTotal = precioTotal;
+        this.precioUnitario = precioUnitario;
+        this.colorId = colorId;
 
+        if (esDigital instanceof Byte) {
+            this.esDigital = ((Byte) esDigital).intValue();
+        } else if (esDigital instanceof Integer) {
+            this.esDigital = (Integer) esDigital;
+        } else if (esDigital != null) {
+            this.esDigital = Integer.valueOf(esDigital.toString());
+        } else {
+            this.esDigital = null;
+        }
+
+        this.linkArchivo = linkArchivo;
+        this.colorNombre = colorNombre;
+    }
+
+    public CarritoCompletoDTO(Integer id, Integer productoId, Integer usuarioId, Integer cantidad,
+                              Double precioTotal, Double precioUnitario, Integer colorId,
+                              Object esDigital, String linkArchivo, String colorNombre) {
+        this.id = id;
+        this.productoId = productoId;
+        this.usuarioId = usuarioId;
+        this.cantidad = cantidad;
+        this.precioTotal = precioTotal;
+        this.precioUnitario = precioUnitario;
+        this.colorId = colorId;
+
+        if (esDigital instanceof Byte) {
+            this.esDigital = ((Byte) esDigital).intValue();
+        } else if (esDigital instanceof Integer) {
+            this.esDigital = (Integer) esDigital;
+        } else if (esDigital != null) {
+            this.esDigital = Integer.valueOf(esDigital.toString());
+        } else {
+            this.esDigital = null;
+        }
+
+        this.linkArchivo = linkArchivo;
+        this.colorNombre = colorNombre;
+    }
     // Constructor actualizado
     public CarritoCompletoDTO(Integer id, Integer productoId, Integer usuarioId, Integer cantidad,
                               Double precioTotal, Double precioUnitario, Integer colorId,

@@ -46,7 +46,8 @@ public interface JpaCarritoRepository extends JpaRepository<CarritoEntity, Integ
 
     @Query("SELECT DISTINCT c.usuarioId FROM CarritoEntity c")
     List<Integer> obtenerIdsUsuariosConCarrito();
-
+    @Query("SELECT c.id FROM CarritoEntity c WHERE c.usuarioId = :usuarioId")
+    List<Integer> seleccionarIdsCarrito(@Param("usuarioId") int usuarioId);
     @Query(value = "CALL ObtenerCarritoCompletoPorUsuario(:usuarioId)", nativeQuery = true)
     List<CarritoCompletoDTO> obtenerCarritoCompletoPorUsuario(@Param("usuarioId") Integer usuarioId);
 }

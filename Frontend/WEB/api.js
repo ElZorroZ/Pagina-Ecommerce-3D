@@ -394,6 +394,148 @@ async eliminarReview(reviewId) {
         console.error('Error en eliminarReview API:', error);
         throw error;
     }
+},
+ async obtenerUsuarioPorToken() {
+        try {
+            const token = localStorage.getItem('accessToken');
+            if (!token) throw new Error('No se encontró token de acceso');
+
+            // Decodificar JWT para obtener el sub
+            const payloadBase64 = token.split('.')[1];
+            const payloadJson = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
+            const payload = JSON.parse(payloadJson);
+            const gmail = payload.sub;
+            if (!gmail) throw new Error('Token inválido, no tiene sub');
+
+            // Llamada al endpoint
+            const response = await fetch(`${API_BASE_URL}/api/usuario/${gmail}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                let errorMsg = response.statusText;
+                try {
+                    const errorData = await response.json();
+                    if (errorData && errorData.message) errorMsg = errorData.message;
+                } catch {}
+                throw new Error(`Error al obtener usuario: ${errorMsg}`);
+            }
+
+            const data = await response.json();
+            return data; // UsuarioGetUpdateResponse
+        } catch (error) {
+            console.error('Error en obtenerUsuarioPorToken API:', error);
+            throw error;
+        }
+    },
+    async modificarPedido(usuarioCambios) {
+      try {
+          const token = localStorage.getItem('accessToken');
+          if (!token) throw new Error('No se encontró token de acceso');
+
+          // Decodificar JWT para obtener el sub (gmail)
+          const payloadBase64 = token.split('.')[1];
+          const payloadJson = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
+          const payload = JSON.parse(payloadJson);
+          const gmail = payload.sub;
+          if (!gmail) throw new Error('Token inválido, no tiene sub');
+
+          // Construir body, siempre enviando gmail del token
+          const body = {
+              ...usuarioCambios,
+              gmail
+          };
+
+          const response = await fetch(`${API_BASE_URL}/api/pedido/modificarPedido`, {
+              method: 'PUT',
+              headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(body)
+          });
+
+          if (!response.ok) {
+              let errorMsg = response.statusText;
+              try {
+                  const errorData = await response.text();
+                  if (errorData) errorMsg = errorData;
+              } catch {}
+              throw new Error(`Error al modificar pedido: ${errorMsg}`);
+          }
+
+          // No hay body que parsear, éxito
+          return true;
+
+      } catch (error) {
+          console.error('Error en modificarPedido API:', error);
+          throw error;
+      }
+  },
+  async crearPedido(cart) {
+  try {
+    const token = localStorage.getItem('accessToken'); // tu JWT
+
+    const response = await fetch(`http://localhost:8080/api/pedido/crearPedido`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(cart)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Error backend:", response.status, errorText);
+      throw new Error("Error al crear pedido");
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.error("Error en crearPedido:", err);
+    throw err;
+  }
 }
+,
+
+
+  async confirmarPedido(pedido, quantity) {
+    try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) throw new Error("No se encontró token de acceso");
+
+        const response = await fetch(`${API_BASE_URL}/api/mp/confirmarPedido?quantity=${quantity}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(pedido)
+        });
+
+        if (!response.ok) {
+            let errorMsg = response.statusText;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.error) errorMsg = errorData.error;
+            } catch {}
+            throw new Error(`Error al confirmar pedido: ${errorMsg}`);
+        }
+
+        const data = await response.json();
+        return data.initPoint; // 👈 URL de Mercado Pago
+    } catch (error) {
+        console.error("Error en confirmarPedido API:", error);
+        throw error;
+    }
+}
+
+
+
 };
 window.API = API;

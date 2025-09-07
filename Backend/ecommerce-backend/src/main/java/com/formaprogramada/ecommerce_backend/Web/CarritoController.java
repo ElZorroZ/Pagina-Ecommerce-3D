@@ -92,24 +92,24 @@ public class CarritoController {
     }
 
     @GetMapping("/verCarrito/{id}")
-    public ResponseEntity<List<CarritoEntity>> VerCarrito(
-            @PathVariable int id
-    ) {
+    public ResponseEntity<List<Integer>> VerCarrito(@PathVariable int id) {
         try {
-            List<CarritoEntity> lista=carritoService.LeerUnCarrito(id);
-            System.out.println(lista);
-            return ResponseEntity.ok(lista);
+            // Leer solo los IDs del carrito
+            List<Integer> listaIds = carritoService.LeerUnCarrito(id);
+            System.out.println("IDs del carrito: " + listaIds);
+            return ResponseEntity.ok(listaIds);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
     @GetMapping("/verCarritoConImagen/{id}")
     public ResponseEntity<List<CarritoCompletoDTO>> VerCarritoImagen(@PathVariable int id) {
         try {
             List<CarritoCompletoDTO> lista = carritoService.LeerUnCarritoCompleto(id);
-            System.out.println(lista);
+            lista.forEach(dto -> System.out.println(dto.getId() + " - " + dto.getNombre()));
             return ResponseEntity.ok(lista);
         } catch (Exception e) {
             e.printStackTrace();

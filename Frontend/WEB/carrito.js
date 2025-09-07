@@ -257,10 +257,9 @@ updateSummary() {
         const taxes = total * 0.08;
         const finalTotal = total + shipping + taxes;
 
-        alert(`Procesando pago por: $${finalTotal.toFixed(2)}\n\nEsta funcionalidad será implementada próximamente.`);
         
         // Redirect to payment page (to be implemented)
-        // window.location.href = 'checkout.html';
+        window.location.href = '/WEB/confirmar-pedido.html';
     }
 }
 

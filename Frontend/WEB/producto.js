@@ -761,7 +761,7 @@ async function initializeAddToCart() {
         const digitalPrice = currentProduct.precioDigital || (basePrice * 0.7);
         const currentPrice = selectedFormat === 'digital' ? digitalPrice : basePrice;
 
-        const usuarioId = localStorage.getItem('usuarioId');
+        const usuarioId = Number(localStorage.getItem('usuarioId'));
 
         const carritoRequest = {
             productoId: currentProduct.id,

@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -63,7 +64,7 @@ public class CarritoServiceImpl implements CarritoService {
         }
     }
 
-
+    @Transactional
     @Override
     public Carrito AgregarCarrito(Carrito carrito) {
         try {
@@ -102,7 +103,10 @@ public class CarritoServiceImpl implements CarritoService {
             nuevoEntity.setColor(colorEntity);
             CarritoEntity savedEntity = jpaCarritoRepository.save(nuevoEntity);
 
-            System.out.println("Producto agregado al carrito con ID: " + savedEntity.getId());
+            System.out.println("Producto agregado al carrito con ID: " + savedEntity.getId() +
+                    ", UsuarioId: " + savedEntity.getUsuarioId() +
+                    ", ProductoId: " + savedEntity.getProductoId() +
+                    ", ColorId: " + (savedEntity.getColor() != null ? savedEntity.getColor().getId() : null));
 
             // Actualizar cache
             actualizarCacheCarrito(carrito.getUsuarioId(), savedEntity);
@@ -192,12 +196,22 @@ public class CarritoServiceImpl implements CarritoService {
         if (eliminado) {
             Cache cacheCarrito = cacheManager.getCache("carrito");
             if (cacheCarrito != null) {
-                List<CarritoEntity> lista = cacheCarrito.get(usuarioId, List.class);
-                if (lista != null) {
-                    lista.removeIf(c -> c.getId() == id);
+                @SuppressWarnings("unchecked")
+                List<Object> listaObj = (List<Object>) cacheCarrito.get(usuarioId, List.class);
+                if (listaObj != null) {
+                    // Crear una lista filtrada solo con CarritoEntity
+                    List<CarritoEntity> lista = listaObj.stream()
+                            .filter(c -> c instanceof CarritoEntity)
+                            .map(c -> (CarritoEntity) c)
+                            .collect(Collectors.toList());
+
+                    // Eliminar el que tenga el ID
+                    lista.removeIf(c -> c.getId().equals(id));
+
                     cacheCarrito.put(usuarioId, lista);
                 }
             }
+
 
             Cache cacheCompleto = cacheManager.getCache("carritoCompleto");
             if (cacheCompleto != null) {
@@ -235,13 +249,19 @@ public class CarritoServiceImpl implements CarritoService {
     }
 
 
-    @Cacheable(value = "carrito", key = "#id")
+    @Cacheable(value = "carrito", key = "#usuarioId")
+    @Transactional
     @Override
-    public List<CarritoEntity> LeerUnCarrito(int id) {
-        System.out.println("⚠️ Consultando base de datos: LeerUnCarrito");
-        return carritoRepository.LeerUnCarrito(id);
+    public List<Integer> LeerUnCarrito(int usuarioId) {
+        try {
+            return jpaCarritoRepository.seleccionarIdsCarrito(usuarioId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
+
     @Cacheable(value = "carritoCompleto", key = "#usuarioId")
+    @Transactional
     @Override
     public List<CarritoCompletoDTO> LeerUnCarritoCompleto(Integer usuarioId) {
         System.out.println("⚠️ Consultando base de datos: LeerUnCarritoCompleto");
