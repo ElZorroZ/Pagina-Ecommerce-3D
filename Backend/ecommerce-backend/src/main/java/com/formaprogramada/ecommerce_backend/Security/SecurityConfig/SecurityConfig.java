@@ -81,14 +81,25 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:5501", "http://127.0.0.1:5501"));
+
+        // Agregá tu dominio de Netlify
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5500",
+                "http://127.0.0.1:5500",
+                "http://localhost:5501",
+                "http://127.0.0.1:5501",
+                "https://forma-programada.netlify.app"
+        ));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of("*"));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 
 
     @Bean

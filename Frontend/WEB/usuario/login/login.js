@@ -41,7 +41,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
     if (lastPage) {
       window.location.href = lastPage;
     } else {
-      window.location.href = "/WEB/index.html";
+      window.location.href = "/index.html";
     }
   } catch (error) {
     console.error("Error en la solicitud:", error);
