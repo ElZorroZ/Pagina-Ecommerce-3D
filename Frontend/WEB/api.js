@@ -1,5 +1,5 @@
 // API Base URL - replace with your actual backend URL
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'https://forma-programada.onrender.com';
 
 // API functions for categories and products
 const API = {
@@ -480,7 +480,7 @@ async eliminarReview(reviewId) {
   try {
     const token = localStorage.getItem('accessToken'); // tu JWT
 
-    const response = await fetch(`http://localhost:8080/api/pedido/crearPedido`, {
+    const response = await fetch(`https://forma-programada.onrender.com/api/pedido/crearPedido`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -11,7 +11,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   try {
     // Cambié la URL para apuntar a tu endpoint de confirmación de email
-    const res = await fetch(`http://localhost:8080/api/usuario/confirmar-email?token=${encodeURIComponent(token)}`);
+    const res = await fetch(`https://forma-programada.onrender.com/api/usuario/confirmar-email?token=${encodeURIComponent(token)}`);
 
     if (res.ok) {
       mensaje.textContent = "¡Email cambiado correctamente! Ya podés iniciar sesión.";

@@ -1,4 +1,4 @@
-const BACKEND_URL = 'http://localhost:8080/api/auth/register';
+const BACKEND_URL = 'https://forma-programada.onrender.com/api/auth/register';
 
 document.getElementById('register-form').onsubmit = async e => {
   e.preventDefault();

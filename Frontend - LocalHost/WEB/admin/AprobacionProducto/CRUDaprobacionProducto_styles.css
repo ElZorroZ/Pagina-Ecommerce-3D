@@ -1,0 +1,425 @@
+/* --- Estilos generales --- */
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  padding-top: 80px;
+  background-color: #f9f9f9;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+
+/* --- Header --- */
+
+.main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 20px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.left-header {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.nav a:hover {
+  color: #000;
+}
+
+.right-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.right-header a,
+.icons a {
+  text-decoration: none;
+  font-size: 18px;
+  color: #333;
+  transition: color 0.3s;
+}
+
+.right-header a:hover,
+.icons a:hover {
+  color: #000;
+}
+
+.main-header .container.header-inner {
+  display: flex;
+}
+
+.main-header .alt-header.mobile-header {
+  display: none;
+}
+
+
+/* --- CRUD Productos --- */
+
+.crud-productos {
+  margin: 40px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.crud-productos h2 {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.crud-productos form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.crud-productos form label {
+  flex: 1 1 100%;
+  font-weight: bold;
+}
+
+.crud-productos form input[type="text"],
+.crud-productos form input[type="number"] {
+  padding: 8px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Botón Guardar mejorado */
+.crud-productos form button {
+  padding: 12px 26px;
+  background: linear-gradient(135deg, #4CAF50, #388E3C);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.crud-productos form button:hover {
+  background: linear-gradient(135deg, #388E3C, #2E7D32);
+  transform: translateY(-2px);
+}
+
+.crud-productos form #btn-agregar-color {
+  background: none !important;
+  background-color: #007bff !important;
+}
+.crud-productos form #btn-agregar-color {
+  background: none !important;
+  background-color: #007bff !important;
+  
+}
+/* Input de archivos mejorado */
+input[type="file"]::-webkit-file-upload-button {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+  background: linear-gradient(135deg, #163562, #244b93);
+  transform: scale(1.05);
+}
+
+input[type="file"] {
+  font-family: inherit;
+  color: #333;
+}
+
+.crud-productos table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.crud-productos th,
+.crud-productos td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.crud-productos th {
+  background-color: #f0f0f0;
+}
+
+.crud-productos button {
+  padding: 8px 14px;
+  margin-right: 6px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #222, #555);
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.crud-productos button:hover {
+  background: linear-gradient(135deg, #000, #333);
+  transform: scale(1.05);
+}
+/* --- TABLA --- */
+/* Tabla general */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+/* Cabecera */
+thead {
+  background-color: #f8f9fa;
+  color: #333;
+  text-align: left;
+}
+
+th, td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Última fila sin borde */
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Hover en filas */
+tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Botones */
+button {
+  padding: 6px 12px;
+  margin-right: 5px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Botón Editar */
+button.editar {
+  background-color: #3b82f6;
+}
+
+button.editar:hover {
+  background-color: #2563eb;
+}
+
+/* Botón Eliminar */
+button.eliminar {
+  background-color: #ef4444;
+}
+
+button.eliminar:hover {
+  background-color: #dc2626;
+}
+
+/* Botón Select */
+button.select {
+  background-color: #4CAF50;
+}
+
+button.select:hover {
+  background-color:  #388E3C;
+}
+
+/* Contenedor del input y botón de agregar color */
+#input-color, #btn-agregar-color {
+  font-size: 1rem;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#input-color {
+  flex-grow: 1;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+}
+
+#input-color:focus {
+  border-color: #007bff;
+}
+
+/* Botón agregar color */
+#btn-agregar-color {
+  background-color: #007bff !important;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  user-select: none;
+}
+
+#btn-agregar-color:hover {
+  background-color: #0056b3 !important;
+}
+
+/* Lista de colores */
+#lista-colores {
+  margin-top: 8px;
+  padding-left: 20px;
+  max-width: 300px;
+  font-size: 1rem;
+  color: #333;
+}
+
+ #lista-colores li {
+    margin-bottom: 5px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+  }
+  #lista-colores li button {
+    background-color: #dc3545;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    color: #fff;
+    cursor: pointer;
+  }
+  #lista-colores li button:hover {
+    background-color: #a71d2a;
+  }
+.color-input-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+#input-color {
+  flex-grow: 1;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+}
+
+#input-color:focus {
+  border-color: #007bff;
+}
+
+/* Botón agregar color */
+#btn-agregar-color {
+  background-color: #007bff !important;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  user-select: none;
+}
+
+#btn-agregar-color:hover {
+  background-color: #0056b3 !important;
+}
+
+/* --- INPUT ARCHIVO --- */
+input[type="file"]::-webkit-file-upload-button {
+  visibility: hidden;
+}
+input[type="file"]::before {
+  content: "Seleccionar imágenes   ";
+  display: inline-block;
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+input[type="file"]:hover::before {
+  background: #ddd;
+}
+/* --- INPUT ARCHIVO COMPRIMIDO --- */
+#archivo-comprimido::-webkit-file-upload-button {
+  visibility: hidden;
+}
+
+#archivo-comprimido::before {
+  content: "Seleccionar archivo comprimido   ";
+  display: inline-block;
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#archivo-comprimido:hover::before {
+  background: #ddd;
+}
+/* Botones debajo del preview */
+.form-botones {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: flex-start;
+  width: 100%;
+}
+/* Estilo específico para el botón azul de Editar */
+.crud-productos .btn-editar-azul {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+}
+
+.crud-productos .btn-editar-azul:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+}

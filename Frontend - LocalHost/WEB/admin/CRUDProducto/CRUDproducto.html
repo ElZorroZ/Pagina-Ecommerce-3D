@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUD de Producto</title>
+  <link rel="stylesheet" href="CRUDproducto_styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/>
+</head>
+<body>
+  <div class="container">
+    <h1>Gestión de Productos</h1>
+
+    <!-- Tabla de productos existentes -->
+    <section>
+      <h2>Listado de Productos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-productos">
+          <!-- Filas dinámicas -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Formulario para agregar/editar -->
+    <section class="crud-productos">
+      <h2>Agregar / Editar Producto</h2>
+      <form id="form-producto">
+        <input type="hidden" id="producto-id" />
+
+        <label>Nombre:</label>
+        <input type="text" id="nombre" maxlength="80" required placeholder="Máx. 80 caracteres" />
+
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" maxlength="500" placeholder="Máx. 500 caracteres" />
+        
+        <label for="categoria">Categoría:</label>
+        <select id="categoria" required>
+          <option value="">Seleccionar categoría</option>
+        </select>
+
+        <label>Precio:</label>
+        <input type="number" id="precio" min="0" step="0.01" required placeholder="Ej: 1234.56" />
+
+        <label>Precio Digital:</label>
+        <input type="number" id="precioDigital" min="0" step="0.01" required placeholder="Ej: 1234.56" />
+
+        
+        <label>Colores:</label>
+        <div class="color-input-container">
+          <div class="color-picker" style="margin-top:5px;"></div>
+          <input type="text" id="input-color-text" placeholder="#00FF00, rgb(...), hsl(...)" readonly />
+          <input type="text" id="input-color-nombre" placeholder="Nombre del color (opcional)" />
+          <button type="button" id="btn-agregar-color">Agregar color</button>
+        </div>
+
+        <!-- Contenedor donde Pickr mostrará la paleta -->
+
+        <ul id="lista-colores"></ul>
+
+
+        <label>Imágenes (máx. 5):</label>
+        <input type="file" id="imagenes" multiple accept="image/*" />
+        <div id="preview-imagenes" style="display:flex; gap:10px; margin-top:10px;"></div>
+           <!-- NUEVOS CAMPOS -->
+        <label for="archivo-comprimido">Archivo comprimido (ZIP, RAR, 7Z, TAR, etc.):</label>
+        <input type="file" id="archivo-comprimido" accept=".zip,.rar,.7z,.tar,.gz,.bz2" />
+        <div id="comprimido-preview" style="display:flex; gap:10px; margin-top:10px;"></div>
+
+        <label for="codigo-inicial">Código Inicial (3 letras):</label>
+        <input type="text" id="codigo-inicial" pattern="[A-Za-z]{3}" title="Debe contener exactamente 3 letras" required maxlength="3" />
+
+        <label for="version">Versión (solo números):</label>
+        <input 
+          type="text" 
+          id="version" 
+          pattern="\d{1,4}" 
+          maxlength="4" 
+          required 
+          inputmode="numeric"
+          title="Número entre 0000 y 9999"
+        />
+
+
+
+        <label for="seguimiento">Seguimiento (letras y números):</label>
+        <input type="text" id="seguimiento" pattern="[A-Za-z0-9]+" title="Solo letras y números" required />
+
+        <label>Dimensiones (cm):</label>
+        <div style="display: flex; gap: 10px;">
+          <input type="number" id="dimension-alto" placeholder="Alto" min="0" required />
+          <input type="number" id="dimension-ancho" placeholder="Ancho" min="0" required />
+          <input type="number" id="dimension-profundidad" placeholder="Profundidad" min="0" required />
+        </div>
+
+        <label for="material">Material:</label>
+        <input type="text" id="material" required />
+
+        <label for="peso">Peso (kg):</label>
+        <input type="number" id="peso" min="0" step="0.01" required />
+
+        <label for="tecnica">Técnica:</label>
+        <input type="text" id="tecnica" required />
+
+
+        <!-- BOTONES: DEBAJO DEL PREVIEW, A LA IZQUIERDA -->
+        <div class="form-botones">
+            <button type="submit">Guardar Producto</button>
+            <button id="btn-editar-producto" class="btn-editar-azul" type="button" style="display: none;">Editar Producto</button>      
+        </div>
+      </form>
+    </section>
+
+    <!-- Previsualización -->
+    <section>
+      <h2>Previsualización</h2>
+      <main class="product-detail">
+        <div class="product-gallery">
+          <div class="product-images">
+            <!-- Imagen principal: inicialmente vacía, se llenará por JS -->
+            <img class="product-image-main" src="" alt="Producto principal" id="main-image" />
+            <!-- Miniaturas vacías para llenar por JS -->
+            <div class="product-thumbnails" id="miniaturas"></div>
+          </div>
+        </div>
+
+        <div class="product-info-detail">
+          <!-- Nombre, descripción y precio vacíos para llenarse por JS -->
+          <h1 id="prev-nombre"></h1>
+          <p class="description" id="prev-desc"></p>
+
+          <div class="options">
+            <p>Formato:</p>
+            <div class="option-buttons" id="option-formato">
+              <!-- Radios se generan dinámicamente -->
+            </div>
+
+            <p>Color:</p>
+            <div class="option-buttons" id="option-color">
+              <!-- Radios se generan dinámicamente -->
+            </div>
+          </div>
+
+          <p class="price" id="prev-precio"></p>
+
+          <div class="buy-section">
+            <input type="number" min="1" value="1" class="quantity-input" />
+            <button class="add-to-cart-btn-detail">Comprar</button>
+          </div>
+        </div>
+      </main>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+  <script src="Create-Producto.js"></script>
+  <script src="Get-Producto.js"></script>
+  <script src="pickr.js"></script>
+
+</body>
+</html>

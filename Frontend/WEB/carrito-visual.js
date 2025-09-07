@@ -10,7 +10,7 @@ function actualizarCantidadCarrito() {
     return;
   }
 
-  fetch(`http://localhost:8080/api/carrito/verCarrito/${usuarioId}`, {
+  fetch(`https://forma-programada.onrender.com/api/carrito/verCarrito/${usuarioId}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }

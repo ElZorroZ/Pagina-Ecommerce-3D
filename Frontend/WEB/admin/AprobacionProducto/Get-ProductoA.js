@@ -45,7 +45,7 @@ async function refreshAccessToken() {
     return null;
   }
   try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
+    const response = await fetch("https://forma-programada.onrender.com/api/auth/refresh", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Cargar productos y llenar tabla
   async function cargarProductos() {
   try {
-    const response = await fetchConRefresh("http://localhost:8080/api/productosAprobacion/VerProductos");
+    const response = await fetchConRefresh("https://forma-programada.onrender.com/api/productosAprobacion/VerProductos");
     if (!response.ok) throw new Error("Error al obtener los productos");
 
     const productos = await response.json();
@@ -210,7 +210,7 @@ window.cargarProductos = cargarProductos;
   async function selectProducto(productoId) {
     try {
         const token = localStorage.getItem("accessToken");
-        const res = await fetch(`http://localhost:8080/api/productosAprobacion/VerProductoCompleto/${productoId}`, {
+        const res = await fetch(`https://forma-programada.onrender.com/api/productosAprobacion/VerProductoCompleto/${productoId}`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
 
@@ -289,7 +289,7 @@ actualizarListaColores();
   async function cargarCategoriasYSeleccionar(categoriaIdSeleccionada) {
     try {
       const token = localStorage.getItem("accessToken");
-      const res = await fetch("http://localhost:8080/api/categoria/combo", {
+      const res = await fetch("https://forma-programada.onrender.com/api/categoria/combo", {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("No se pudieron cargar las categorías");
@@ -353,7 +353,7 @@ async function eliminarProducto(id) {
   try {
     const token = localStorage.getItem("accessToken");
 
-    const url = new URL("http://localhost:8080/api/productosAprobacion/BorrarProducto");
+    const url = new URL("https://forma-programada.onrender.com/api/productosAprobacion/BorrarProducto");
     url.searchParams.append("id", id);
 
     const res = await fetch(url, {

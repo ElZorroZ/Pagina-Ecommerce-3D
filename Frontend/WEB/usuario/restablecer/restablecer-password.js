@@ -12,7 +12,7 @@ document.getElementById('reset-password-form').addEventListener('submit', async 
   }
 
   try {
-    const res = await fetch('http://localhost:8080/api/auth/reset-password-request', {
+    const res = await fetch('https://forma-programada.onrender.com/api/auth/reset-password-request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -10,7 +10,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const res = await fetch(`http://localhost:8080/api/auth/validate?token=${token}`);
+    const res = await fetch(`https://forma-programada.onrender.com/api/auth/validate?token=${token}`);
 
     if (res.ok) {
       mensaje.textContent = "¡Cuenta validada correctamente! Ya podés iniciar sesión.";

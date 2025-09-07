@@ -12,7 +12,7 @@
             if (!accessToken || tokenExpirado(accessToken)) {
                 if (!refreshToken) throw new Error("No hay refresh token");
 
-                const response = await fetch("http://localhost:8080/api/auth/refresh", {
+                const response = await fetch("https://forma-programada.onrender.com/api/auth/refresh", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ refreshToken }),

@@ -8,7 +8,7 @@ async function refreshAccessToken() {
   }
 
   try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
+    const response = await fetch("https://forma-programada.onrender.com/api/auth/refresh", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -96,7 +96,7 @@ async function fetchConRefresh(url, options = {}) {
   try {
     const colaboradorPayload = { gmail };
 
-    const res = await fetchConRefresh("http://localhost:8080/api/usuario/colaboradores", {
+    const res = await fetchConRefresh("https://forma-programada.onrender.com/api/usuario/colaboradores", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(colaboradorPayload),

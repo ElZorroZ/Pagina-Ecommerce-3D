@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUD de Categorias</title>
+  <link rel="stylesheet" href="CRUDcategoria_styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Gestión de Categorias</h1>
+
+    <!-- Tabla de productos existentes -->
+    <section>
+      <h2>Listado de Categorias</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-productos">
+          <!-- Filas dinámicas -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Formulario para agregar/editar -->
+    <section class="crud-productos">
+      <h2>Agregar / Editar Categoria</h2>
+      <form id="form-producto">
+        <input type="hidden" id="categoria-id" />
+
+        <label>Nombre:</label>
+        <input type="text" id="nombre" maxlength="20" required placeholder="Máx. 20 caracteres" />
+
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" maxlength="80" placeholder="Máx. 80 caracteres" />
+
+        <!-- BOTONES: DEBAJO DEL PREVIEW, A LA IZQUIERDA -->
+        <div class="form-botones">
+            <button type="submit">Guardar Categoria</button>
+            <button id="btn-editar-producto" class="btn-editar-azul" type="button" style="display: none;">Editar Producto</button>      
+        </div>
+      </form>
+    </section>
+  </div>
+  <script src="Create-Categoria.js"></script>
+  <script src="Get-Categoria.js"></script>
+
+</body>
+</html>

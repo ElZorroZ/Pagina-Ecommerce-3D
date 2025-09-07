@@ -46,9 +46,9 @@ public class MercadoPagoServiceImpl implements MercadoPagoService {
                     .items(List.of(itemRequest))
                     .backUrls(
                             PreferenceBackUrlsRequest.builder()
-                                    .success("https://<tu-dominio-o-ngrok>/api/mp/pago-exitoso?pedidoId=" + pedidoId)
-                                    .pending("https://<tu-dominio-o-ngrok>/api/mp/pago-pendiente?pedidoId=" + pedidoId)
-                                    .failure("https://<tu-dominio-o-ngrok>/api/mp/pago-fallido?pedidoId=" + pedidoId)
+                                    .success("https://forma-programada.onrender.com/api/mp/pago-exitoso?pedidoId=" + pedidoId)
+                                    .pending("https://forma-programada.onrender.com/api/mp/pago-pendiente?pedidoId=" + pedidoId)
+                                    .failure("https://forma-programada.onrender.com/api/mp/pago-fallido?pedidoId=" + pedidoId)
                                     .build()
                     )
                     .autoReturn("approved") // Redirige automáticamente cuando se aprueba

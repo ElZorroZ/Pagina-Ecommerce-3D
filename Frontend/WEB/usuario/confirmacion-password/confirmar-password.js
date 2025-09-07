@@ -36,7 +36,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     try {
       // Enviar el cambio de contraseña al backend (POST)
-      const cambiarRes = await fetch('http://localhost:8080/api/auth/reset-password/confirm', {
+      const cambiarRes = await fetch('https://forma-programada.onrender.com/api/auth/reset-password/confirm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

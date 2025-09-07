@@ -11,7 +11,7 @@ async function refreshAccessToken() {
     return null;
   }
   try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
+    const response = await fetch("https://forma-programada.onrender.com/api/auth/refresh", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function cargarColaboradores() {
     try {
-      const response = await fetchConRefresh("http://localhost:8080/api/usuario/colaboradores");
+      const response = await fetchConRefresh("https://forma-programada.onrender.com/api/usuario/colaboradores");
       if (!response.ok) throw new Error("Error al obtener los colaboradores");
 
       const colaboradores = await response.json();
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      const res = await fetch("http://localhost:8080/api/usuario/colaboradores", {
+      const res = await fetch("https://forma-programada.onrender.com/api/usuario/colaboradores", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

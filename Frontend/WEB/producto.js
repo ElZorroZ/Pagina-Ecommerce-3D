@@ -800,7 +800,7 @@ async function initializeAddToCart() {
                 await API.sumarCantidadCarrito(productoFisicoExistente.id, 1);
             } else {
                 // Agregar producto al carrito
-                const response = await fetch('http://localhost:8080/api/carrito/agregarProductoaCarrito', {
+                const response = await fetch('https://forma-programada.onrender.com/api/carrito/agregarProductoaCarrito', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
