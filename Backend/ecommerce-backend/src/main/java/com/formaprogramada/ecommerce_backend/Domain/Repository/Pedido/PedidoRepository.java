@@ -3,6 +3,7 @@ package com.formaprogramada.ecommerce_backend.Domain.Repository.Pedido;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.Pedido;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.PedidoProducto;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoInternoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoUsuarioDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdatePedido;
@@ -18,4 +19,5 @@ public interface PedidoRepository {
     List<PedidoDTO> verPedidosDeUsuario(UsuarioEntity idUsuario);
     void ModificarPedido(UsuarioUpdatePedido usuario);
     void CambiarEstado(String estado,int id);
+    PedidoInternoDTO verPedidoInterno(int id);
 }

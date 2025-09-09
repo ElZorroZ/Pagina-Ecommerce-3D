@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/completo").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/pedido/EnviarPedidoOnline").permitAll()
 
                         // ENDPOINTS PROTEGIDOS
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")

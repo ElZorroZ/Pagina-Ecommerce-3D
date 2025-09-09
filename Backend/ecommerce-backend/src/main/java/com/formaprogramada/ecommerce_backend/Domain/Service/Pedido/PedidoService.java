@@ -19,4 +19,5 @@ public interface PedidoService {
     void ModificarPedido(UsuarioUpdatePedido usuario);
     void CambiarEstado(String estado,int id);
     Pedido obtenerPedidoPorMercadoPagoId(String pedidoId);
+    List<String> EnviarPedidoOnline(int idPedido);
     }

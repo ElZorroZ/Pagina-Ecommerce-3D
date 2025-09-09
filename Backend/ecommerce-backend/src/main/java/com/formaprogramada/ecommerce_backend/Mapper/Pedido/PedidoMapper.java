@@ -7,6 +7,7 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoA
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoCompletoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.ProductoEnPedidoDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.ProductoEnPedidoDTOinterno;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido.PedidoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido.PedidoProductoEntity;
@@ -126,6 +127,7 @@ public class PedidoMapper {
             pedidoEnProductDTO.setNombre(productos.getNombre());
             pedidoEnProductDTO.setPrecioTotal(productos.getPrecio());
             pedidoEnProductDTO.setCantidad(productos.getCantidad());
+            pedidoEnProductDTO.setEsDigital(productos.getEsDigital());
 
             PEDto.add(pedidoEnProductDTO);
 
@@ -152,6 +154,26 @@ public class PedidoMapper {
         builder.pedidoId(null);
 
         return builder.build();
+    }
+
+
+
+    public static List<ProductoEnPedidoDTOinterno> toProductoEnPedidoInterno (List <PedidoProductoEntity> pedidoProducto){
+        List<ProductoEnPedidoDTOinterno> PEDto= new ArrayList<>();
+        for (PedidoProductoEntity productos: pedidoProducto){
+            ProductoEnPedidoDTOinterno pedidoEnProductDTO= new ProductoEnPedidoDTOinterno();
+
+            pedidoEnProductDTO.setId(productos.getId());
+            pedidoEnProductDTO.setNombre(productos.getNombre());
+            pedidoEnProductDTO.setPrecioTotal(productos.getPrecio());
+            pedidoEnProductDTO.setCantidad(productos.getCantidad());
+            pedidoEnProductDTO.setEsDigital(productos.getEsDigital());
+            pedidoEnProductDTO.setIdProducto(productos.getProductoId().getId());
+
+            PEDto.add(pedidoEnProductDTO);
+
+        }
+        return PEDto;
     }
 
 }

@@ -4,9 +4,7 @@ import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.Pedido;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.PedidoProducto;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Pedido.PedidoRepository;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoDTO;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoUsuarioDTO;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.ProductoEnPedidoDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.*;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdatePedido;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido.PedidoEntity;
@@ -104,6 +102,41 @@ public class PedidoRepositoryImpl implements PedidoRepository {
 
         return puDTO;
     }
+
+
+    //ESTO ES TODO LO QUE ESTA MAL EN LA PROGRAMACION ORIENTADA A OBJETOS
+    @Override
+    public PedidoInternoDTO verPedidoInterno(int id) {
+        PedidoInternoDTO puDTO = new PedidoInternoDTO();
+
+        PedidoEntity byId = jpaPedidoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+
+        List <PedidoProductoEntity> pedidoProducto = jpaPedidoProductoRepository.findByPedidoId(byId);
+
+        List<ProductoEnPedidoDTOinterno> productoEnPedidoDTO = PedidoMapper.toProductoEnPedidoInterno(pedidoProducto);
+
+        UsuarioEntity ue = byId.getUsuarioId();
+        System.out.println(ue.getId());
+        UsuarioEntity usuario = jpaUsuarioRepository.findById(ue.getId())
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+
+        puDTO.setFechaPedido(byId.getFechaPedido());
+        puDTO.setEstado(byId.getEstado());
+        puDTO.setProductos(productoEnPedidoDTO);
+        puDTO.setNombre(usuario.getNombre());
+        puDTO.setApellido(usuario.getApellido());
+        puDTO.setGmail(usuario.getGmail());
+        puDTO.setDireccion(usuario.getDireccion());
+        puDTO.setCp(usuario.getCp());
+        puDTO.setCiudad(usuario.getCiudad());
+        puDTO.setTelefono(usuario.getTelefono());
+        puDTO.setTotal(byId.getTotal());
+
+
+        return puDTO;
+    }
+
 
     @Override
     public List<PedidoDTO> verPedidos() {

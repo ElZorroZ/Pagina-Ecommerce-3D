@@ -7,10 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductoEnPedidoDTO {
+public class ProductoEnPedidoDTOinterno {
     private Integer id;
     private String nombre;
     private double precioTotal;
     private int cantidad;
     private Boolean esDigital;
+    private int idProducto;
 }

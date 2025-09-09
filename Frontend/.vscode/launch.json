@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense para saber los atributos posibles.
+    // Mantenga el puntero para ver las descripciones de los existentes atributos.
+    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to Edge",
+            "port": 9222,
+            "request": "attach",
+            "type": "msedge",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Open confirmar-email.html",
+            "file": "c:\\Users\\HP OMEN\\Desktop\\Lenguajes\\Java\\Pagina-Ecommerce-3D\\Frontend\\WEB\\usuario\\confirmacion_compra\\confirmar-email.html"
+        }
+    ]
+}
