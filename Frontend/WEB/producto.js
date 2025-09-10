@@ -967,7 +967,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartBtn = document.querySelector('.cart-btn');
   if (cartBtn) {
     cartBtn.addEventListener('click', () => {
-      window.location.href = '/WEB/carrito.html';
+      window.location.href = '/carrito.html';
     });
   }
 });

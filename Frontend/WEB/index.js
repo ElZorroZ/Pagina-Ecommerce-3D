@@ -252,7 +252,7 @@ function handleClicks(e) {
         const productCard = e.target.closest('.product-card');
         const productId = productCard.dataset.productId;
         if (productId) {
-            window.location.href = `/WEB/producto.html?id=${productId}`;
+            window.location.href = `/producto.html?id=${productId}`;
         }
     }
     
