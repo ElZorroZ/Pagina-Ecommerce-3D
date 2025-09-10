@@ -403,7 +403,7 @@ public class MercadoPagoController {
             // No fallar el redirect por esto
         }
 
-        return "redirect:/gracias-por-tu-compra";
+        return "redirect:https://forma-programada.netlify.app/confirmar-pago.html";
     }
 
     @GetMapping("/pago-pendiente")
@@ -427,7 +427,7 @@ public class MercadoPagoController {
             System.err.println("⚠️ Error actualizando estado: " + e.getMessage());
         }
 
-        return "redirect:/estado-pendiente";
+        return "redirect:https://forma-programada.netlify.app/pago-pendiente.html";
     }
 
     @GetMapping("/pago-fallido")
@@ -451,7 +451,7 @@ public class MercadoPagoController {
             System.err.println("⚠️ Error actualizando estado: " + e.getMessage());
         }
 
-        return "redirect:/pago-fallido";
+        return "redirect:https://forma-programada.netlify.app/pago-fallido.html";
     }
 
     // 🔥 ENDPOINT PARA VERIFICACIÓN MANUAL DE PAGO

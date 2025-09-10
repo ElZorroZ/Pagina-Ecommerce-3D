@@ -1,5 +1,4 @@
 const cartCount = document.querySelector('.cart-count');
-const API_BASE_URL = "https://forma-programada.onrender.com";
 
 function actualizarCantidadCarrito() {
   const usuarioId = localStorage.getItem('usuarioId');
