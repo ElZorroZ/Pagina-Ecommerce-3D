@@ -1,4 +1,3 @@
-const API_BASE_URL = "https://forma-programada.onrender.com";
 
    async function validarToken() {
         const accessToken = localStorage.getItem('accessToken');
