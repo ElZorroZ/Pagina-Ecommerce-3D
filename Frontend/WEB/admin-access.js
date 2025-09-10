@@ -1,4 +1,6 @@
-    async function validarToken() {
+const API_BASE_URL = "https://forma-programada.onrender.com";
+
+   async function validarToken() {
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
 
@@ -12,7 +14,7 @@
             if (!accessToken || tokenExpirado(accessToken)) {
                 if (!refreshToken) throw new Error("No hay refresh token");
 
-                const response = await fetch("https://forma-programada.onrender.com/api/auth/refresh", {
+                const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ refreshToken }),
@@ -105,15 +107,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (roles.includes("ROLE_ADMIN")) {
                     adminOptions.innerHTML = `
-                        <a href="/admin/CRUDCategoria/CRUDcategoria.html" class="dropdown-category">Gestionar categorías</a>
-                        <a href="/admin/CRUDProducto/CRUDproducto.html" class="dropdown-category">Gestionar productos</a>
-                        <a href="/admin/pedidos.html" class="dropdown-category">Gestionar pedidos</a>
-                        <a href="/admin/Aprobacion/CRUDaprobacion.html" class="dropdown-category">Gestionar colaboradores</a>
-                        <a href="/admin/AprobacionProducto/CRUDaprobacionProducto.html" class="dropdown-category">Gestionar productos sin aprobar</a>
+                        <a href="/WEB/admin/CRUDCategoria/CRUDcategoria.html" class="dropdown-category">Gestionar categorías</a>
+                        <a href="/WEB/admin/CRUDProducto/CRUDproducto.html" class="dropdown-category">Gestionar productos</a>
+                        <a href="/admin/Pedidos/pedidos.html" class="dropdown-category">Gestionar pedidos</a>
+                        <a href="/WEB/admin/Aprobacion/CRUDaprobacion.html" class="dropdown-category">Gestionar colaboradores</a>
+                        <a href="/WEB/admin/AprobacionProducto/CRUDaprobacionProducto.html" class="dropdown-category">Gestionar productos sin aprobar</a>
                     `;
                 } else {
                     adminOptions.innerHTML = `
-                        <a href="/admin/CRUDColaboradorProducto/CRUDproductoC.html" class="dropdown-category">Gestionar productos</a>
+                        <a href="/WEB/admin/CRUDColaboradorProducto/CRUDproductoC.html" class="dropdown-category">Gestionar productos</a>
                     `;
                 }
 

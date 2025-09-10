@@ -10,13 +10,13 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.ProductoE
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido.PedidoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido.PedidoProductoEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoArchivoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PedidoMapper {
 
@@ -116,20 +116,77 @@ public class PedidoMapper {
         }
         return lista2;
     }
+    public static PedidoDTO toDTO(PedidoEntity pedido) {
+        PedidoDTO dto = new PedidoDTO();
+        dto.setId(pedido.getId());
+        dto.setFechaPedido(pedido.getFechaPedido());
+        dto.setTotal(pedido.getTotal());
+        dto.setEstado(pedido.getEstado());
+        dto.setUsuarioId(pedido.getUsuarioId().getId());
 
-    public static List<ProductoEnPedidoDTO> toProductoEnPedidoDTO (List <PedidoProductoEntity> pedidoProducto){
-        List<ProductoEnPedidoDTO> PEDto= new ArrayList<>();
-        for (PedidoProductoEntity productos: pedidoProducto){
-            ProductoEnPedidoDTO pedidoEnProductDTO= new ProductoEnPedidoDTO();
+        List<ProductoEnPedidoDTO> productos = pedido.getProductos() != null
+                ? pedido.getProductos().stream().map(pp -> {
+            ProductoEnPedidoDTO ppDTO = new ProductoEnPedidoDTO();
+            ppDTO.setId(pp.getId());
+            ppDTO.setProductoId(pp.getProductoId().getId());
+            ppDTO.setNombre(pp.getNombre());
+            ppDTO.setPrecio(pp.getPrecio());
+            ppDTO.setCantidad(pp.getCantidad());
+            ppDTO.setEsDigital(pp.getEsDigital());
+            ppDTO.setColorId(pp.getColorId());
+            ppDTO.setColorNombre(pp.getColor() != null ? pp.getColor().getColor() : null);
+            ppDTO.setHex(pp.getColor() != null ? pp.getColor().getHex() : null); // 🔹 Mapeo del hex
+            ppDTO.setPrecioTotal(pp.getPrecio() * pp.getCantidad());
 
-            pedidoEnProductDTO.setId(productos.getId());
-            pedidoEnProductDTO.setNombre(productos.getNombre());
-            pedidoEnProductDTO.setPrecioTotal(productos.getPrecio());
-            pedidoEnProductDTO.setCantidad(productos.getCantidad());
+            // 🔹 Mapear la primera imagen si existe
+            if (pp.getProductoId().getArchivos() != null && !pp.getProductoId().getArchivos().isEmpty()) {
+                pp.getProductoId().getArchivos().sort(Comparator.comparingInt(ProductoArchivoEntity::getOrden));
+                ppDTO.setImagen(pp.getProductoId().getArchivos().get(0).getLinkArchivo());
+            } else {
+                ppDTO.setImagen(null);
+            }
+            return ppDTO;
+        }).collect(Collectors.toList())
+                : new ArrayList<>();
 
-            PEDto.add(pedidoEnProductDTO);
+        dto.setProductos(productos);
 
+        return dto;
+    }
+
+
+
+
+    public static List<PedidoDTO> toDTOList(List<PedidoEntity> pedidos) {
+        return pedidos.stream().map(PedidoMapper::toDTO).collect(Collectors.toList());
+    }
+
+    public static List<ProductoEnPedidoDTO> toProductoEnPedidoDTO(List<PedidoProductoEntity> pedidoProducto) {
+        List<ProductoEnPedidoDTO> PEDto = new ArrayList<>();
+
+        for (PedidoProductoEntity productos : pedidoProducto) {
+            ProductoEnPedidoDTO dto = new ProductoEnPedidoDTO();
+
+            dto.setId(productos.getId());
+            dto.setProductoId(productos.getProductoId().getId());
+            dto.setNombre(productos.getNombre());
+            dto.setPrecio(productos.getPrecio());
+            dto.setCantidad(productos.getCantidad());
+            dto.setEsDigital(productos.getEsDigital());
+            dto.setColorId(productos.getColorId());
+            dto.setColorNombre(productos.getColor() != null ? productos.getColor().getColor() : null);
+            dto.setPrecioTotal(productos.getPrecio() * productos.getCantidad());
+
+            // Convertir archivo a Base64
+            if (productos.getProductoId().getArchivo() != null) {
+                dto.setArchivoBase64(Base64.getEncoder().encodeToString(productos.getProductoId().getArchivo()));
+            } else {
+                dto.setArchivoBase64(null);
+            }
+
+            PEDto.add(dto);
         }
+
         return PEDto;
     }
     // Convierte un solo PedidoProducto a PedidoProductoEntity

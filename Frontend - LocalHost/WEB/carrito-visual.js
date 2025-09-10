@@ -1,4 +1,5 @@
 const cartCount = document.querySelector('.cart-count');
+const API_BASE_URL = "http://localhost:8080";
 
 function actualizarCantidadCarrito() {
   const usuarioId = localStorage.getItem('usuarioId');
@@ -10,7 +11,7 @@ function actualizarCantidadCarrito() {
     return;
   }
 
-  fetch(`http://localhost:8080/api/carrito/verCarrito/${usuarioId}`, {
+  fetch(`${API_BASE_URL}/api/carrito/verCarrito/${usuarioId}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }

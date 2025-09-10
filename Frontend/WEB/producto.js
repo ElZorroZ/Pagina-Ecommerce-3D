@@ -5,6 +5,7 @@ let selectedWiring = 'cordless';
 let selectedFormat = 'fisico';
 let currentRating = 0;
 const categoriesDropdown = document.getElementById('categories-dropdown');
+const API_BASE_URL = "https://forma-programada.onrender.com";
 
 // Get product ID from URL
 function getProductIdFromUrl() {
@@ -70,7 +71,7 @@ function displayProduct(product) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, '-');
 
-    document.getElementById('breadcrumb-category').href = `/categoria.html?categoria=${encodeURIComponent(categoriaSlug)}`;
+    document.getElementById('breadcrumb-category').href = `/WEB/categoria.html?categoria=${encodeURIComponent(categoriaSlug)}`;
     document.getElementById('breadcrumb-product').textContent = product.nombre;
 
     // Update product info
@@ -800,7 +801,7 @@ async function initializeAddToCart() {
                 await API.sumarCantidadCarrito(productoFisicoExistente.id, 1);
             } else {
                 // Agregar producto al carrito
-                const response = await fetch('https://forma-programada.onrender.com/api/carrito/agregarProductoaCarrito', {
+                const response = await fetch(`${API_BASE_URL}/api/carrito/agregarProductoaCarrito`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -928,7 +929,7 @@ function handleClicks(e) {
         const categoryId = e.target.dataset.categoryId;
         const categoryName = e.target.textContent.toLowerCase().replace(/ /g, '-');
         if (categoryId) {
-            window.location.href = `/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
+            window.location.href = `/WEB/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
         }
     }
 
@@ -966,7 +967,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartBtn = document.querySelector('.cart-btn');
   if (cartBtn) {
     cartBtn.addEventListener('click', () => {
-      window.location.href = '/carrito.html';
+      window.location.href = '/WEB/carrito.html';
     });
   }
 });

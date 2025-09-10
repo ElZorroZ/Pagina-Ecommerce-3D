@@ -5,6 +5,7 @@ let selectedWiring = 'cordless';
 let selectedFormat = 'fisico';
 let currentRating = 0;
 const categoriesDropdown = document.getElementById('categories-dropdown');
+const API_BASE_URL = "http://localhost:8080";
 
 // Get product ID from URL
 function getProductIdFromUrl() {
@@ -800,7 +801,7 @@ async function initializeAddToCart() {
                 await API.sumarCantidadCarrito(productoFisicoExistente.id, 1);
             } else {
                 // Agregar producto al carrito
-                const response = await fetch('http://localhost:8080/api/carrito/agregarProductoaCarrito', {
+                const response = await fetch(`${API_BASE_URL}/api/carrito/agregarProductoaCarrito`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

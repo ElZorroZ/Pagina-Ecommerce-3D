@@ -4,6 +4,8 @@ window.productoState = window.productoState || {
   archivosSeleccionados: []
 };
 let preview;
+const API_BASE_URL = "https://forma-programada.onrender.com";
+
   // Preview archivos
   function actualizarPreview() {
     preview.innerHTML = "";
@@ -66,7 +68,7 @@ async function refreshAccessToken() {
     return null;
   }
   try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -219,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Cargar productos y llenar tabla
   async function cargarProductos() {
     try {
-      const response = await fetchConRefresh("http://localhost:8080/api/productos");
+      const response = await fetchConRefresh(`${API_BASE_URL}/api/productos`);
       if (!response.ok) throw new Error("Error al obtener los productos");
       const productos = await response.json();
       tablaBody.innerHTML = "";
@@ -266,7 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function toggleDestacado(productoId) {
   try {
     const token = localStorage.getItem("accessToken");
-    const res = await fetch(`http://localhost:8080/api/productos/${productoId}/destacado`, {
+    const res = await fetch(`${API_BASE_URL}/api/productos/${productoId}/destacado`, {
       method: "POST", // puede ser POST o PUT según cómo lo manejes
       headers: {
         "Authorization": `Bearer ${token}`
@@ -282,7 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function selectProducto(productoId) {
     try {
       const token = localStorage.getItem("accessToken");
-      const res = await fetch(`http://localhost:8080/api/productos/${productoId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/productos/${productoId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("No se pudo cargar el producto");
@@ -335,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function cargarCategoriasYSeleccionar(categoriaIdSeleccionada) {
     try {
       const token = localStorage.getItem("accessToken");
-      const res = await fetch("http://localhost:8080/api/categoria/combo", {
+      const res = await fetch(`${API_BASE_URL}/api/categoria/combo`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("No se pudieron cargar las categorías");
@@ -462,7 +464,7 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
         console.log(pair[0], pair[1]);
       }
       console.log("DTO que envío:", productoCompletoDTO);
-      const res = await fetchConRefresh(`http://localhost:8080/api/productos/${id}`, {
+      const res = await fetchConRefresh(`${API_BASE_URL}/api/productos/${id}`, {
         method: "PUT",
         body: formData,
       });
@@ -567,7 +569,7 @@ async function eliminarProducto(id) {
   if (!confirm("¿Seguro que querés eliminar este producto?")) return;
   try {
     const token = localStorage.getItem("accessToken");
-    const res = await fetch(`http://localhost:8080/api/productos/${id}`, {
+    const res = await fetch(`${API_BASE_URL}/api/productos/${id}`, {
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`

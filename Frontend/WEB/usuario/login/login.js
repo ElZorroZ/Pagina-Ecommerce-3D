@@ -5,7 +5,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
   const password = document.getElementById("password").value;
 
   try {
-    const response = await fetch("https://forma-programada.onrender.com/api/auth/login", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -41,7 +41,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
     if (lastPage) {
       window.location.href = lastPage;
     } else {
-      window.location.href = "/index.html";
+      window.location.href = "/WEB/index.html";
     }
   } catch (error) {
     console.error("Error en la solicitud:", error);
