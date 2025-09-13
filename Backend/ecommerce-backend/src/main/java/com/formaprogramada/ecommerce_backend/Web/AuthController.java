@@ -2,6 +2,8 @@ package com.formaprogramada.ecommerce_backend.Web;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Usuario.UsuarioRepository;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Email.EmailService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Jwt.JwtTokenService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Jwt.RefreshTokenExpiredException;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Jwt.RefreshTokenNotFoundException;
 import com.formaprogramada.ecommerce_backend.Domain.Service.TokenVerificacion.TokenVerificacionService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Usuario.UsuarioService;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
@@ -99,39 +101,60 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
-            var authToken = new UsernamePasswordAuthenticationToken(request.getGmail(), request.getPassword());
+            log.info("Intento de login para: {}", request.getGmail());
+
+            var authToken = new UsernamePasswordAuthenticationToken(
+                    request.getGmail(),
+                    request.getPassword()
+            );
+
             var auth = authManager.authenticate(authToken);
             var userDetails = (UserDetails) auth.getPrincipal();
 
-            AuthResponse tokens = jwtTokenService.generarTokens(userDetails);
+            AuthResponse response = jwtTokenService.generarTokens(userDetails);
 
-            Optional<Usuario> usuarioOpt = usuarioService.buscarPorGmail(request.getGmail());
-            if (usuarioOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
-            }
+            log.info("Login exitoso para: {} - ID: {}", request.getGmail(), response.getUsuarioId());
 
-            Usuario usuario = usuarioOpt.get();
-
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("accessToken", tokens.getAccessToken());
-            responseBody.put("refreshToken", tokens.getRefreshToken());
-            responseBody.put("usuarioId", usuario.getId());
-
-            return ResponseEntity.ok(responseBody);
+            return ResponseEntity.ok(Map.of(
+                    "accessToken", response.getAccessToken(),
+                    "refreshToken", response.getRefreshToken(),
+                    "usuarioId", response.getUsuarioId()
+            ));
 
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
+            log.warn("Login fallido para: {} - {}", request.getGmail(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Credenciales inválidas");
+        } catch (Exception e) {
+            log.error("Error inesperado en login: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error interno del servidor");
         }
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
-        log.info("Refresh token recibido: {}", request.getRefreshToken());
         try {
-            AuthResponse tokens = jwtTokenService.refrescarTokens(request.getRefreshToken());
-            return ResponseEntity.ok(tokens);
-        } catch (RuntimeException e) {
+            String username = jwtService.extractUsername(request.getRefreshToken());
+            log.info("Procesando refresh para usuario: {}", username);
+
+            AuthResponse response = jwtTokenService.refrescarTokens(request.getRefreshToken());
+
+            log.info("Refresh exitoso para usuario: {} - ID: {}", username, response.getUsuarioId());
+
+            return ResponseEntity.ok(Map.of(
+                    "accessToken", response.getAccessToken(),
+                    "refreshToken", response.getRefreshToken(),
+                    "usuarioId", response.getUsuarioId()
+            ));
+
+        } catch (RefreshTokenExpiredException | RefreshTokenNotFoundException e) {
+            log.warn("Refresh fallido: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error inesperado en refresh: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error interno del servidor");
         }
     }
 

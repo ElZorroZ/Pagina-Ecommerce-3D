@@ -1,4 +1,3 @@
-const API_BASE_URL = "http://localhost:8080";
 
    async function validarToken() {
         const accessToken = localStorage.getItem('accessToken');
@@ -107,15 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (roles.includes("ROLE_ADMIN")) {
                     adminOptions.innerHTML = `
-                        <a href="/WEB/admin/CRUDCategoria/CRUDcategoria.html" class="dropdown-category">Gestionar categorías</a>
-                        <a href="/WEB/admin/CRUDProducto/CRUDproducto.html" class="dropdown-category">Gestionar productos</a>
+                        <a href="/admin/CRUDCategoria/CRUDcategoria.html" class="dropdown-category">Gestionar categorías</a>
+                        <a href="/admin/CRUDProducto/CRUDproducto.html" class="dropdown-category">Gestionar productos</a>
                         <a href="/admin/Pedidos/pedidos.html" class="dropdown-category">Gestionar pedidos</a>
-                        <a href="/WEB/admin/Aprobacion/CRUDaprobacion.html" class="dropdown-category">Gestionar colaboradores</a>
-                        <a href="/WEB/admin/AprobacionProducto/CRUDaprobacionProducto.html" class="dropdown-category">Gestionar productos sin aprobar</a>
+                        <a href="/admin/Aprobacion/CRUDaprobacion.html" class="dropdown-category">Gestionar colaboradores</a>
+                        <a href="/admin/AprobacionProducto/CRUDaprobacionProducto.html" class="dropdown-category">Gestionar productos sin aprobar</a>
                     `;
                 } else {
                     adminOptions.innerHTML = `
-                        <a href="/WEB/admin/CRUDColaboradorProducto/CRUDproductoC.html" class="dropdown-category">Gestionar productos</a>
+                        <a href="/admin/CRUDColaboradorProducto/CRUDproductoC.html" class="dropdown-category">Gestionar productos</a>
                     `;
                 }
 

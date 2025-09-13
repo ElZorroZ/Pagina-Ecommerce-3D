@@ -56,7 +56,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // Opcional: esperar 3 seg y redirigir
         setTimeout(() => {
-          window.location.href = '/WEB/usuario/login/login.html';
+          window.location.href = '/usuario/login/login.html';
         }, 3000);
       } else {
         const errorText = await cambiarRes.text();

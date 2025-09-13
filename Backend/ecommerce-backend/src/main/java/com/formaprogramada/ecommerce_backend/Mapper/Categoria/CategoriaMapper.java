@@ -10,7 +10,6 @@ public class CategoriaMapper {
     public static Categoria toDomain(CategoriaCrearRequest request) {
         Categoria categoria = new Categoria();
         categoria.setNombre(request.getNombre());
-        categoria.setDescripcion(request.getDescripcion());
         return categoria;
     }
 

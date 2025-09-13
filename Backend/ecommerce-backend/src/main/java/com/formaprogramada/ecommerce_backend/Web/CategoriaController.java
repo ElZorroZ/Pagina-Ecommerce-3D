@@ -42,20 +42,6 @@ public class CategoriaController {
         }
     }
 
-    @PostMapping(value = "/crearCategoriaConImagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> crearCategoriaConImagen(
-            @RequestPart("categoria") CategoriaCrearRequest categoriaCrearRequest,
-            @RequestPart("file") MultipartFile file) {
-        try {
-            var categoria = CategoriaMapper.toDomain(categoriaCrearRequest);
-            categoria = categoriaService.CrearCategoriaConImagen(categoria, file);
-            return ResponseEntity.ok("Se hizo bien");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
     @GetMapping
     public ResponseEntity<List<CategoriaDTO>> leerCategoriaTodas() {
         try {
@@ -121,21 +107,5 @@ public class CategoriaController {
             throw new RuntimeException(e);
         }
     }
-
-    @PostMapping("/toggleCategoriaDestacada/{id}")
-    public ResponseEntity<?> toggleCategoriaDestacada(@PathVariable int id) {
-        try {
-            categoriaService.toggleCategoriaDestacada(id);
-            return ResponseEntity.ok("Destacado actualizado correctamente");
-        } catch (MaxDestacadosException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }
-
-
-
-
 
 }

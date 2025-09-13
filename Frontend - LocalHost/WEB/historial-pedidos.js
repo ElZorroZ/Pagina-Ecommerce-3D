@@ -224,20 +224,6 @@ function createActionButtons(order) {
     if (order.estado === 'PROCESANDO' || order.estado === 'FALLIDO') {
         buttons += `<button class="retry-payment-btn" data-order-id="${order.id}">Reintentar pago</button>`;
     }
-    
-    // Botón "Pedir reembolso" para productos físicos pagados dentro de 30 días
-    if (order.estado === 'PAGADO') {
-        const orderDate = new Date(order.fechaPedido);
-        const today = new Date();
-        const daysDiff = Math.floor((today - orderDate) / (1000 * 60 * 60 * 24));
-        
-        const hasPhysicalProducts = order.productos.some(product => product.esDigital === false);
-        
-        if (hasPhysicalProducts && daysDiff <= 30) {
-            buttons += `<button class="refund-btn" data-order-id="${order.id}">Pedir reembolso</button>`;
-        }
-    }
-    
     return buttons;
 }
 
@@ -300,17 +286,6 @@ async function handleRetryPayment(orderId) {
     }
 }
 
-
-
-
-// Función para manejar solicitudes de reembolso
-function handleRefundRequest(orderId) {
-    console.log('Redirigiendo a solicitud de reembolso para pedido:', orderId);
-    // En producción, redirigir a la página de reembolso
-    // window.location.href = `solicitar-reembolso.html?orderId=${orderId}`;
-    alert(`Redirigiendo a solicitud de reembolso para pedido ${orderId}`);
-}
-
 // Función para agregar event listeners
 function attachEventListeners() {
     // Event listeners para botones de reintentar pago
@@ -318,14 +293,6 @@ function attachEventListeners() {
         btn.addEventListener('click', (e) => {
             const orderId = e.target.getAttribute('data-order-id');
             handleRetryPayment(orderId);
-        });
-    });
-    
-    // Event listeners para botones de reembolso
-    document.querySelectorAll('.refund-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const orderId = e.target.getAttribute('data-order-id');
-            handleRefundRequest(orderId);
         });
     });
 }

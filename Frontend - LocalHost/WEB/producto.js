@@ -71,7 +71,7 @@ function displayProduct(product) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, '-');
 
-    document.getElementById('breadcrumb-category').href = `/WEB/categoria.html?categoria=${encodeURIComponent(categoriaSlug)}`;
+    document.getElementById('breadcrumb-category').href = `/categoria.html?categoria=${encodeURIComponent(categoriaSlug)}`;
     document.getElementById('breadcrumb-product').textContent = product.nombre;
 
     // Update product info
@@ -929,7 +929,7 @@ function handleClicks(e) {
         const categoryId = e.target.dataset.categoryId;
         const categoryName = e.target.textContent.toLowerCase().replace(/ /g, '-');
         if (categoryId) {
-            window.location.href = `/WEB/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
+            window.location.href = `/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
         }
     }
 
@@ -967,7 +967,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartBtn = document.querySelector('.cart-btn');
   if (cartBtn) {
     cartBtn.addEventListener('click', () => {
-      window.location.href = '/WEB/carrito.html';
+      window.location.href = '/carrito.html';
     });
   }
 });

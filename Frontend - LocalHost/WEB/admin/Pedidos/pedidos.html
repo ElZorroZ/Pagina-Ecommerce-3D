@@ -6,19 +6,84 @@
   <link rel="stylesheet" href="pedidos_styles.css">
 </head>
 <body>
-  <header class="main-header">
-    <div class="header-inner">
-    </div>
-  </header>
+  <header class="header">
+        
+        <!-- Main navigation -->
+        <div class="nav-container">
+            <div class="nav-content">
+                <!-- Logo -->
+                <div class="logo">
+                    <h1><a href="/index.html" style="text-decoration: none; color: inherit;">Forma programada</a></h1>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <div class="nav-dropdown">
+                        <a href="#" class="nav-link" id="shop-trigger">Shop</a>
+                        <div class="dropdown-menu" id="categories-dropdown">
+                            <div class="dropdown-content">
+                                <!-- Categories will be loaded dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Panel de administración (dropdown) -->
+                    <div class="nav-dropdown hidden" id="admin-dropdown">
+                        <span class="nav-link" style="cursor: default;">Panel de administración</span>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-content" id="admin-options"></div>
+                        </div>
+                        </div>
+
+                </nav>
+
+                <!-- Right side icons -->
+                <div class="nav-icons">
+                    <!-- Contenedor de cuenta -->
+                    <div class="nav-dropdown" id="account-dropdown">
+                        <button class="icon-btn account-icon" id="account-btn" title="Cuenta" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown para cuenta (solo visible si hay JWT) -->
+                        <div class="dropdown-menu" id="account-menu" style="display: none;">
+                            <div class="dropdown-content">
+                            <a href="/usuario/perfil/perfil.html">Acceder Cuenta</a>
+                            <a href="/historial-pedidos.html">Ver pedidos</a>
+                            <a href="#" id="logout-btn">Salir de la cuenta</a>
+                            </div>
+                        </div>
+                    </div>
+
+                  
+                    <!-- Navegación móvil -->
+                    <div id="mobile-nav" class="mobile-nav">
+                        <!-- Agregá links o lo que necesites acá -->
+                    </div>
+                    <!-- Botón para menú móvil -->
+                    <button class="mobile-menu icon-btn" aria-label="Menú móvil">
+                        <!-- Icono hamburguesa simple -->
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </header>
 
   <main class="container">
-    <h2>Seguimiento de Pedidos y Reembolsos</h2>
+    <h2>Seguimiento de Pedidos</h2>
     <label for="filtro-estado">Filtrar por estado:</label>
 <select id="filtro-estado">
   <option value="TODOS">Todos</option>
   <option value="PROCESANDO">PROCESANDO</option>
   <option value="PAGADO">PAGADO</option>
-  <option value="REEMBOLSADO">REEMBOLSADO</option>
   <option value="FALLIDO">FALLIDO</option>
   <option value="CANCELADO">CANCELADO</option>
 </select>
@@ -66,29 +131,24 @@
       <input type="text" id="email" maxlength="100" placeholder="ejemplo@correo.com" readonly />
     </fieldset>
 
-    <!-- Datos del producto -->
-    <fieldset>
-      <legend>Datos del producto</legend>
+    <!-- Datos de productos -->
+<fieldset>
+  <legend>Productos del pedido</legend>
+  <div id="productos-container"></div>
+</fieldset>
 
-      <label>Nombre del producto:</label>
-      <input type="text" id="nombre-producto" maxlength="100" placeholder="Nombre del producto" readonly />
+<!-- Archivos comprimidos -->
+<label>Archivos comprimidos:</label>
+<div id="comprimido-preview" style="display:flex; gap:10px; margin-top:10px;"></div>
 
-      <label>Nombre Color:</label>
-      <input type="text" id="nombreColor" maxlength="100" placeholder="Ej: Rojo" readonly />
-
-      <label>Cantidad:</label>
-      <input type="number" id="cantidad" min="1" step="1" placeholder="Ej: 1" readonly />
-    </fieldset>
-
-    <!-- Archivo comprimido -->
-    <label for="archivo-comprimido">Archivo comprimido (ZIP, RAR, 7Z, TAR, etc.):</label>
-    <div id="comprimido-preview" style="display:flex; gap:10px; margin-top:10px;"></div>
   </form>
 </section>
 
     <hr />
   </main>
-
+  <script src="/auth-manager.js"></script>
+  <script src="/admin-access.js"></script>
+  <script src="/mensajes.js"></script>
   <script src="pedidos.js"></script>
 </body>
 </html>

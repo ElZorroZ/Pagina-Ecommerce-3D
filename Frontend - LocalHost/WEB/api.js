@@ -1,6 +1,3 @@
-// API Base URL - replace with your actual backend URL
-const API_BASE_URL = 'http://localhost:8080';
-
 // API functions for categories and products
 const API = {
     // Fetch all categories

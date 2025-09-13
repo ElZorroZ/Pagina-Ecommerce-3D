@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/reviews/*/responder").hasAnyRole("COLABORADOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/productosAprobacion/AprobarProducto").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/productosAprobacion/crearAprobacionProducto").hasRole("COLABORADOR")
+                        .requestMatchers(HttpMethod.POST, "/api/productosAprobacion/*/archivos").hasRole("COLABORADOR")
                         .requestMatchers(HttpMethod.GET, "/api/productosAprobacion/**").hasAnyRole("COLABORADOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/productosAprobacion/**").hasRole("COLABORADOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/productosAprobacion/**").hasAnyRole("COLABORADOR", "ADMIN")

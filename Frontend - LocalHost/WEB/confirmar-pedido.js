@@ -501,7 +501,7 @@ function renderCategories(categories) {
     if (!dropdown) return;
 
     dropdown.innerHTML = categories.map(category => 
-        `<a href="/WEB/category.html?id=${category.id}" class="dropdown-item">${category.nombre}</a>`
+        `<a href="/category.html?id=${category.id}" class="dropdown-item">${category.nombre}</a>`
     ).join('');
 }
 

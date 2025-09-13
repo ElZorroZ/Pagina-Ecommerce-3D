@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,12 +15,22 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
+    private final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
+    // Rutas que NO requieren autenticación
+    private static final Set<String> PUBLIC_PATHS = Set.of(
+            "/api/auth/login",
+            "/api/auth/register",
+            "/api/auth/refresh",
+            "/api/auth/validate"
+    );
 
     public JwtAuthenticationFilter(JwtService jwtService, CustomUserDetailsService userDetailsService) {
         this.jwtService = jwtService;
@@ -30,41 +42,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // Rutas públicas sin token
         String path = request.getServletPath();
-        if (path.equals("/api/auth/login") || path.equals("/api/auth/register") ||
-                path.equals("/api/auth/validate") || path.equals("/api/auth/refresh")) {
+
+        // Permitir rutas públicas
+        if (PUBLIC_PATHS.contains(path)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Obtener el token del header
         final String authHeader = request.getHeader("Authorization");
 
+        // Si no hay header Authorization, continuar sin autenticar
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            // Si no hay token o no tiene el formato correcto, continuar sin autenticar
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String jwtToken = authHeader.substring(7);
-        String username;
         try {
-            username = jwtService.extractUsername(jwtToken);
-        } catch (Exception e) {
-            // Si falla al parsear el token, no tiramos excepción: solo devolvemos 401
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
+            final String jwtToken = authHeader.substring(7);
+            final String username = jwtService.extractUsername(jwtToken);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (jwtService.isTokenValid(jwtToken, userDetails.getUsername())) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            // Si ya hay autenticación en el contexto, no procesar de nuevo
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                if (jwtService.isTokenValid(jwtToken, userDetails.getUsername())) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    logger.debug("Usuario autenticado: {}", username);
+                } else {
+                    logger.warn("Token inválido para usuario: {}", username);
+                }
             }
+        } catch (Exception e) {
+            logger.error("Error procesando JWT: {}", e.getMessage());
+            // No establecer autenticación, pero continuar con la cadena
         }
 
         filterChain.doFilter(request, response);

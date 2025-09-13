@@ -109,7 +109,7 @@ async function refreshAccessToken() {
 
 function redirigirALogin() {
   eliminarTokens();
-  window.location.href = '/WEB/usuario/login/login.html'; // Cambiar según ruta real
+  window.location.href = '/usuario/login/login.html'; // Cambiar según ruta real
 }
 
 // --- Función fetch con refresh automático ---

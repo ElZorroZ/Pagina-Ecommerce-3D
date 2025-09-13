@@ -331,7 +331,7 @@ public class MercadoPagoController {
             }
             MercadoPagoConfig.setAccessToken(mercadolibreToken);
 
-            // 👉 AQUÍ va el bloque que consultará el pago
+            // 👉 Consultar el pago
             PaymentClient paymentClient = new PaymentClient();
             Payment payment = paymentClient.get(Long.valueOf(paymentId));
 
@@ -339,13 +339,15 @@ public class MercadoPagoController {
             System.out.println("📅 Fecha: " + payment.getDateApproved());
             System.out.println("🔗 Pedido asociado (externalReference): " + payment.getExternalReference());
 
+            // 🔄 Mapear estado de MercadoPago a estado interno
+            String estadoInterno = mapearEstadoPago(payment.getStatus());
+            System.out.println("🔄 Estado mapeado: " + estadoInterno);
+
             // Actualizar estado en DB
             pedidoService.CambiarEstado(
-                    payment.getStatus().toString(),     // estado
+                    estadoInterno,                        // estado mapeado
                     Integer.parseInt(payment.getExternalReference()) // id convertido a int
             );
-
-
 
         } catch (Exception e) {
             System.err.println("❌ ERROR EN WEBHOOK: " + e.getMessage());
@@ -354,9 +356,6 @@ public class MercadoPagoController {
         }
         return ResponseEntity.ok("PROCESSED");
     }
-
-
-
 
     // 🔥 MÉTODO AUXILIAR - Mapear estados de MercadoPago a nuestros estados
     private String mapearEstadoPago(String estadoMercadoPago) {
@@ -373,6 +372,7 @@ public class MercadoPagoController {
                 return "PROCESANDO";
         }
     }
+
 
     // 🔥 ENDPOINTS DE REDIRECCIÓN MEJORADOS
     @GetMapping("/pago-exitoso")

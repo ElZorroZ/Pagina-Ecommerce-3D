@@ -20,7 +20,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       mensaje.classList.add("success");
       // Redirigir al login luego de 3 segundos
       setTimeout(() => {
-        window.location.href = '/WEB/usuario/login/login.html';
+        window.location.href = '/usuario/login/login.html';
       }, 3000);
     } else {
       const error = await res.text();
