@@ -4,14 +4,11 @@ import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.Pedido;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.PedidoProducto;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Repository.Pedido.PedidoRepository;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoDTO;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoUsuarioDTO;
-import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.ProductoEnPedidoDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.*;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdatePedido;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido.PedidoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido.PedidoProductoEntity;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Carrito.JpaCarritoRepository;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Producto.JpaProductoRepository;
@@ -22,8 +19,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,42 +75,17 @@ public class PedidoRepositoryImpl implements PedidoRepository {
     public PedidoUsuarioDTO verPedido(int id) {
         PedidoUsuarioDTO puDTO = new PedidoUsuarioDTO();
 
-        // Obtener pedido
         PedidoEntity byId = jpaPedidoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
 
-        // Obtener productos del pedido
-        List<PedidoProductoEntity> pedidoProducto = jpaPedidoProductoRepository.findByPedidoId(byId);
+        List <PedidoProductoEntity> pedidoProducto = jpaPedidoProductoRepository.findByPedidoId(byId);
 
-        List<ProductoEnPedidoDTO> productoEnPedidoDTO = new ArrayList<>();
-        for (PedidoProductoEntity p : pedidoProducto) {
-            ProductoEnPedidoDTO dto = new ProductoEnPedidoDTO();
-            dto.setId(p.getId());
-            dto.setProductoId(p.getProductoId().getId());
-            dto.setNombre(p.getNombre());
-            dto.setCantidad(p.getCantidad());
-            dto.setPrecio(p.getPrecio());
-            dto.setEsDigital(p.getEsDigital());
-            dto.setColorId(p.getColorId());
-            dto.setColorNombre(p.getColor() != null ? p.getColor().getColor() : null);
-            dto.setPrecioTotal(p.getPrecio() * p.getCantidad());
+        List<ProductoEnPedidoDTO> productoEnPedidoDTO = PedidoMapper.toProductoEnPedidoDTO(pedidoProducto);
 
-            // --- Aquí vamos a traer el archivo desde la tabla PRODUCTO ---
-            ProductoEntity productoReal = jpaProductoRepository.findById(p.getProductoId().getId())
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-            if (productoReal.getArchivo() != null) {
-                dto.setArchivoBase64(Base64.getEncoder().encodeToString(productoReal.getArchivo()));
-            } else {
-                dto.setArchivoBase64(null);
-            }
-
-            productoEnPedidoDTO.add(dto);
-        }
-
-        // Datos del usuario
         UsuarioEntity ue = byId.getUsuarioId();
+        System.out.println(ue.getId());
         UsuarioEntity usuario = jpaUsuarioRepository.findById(ue.getId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
 
         puDTO.setFechaPedido(byId.getFechaPedido());
         puDTO.setEstado(byId.getEstado());
@@ -128,6 +98,41 @@ public class PedidoRepositoryImpl implements PedidoRepository {
         puDTO.setCiudad(usuario.getCiudad());
         puDTO.setTelefono(usuario.getTelefono());
         puDTO.setTotal(byId.getTotal());
+
+
+        return puDTO;
+    }
+
+
+    //ESTO ES TODO LO QUE ESTA MAL EN LA PROGRAMACION ORIENTADA A OBJETOS
+    @Override
+    public PedidoInternoDTO verPedidoInterno(int id) {
+        PedidoInternoDTO puDTO = new PedidoInternoDTO();
+
+        PedidoEntity byId = jpaPedidoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+
+        List <PedidoProductoEntity> pedidoProducto = jpaPedidoProductoRepository.findByPedidoId(byId);
+
+        List<ProductoEnPedidoDTOinterno> productoEnPedidoDTO = PedidoMapper.toProductoEnPedidoInterno(pedidoProducto);
+
+        UsuarioEntity ue = byId.getUsuarioId();
+        System.out.println(ue.getId());
+        UsuarioEntity usuario = jpaUsuarioRepository.findById(ue.getId())
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+
+        puDTO.setFechaPedido(byId.getFechaPedido());
+        puDTO.setEstado(byId.getEstado());
+        puDTO.setProductos(productoEnPedidoDTO);
+        puDTO.setNombre(usuario.getNombre());
+        puDTO.setApellido(usuario.getApellido());
+        puDTO.setGmail(usuario.getGmail());
+        puDTO.setDireccion(usuario.getDireccion());
+        puDTO.setCp(usuario.getCp());
+        puDTO.setCiudad(usuario.getCiudad());
+        puDTO.setTelefono(usuario.getTelefono());
+        puDTO.setTotal(byId.getTotal());
+
 
         return puDTO;
     }
