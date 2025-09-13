@@ -138,7 +138,7 @@ public class CacheInitializer {
             pedidoService.getCacheManager().getCache("pedido").put(dto.getId(), pedidoUsuarioDTO);
 
             // Cache "pedidoMpId"
-            Pedido pedido = pedidoService.obtenerPedidoPorId(dto.getId());
+            Pedido pedido = pedidoService.obtenerPedidoPorId(dto.getId().toString());
             if (pedido != null) {
                 pedidoService.getCacheManager().getCache("pedidoMpId").put(dto.getId(), pedido);
 

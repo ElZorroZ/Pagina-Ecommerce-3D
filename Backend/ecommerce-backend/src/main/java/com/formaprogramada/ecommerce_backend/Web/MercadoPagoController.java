@@ -74,7 +74,7 @@ public class MercadoPagoController {
             if (payment.getExternalReference() != null) {
                 try {
                     Integer pedidoId = Integer.valueOf(payment.getExternalReference());
-                    Pedido pedido = pedidoService.obtenerPedidoPorId(pedidoId);
+                    Pedido pedido = pedidoService.obtenerPedidoPorId(pedidoId.toString());
 
                     if (pedido != null) {
                         info.put("pedidoFound", true);
@@ -460,7 +460,7 @@ public class MercadoPagoController {
         try {
             System.out.println("🔍 Verificando pedido: " + pedidoId);
 
-            Pedido pedido = pedidoService.obtenerPedidoPorId(pedidoId);
+            Pedido pedido = pedidoService.obtenerPedidoPorId(pedidoId.toString());
             String estadoAnterior = pedido.getEstado();
 
             System.out.println("📋 Estado actual del pedido: " + estadoAnterior);
