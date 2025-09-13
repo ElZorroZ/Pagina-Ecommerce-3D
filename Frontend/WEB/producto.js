@@ -5,6 +5,7 @@ let selectedWiring = 'cordless';
 let selectedFormat = 'fisico';
 let currentRating = 0;
 const categoriesDropdown = document.getElementById('categories-dropdown');
+const API_BASE_URL = "https://forma-programada.onrender.com";
 
 // Get product ID from URL
 function getProductIdFromUrl() {
