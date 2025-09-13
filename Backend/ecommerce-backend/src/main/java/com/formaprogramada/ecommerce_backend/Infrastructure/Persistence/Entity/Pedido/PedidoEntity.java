@@ -4,9 +4,7 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.U
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -38,15 +36,6 @@ public class PedidoEntity {
 
     @Column(length = 50, nullable = false)
     private String estado;
-
-    @Column(name = "external_payment_id")
-    private String externalPaymentId;
-
-    @Column(name = "payment_provider")
-    private String paymentProvider;
-
-    @OneToMany(mappedBy = "pedidoId", fetch = FetchType.LAZY)
-    private List<PedidoProductoEntity> productos = new ArrayList<>();
 
 
 }

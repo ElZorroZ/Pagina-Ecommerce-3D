@@ -157,10 +157,10 @@ async function handleSearch() {
     const products = await API.searchProducts(query);
 
     if (products.length === 1) {
-        window.location.href = `/WEB/producto.html?id=${products[0].id}`; // usar directamente id
+        window.location.href = `/producto.html?id=${products[0].id}`; // usar directamente id
     } else if (products.length > 1) {
         localStorage.setItem('searchQuery', query);
-        window.location.href = '/WEB/categoria.html';
+        window.location.href = '/categoria.html';
     } else {
         alert("No se encontraron productos con esa búsqueda.");
     }
@@ -197,7 +197,7 @@ function renderSuggestions(suggestions) {
         item.textContent = s.nombre; // mostramos el nombre
         item.className = 'suggestion-item';
         item.addEventListener('click', () => {
-            window.location.href = `/WEB/producto.html?id=${s.id}`; // ya no s.producto.id
+            window.location.href = `/producto.html?id=${s.id}`; // ya no s.producto.id
         });
 
         suggestionsBox.appendChild(item);
@@ -263,7 +263,7 @@ function handleClicks(e) {
     
     // Handle explore all products button - navigate to products page
     if (e.target.classList.contains('featured-btn')) {
-        window.location.href = `/WEB/categoria.html?categoria=all`;
+        window.location.href = `/categoria.html?categoria=all`;
     }
     
     // Handle category clicks in dropdown
@@ -272,7 +272,7 @@ function handleClicks(e) {
         const categoryId = e.target.dataset.categoryId;
         const categoryName = e.target.textContent.toLowerCase().replace(/ /g, '-');
         if (categoryId) {
-            window.location.href = `/WEB/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
+            window.location.href = `/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
         }
     }
 

@@ -1,6 +1,4 @@
-const API_BASE_URL = "http://localhost:8080";
-
-const BACKEND_URL = `${API_BASE_URL}/api/auth/register`;
+const BACKEND_URL = 'http://localhost:8080/api/auth/register';
 
 document.getElementById('register-form').onsubmit = async e => {
   e.preventDefault();

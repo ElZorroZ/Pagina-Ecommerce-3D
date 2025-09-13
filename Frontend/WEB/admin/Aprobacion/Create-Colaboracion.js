@@ -1,6 +1,4 @@
-const API_BASE_URL = "https://forma-programada.onrender.com";
 document.addEventListener("DOMContentLoaded", () => {
-  
 // Función para refrescar el access token usando el refresh token
 async function refreshAccessToken() {
   const refreshToken = localStorage.getItem("refreshToken");
@@ -10,7 +8,7 @@ async function refreshAccessToken() {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+    const response = await fetch("https://forma-programada.onrender.com/api/auth/refresh", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -98,7 +96,7 @@ async function fetchConRefresh(url, options = {}) {
   try {
     const colaboradorPayload = { gmail };
 
-    const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/colaboradores`, {
+    const res = await fetchConRefresh("https://forma-programada.onrender.com/api/usuario/colaboradores", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(colaboradorPayload),

@@ -1,6 +1,4 @@
-const API_BASE_URL = "https://forma-programada.onrender.com";
-
-const BACKEND_URL = `${API_BASE_URL}/api/auth/register`;
+const BACKEND_URL = 'https://forma-programada.onrender.com/api/auth/register';
 
 document.getElementById('register-form').onsubmit = async e => {
   e.preventDefault();

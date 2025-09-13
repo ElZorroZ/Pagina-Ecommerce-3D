@@ -1,5 +1,81 @@
-
 document.addEventListener("DOMContentLoaded", () => {
+// Función para refrescar el access token usando el refresh token
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (!refreshToken) {
+    // No redirige automáticamente, podés agregarlo si querés
+    return null;
+  }
+
+  try {
+    const response = await fetch("http://localhost:8080/api/auth/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem("accessToken", data.token);      // ojo que el token viene como "token"
+      localStorage.setItem("refreshToken", data.refreshToken);
+      return data.token;
+    } else {
+      return null;
+    }
+  } catch (err) {
+    console.error("Error al refrescar el token", err);
+    return null;
+  }
+}
+
+async function fetchConRefresh(url, options = {}) {
+  options.headers = options.headers || {};
+
+  // Agregar Authorization si falta
+  if (!options.headers['Authorization']) {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      options.headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+
+  // Controlar Content-Type solo si body NO es FormData
+  if (!(options.body instanceof FormData)) {
+    // Si no existe Content-Type, se lo ponemos JSON (o el que quieras)
+    if (!options.headers['Content-Type']) {
+      options.headers['Content-Type'] = 'application/json';
+    }
+  } else {
+    // Si body es FormData, eliminar cualquier Content-Type para evitar conflictos
+    if ('Content-Type' in options.headers) {
+      delete options.headers['Content-Type'];
+    }
+  }
+
+  let response = await fetch(url, options);
+
+  // Si el token expiró o es inválido, intentamos refrescar
+  if (response.status === 401) {
+    const nuevoToken = await refreshAccessToken();
+    if (nuevoToken) {
+      // Clonamos las opciones para evitar problemas con body reutilizable
+      const newOptions = {
+        ...options,
+        headers: {
+          ...options.headers,
+          'Authorization': `Bearer ${nuevoToken}`
+        }
+      };
+      response = await fetch(url, newOptions);
+    } else {
+      // No se pudo refrescar el token
+      throw new Error('No autorizado - token expirado y no se pudo refrescar');
+    }
+  }
+
+  return response;
+}
+
 (() => {
   const preview = document.getElementById('preview-imagenes'); // ✅ agregado
 
@@ -9,40 +85,53 @@ document.addEventListener("DOMContentLoaded", () => {
   window.productoState.archivosSeleccionados = window.productoState.archivosSeleccionados || [];
 
 
-async function subirArchivoBackend(productoId, file, orden) {
-  const formData = new FormData();
-  formData.append("file", file); // clave que espera Spring
-  formData.append("orden", orden);
+  async function cargarCategorias() {
+    try {
+      const token = localStorage.getItem("accessToken"); // o donde tengas el token guardado
+      const res = await fetch("http://localhost:8080/api/categoria/combo", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (!res.ok) throw new Error("No se pudieron cargar las categorías");
+      const categorias = await res.json();
 
-  try {
-    // ✅ usamos authManager para agregar el token
-    const res = await authManager.fetchWithAuth(
-      `${API_BASE_URL}/api/productos/${productoId}/archivos`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+      const select = document.getElementById("categoria");
+      select.innerHTML = '<option value="">Seleccionar categoría</option>';
+
+      categorias.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat.id;
+        option.textContent = cat.nombre;
+        select.appendChild(option);
+      });
+    } catch (err) {
+      alert("Error cargando categorías: " + err.message);
+    }
+  }
+
+
+  async function subirArchivoBackend(productoId, file, orden) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("orden", orden);
+
+    const res = await fetchConRefresh(`http://localhost:8080/api/productos/${productoId}/archivos`, {
+      method: "POST",
+      body: formData,
+    });
 
     if (!res.ok) {
-      const errorText = await res.text();
+      let errorText = await res.text();
       console.error("Error backend text:", errorText);
       try {
         const errorData = JSON.parse(errorText);
-        mostrarError(errorData.message || "Error subiendo archivo al backend");
         throw new Error(errorData.message || "Error subiendo archivo al backend");
       } catch {
-        mostrarError(errorText || "Error subiendo archivo al backend");
         throw new Error(errorText || "Error subiendo archivo al backend");
       }
     }
-
-  } catch (err) {
-    console.error("Error en subirArchivoBackend:", err);
-    mostrarError(err.message || "Error inesperado al subir archivo");
-    throw err;
   }
-}
 
   const form = document.getElementById("form-producto");
   const listaColores = document.getElementById("lista-colores");
@@ -57,35 +146,24 @@ async function subirArchivoBackend(productoId, file, orden) {
     });
     }
 async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
-  const url = new URL(`${API_BASE_URL}/api/productosAprobacion/AprobarProducto`);
-  url.searchParams.append("id", id);
-  url.searchParams.append("codigoInicial", codigoInicial);
-  url.searchParams.append("versionStr", versionStr);
-  url.searchParams.append("seguimiento", seguimiento);
+  const url = new URL('http://localhost:8080/api/productosAprobacion/AprobarProducto');
+  url.searchParams.append('id', id);
+  url.searchParams.append('codigoInicial', codigoInicial);
+  url.searchParams.append('versionStr', versionStr);
+  url.searchParams.append('seguimiento', seguimiento);
 
-  try {
-    // ✅ usamos authManager para incluir token
-    const res = await authManager.fetchWithAuth(url.toString(), { method: "POST" });
+  const token = localStorage.getItem('accessToken');
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Error backend text:", errorText);
-      try {
-        const errorData = JSON.parse(errorText);
-        mostrarError(errorData.message || "Error al aprobar producto");
-        throw new Error(errorData.message || "Error al aprobar producto");
-      } catch {
-        mostrarError(errorText || "Error al aprobar producto");
-        throw new Error(errorText || "Error al aprobar producto");
-      }
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
     }
+  });
 
-    // ✅ éxito
-    mostrarExito("Producto aprobado correctamente");
-  } catch (err) {
-    console.error("Error en aprobarProducto:", err);
-    mostrarError(err.message || "Error inesperado al aprobar producto");
-    throw err;
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || 'Error al aprobar producto');
   }
 }
 
@@ -122,6 +200,7 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
   });
 }
 
+  cargarCategorias();
   const inputArchivoComprimido = document.getElementById("archivo-comprimido");
   const previewComprimido = document.getElementById("comprimido-preview");
 
@@ -170,6 +249,12 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
   const codigoInicial = document.getElementById("codigo-inicial").value.trim();
   const versionInput = document.getElementById('version');
   const versionValue = versionInput.value.trim();
+
+  if (!/^\d{1,4}$/.test(versionValue)) {
+    alert("La versión debe ser un número de hasta 4 dígitos.");
+    return;
+  }
+
   const version = versionValue;
   const seguimiento = document.getElementById("seguimiento").value.trim();
 
@@ -181,13 +266,20 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
   const peso = parseFloat(document.getElementById("peso").value);
   const tecnica = document.getElementById("tecnica").value.trim();
 
+  if (!nombre || isNaN(precio)) {
+    alert("Por favor completa todos los campos obligatorios.");
+    return;
+  }
 
   const categoriaId = parseInt(document.getElementById("categoria").value);
-
+  if (!categoriaId) {
+    alert("Seleccioná una categoría");
+    return;
+  }
   const productoId = document.getElementById("producto-id").value;
 
   try {
-  const backendBase = `${API_BASE_URL}/api/productosAprobacion/AprobarProducto`;
+  const backendBase = "http://localhost:8080/api/productosAprobacion/AprobarProducto";
 
   const url = new URL(backendBase);
   url.searchParams.append('id', productoId); // Reemplazar por el ID real
@@ -195,29 +287,26 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
   url.searchParams.append('versionStr', version);
   url.searchParams.append('seguimiento', seguimiento);
 
-  const res = await authManager.fetchWithAuth(url.toString(), {
+  const res = await fetchConRefresh(url, {
     method: "POST",
   });
 
   if (!res.ok) {
     const errorText = await res.text();
-    mostrarError(errorText || "Error al aprobar producto");
     throw new Error(errorText || "Error al aprobar producto");
   }
 
-  mostrarExito("Producto aprobado con éxito!");
+  alert("Producto aprobado con éxito!");
   form.reset();
-  window.productoState.coloresSeleccionados = [];
-  window.productoState.archivosSeleccionados = [];
-  actualizarListaColores();
-  actualizarPreview();
-  cargarProductos();
-
+    window.productoState.coloresSeleccionados = [];
+    window.productoState.archivosSeleccionados = [];
+    actualizarListaColores();
+    actualizarPreview();
+    cargarProductos();
 } catch (error) {
-  console.error("Error al aprobar producto:", error);
-  mostrarError("Error: " + error.message);
+  alert("Error: " + error.message);
+  console.log(error.message)
 }
-
 
 });
 

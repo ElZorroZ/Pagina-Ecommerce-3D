@@ -1,5 +1,3 @@
-const API_BASE_URL = "http://localhost:8080";
-
 document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const messageDiv = document.getElementById('message');
@@ -14,7 +12,7 @@ document.getElementById('reset-password-form').addEventListener('submit', async 
   }
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/auth/reset-password-request`, {
+    const res = await fetch('http://localhost:8080/api/auth/reset-password-request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

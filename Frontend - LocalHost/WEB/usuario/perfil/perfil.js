@@ -1,5 +1,4 @@
 const categoriesDropdown = document.getElementById('categories-dropdown');
-const API_BASE_URL = "http://localhost:8080";
 
 // Load categories from API
 async function loadCategories() {
@@ -85,7 +84,7 @@ async function refreshAccessToken() {
   if (!refreshToken) return null;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/auth/refresh-token`, {
+    const res = await fetch('http://localhost:8080/api/auth/refresh-token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken })
@@ -206,7 +205,7 @@ formCambiarPassword.addEventListener('submit', async (e) => {
       nuevaPassword,
     };
 
-    const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${encodeURIComponent(gmail)}/password-directo`, {
+    const res = await fetchConRefresh(`http://localhost:8080/api/usuario/${encodeURIComponent(gmail)}/password-directo`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -260,7 +259,7 @@ btnEnviarCambioEmail.addEventListener('click', async () => {
   }
 
   try {
-    const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${encodeURIComponent(gmail)}/email`, {
+    const res = await fetchConRefresh(`http://localhost:8080/api/usuario/${encodeURIComponent(gmail)}/email`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -306,7 +305,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Cargar datos del usuario
   try {
-    const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${gmail}`);
+    const res = await fetchConRefresh(`http://localhost:8080/api/usuario/${gmail}`);
     const usuario = await res.json();
 
     form.nombre.value = usuario.nombre ?? "";
@@ -337,7 +336,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     try {
-      const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${gmail}`, {
+      const res = await fetchConRefresh(`http://localhost:8080/api/usuario/${gmail}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos)

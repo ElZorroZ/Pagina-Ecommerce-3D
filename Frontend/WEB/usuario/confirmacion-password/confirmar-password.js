@@ -1,5 +1,3 @@
-const API_BASE_URL = "https://forma-programada.onrender.com";
-
 window.addEventListener('DOMContentLoaded', () => {
   const mensaje = document.getElementById('mensaje');
   const formulario = document.getElementById('formularioCambioPassword');
@@ -38,7 +36,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     try {
       // Enviar el cambio de contraseña al backend (POST)
-      const cambiarRes = await fetch(`${API_BASE_URL}/api/auth/reset-password/confirm`, {
+      const cambiarRes = await fetch('https://forma-programada.onrender.com/api/auth/reset-password/confirm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -56,7 +54,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // Opcional: esperar 3 seg y redirigir
         setTimeout(() => {
-          window.location.href = '/WEB/usuario/login/login.html';
+          window.location.href = '/usuario/login/login.html';
         }, 3000);
       } else {
         const errorText = await cambiarRes.text();

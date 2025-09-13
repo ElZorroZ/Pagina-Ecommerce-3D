@@ -1,6 +1,5 @@
 package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido;
 
-import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoColorEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -44,11 +43,4 @@ public class PedidoProductoEntity {
     @Column(length = 100, nullable = false)
     private String nombre;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "colorId", insertable = false, updatable = false)
-    private ProductoColorEntity color;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "productoId", insertable = false, updatable = false)
-    private ProductoEntity producto;
 }

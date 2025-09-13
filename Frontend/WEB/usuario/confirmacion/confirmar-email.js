@@ -1,5 +1,3 @@
-const API_BASE_URL = "https://forma-programada.onrender.com";
-
 window.addEventListener('DOMContentLoaded', async () => {
   const mensaje = document.getElementById('mensaje');
   const urlParams = new URLSearchParams(window.location.search);
@@ -13,14 +11,14 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   try {
     // Cambié la URL para apuntar a tu endpoint de confirmación de email
-    const res = await fetch(`${API_BASE_URL}/api/usuario/confirmar-email?token=${encodeURIComponent(token)}`);
+    const res = await fetch(`https://forma-programada.onrender.com/api/usuario/confirmar-email?token=${encodeURIComponent(token)}`);
 
     if (res.ok) {
       mensaje.textContent = "¡Email cambiado correctamente! Ya podés iniciar sesión.";
       mensaje.classList.add("success");
       // Redirigir al login luego de 3 segundos
       setTimeout(() => {
-        window.location.href = '/WEB/usuario/login/login.html';
+        window.location.href = '/usuario/login/login.html';
       }, 3000);
     } else {
       const error = await res.text();

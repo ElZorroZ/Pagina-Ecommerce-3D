@@ -30,12 +30,6 @@ public interface JpaProductoRepository extends JpaRepository<ProductoEntity, Int
     Optional<ProductoEntity> findTopByOrderByIdDesc();
     @Query("SELECT p.id FROM ProductoEntity p")
     List<Integer> findAllIds();
-    @Query("""
-    SELECT prod 
-    FROM ProductoEntity prod
-    LEFT JOIN FETCH prod.archivos
-    WHERE prod.id IN :ids
-""")
-    List<ProductoEntity> findProductosConArchivos(@Param("ids") List<Integer> ids);
+
 }
 

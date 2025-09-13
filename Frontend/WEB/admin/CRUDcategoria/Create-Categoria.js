@@ -1,5 +1,3 @@
-const API_BASE_URL = "https://forma-programada.onrender.com";
-
 document.addEventListener("DOMContentLoaded", () => {
 // Función para refrescar el access token usando el refresh token
 async function refreshAccessToken() {
@@ -10,7 +8,7 @@ async function refreshAccessToken() {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+    const response = await fetch("http://localhost:8080/api/auth/refresh", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -175,8 +173,8 @@ async function fetchConRefresh(url, options = {}) {
   }
 
   const tieneArchivos = window.categoriaState.archivosSeleccionados.length > 0;
-  const backendBaseSinImagen = `${API_BASE_URL}/api/categoria`; // Cambié el path a /categorias
-  const backendBaseConImagen = `${API_BASE_URL}/api/categoria/crearCategoriaConImagen`;
+  const backendBaseSinImagen = "http://localhost:8080/api/categoria"; // Cambié el path a /categorias
+  const backendBaseConImagen = "http://localhost:8080/api/categoria/crearCategoriaConImagen";
 
   try {
     if (!tieneArchivos) {
