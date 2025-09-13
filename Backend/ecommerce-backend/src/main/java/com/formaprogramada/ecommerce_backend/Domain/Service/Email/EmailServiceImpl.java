@@ -58,57 +58,6 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-
-    @Override
-    public void enviarEmailHtmlConArchivos(String destinatario, String asunto, Map<String, Object> variables, String plantilla,List<MultipartFile> listaDeArchivos) {
-        Context context = new Context();
-        context.setVariables(variables);
-        String contenidoHtml = templateEngine.process(plantilla, context);
-
-        try {
-            MimeMessage mensaje = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
-
-            helper.setTo(destinatario);
-            helper.setSubject(asunto);
-            helper.setText(contenidoHtml, true);
-            for (MultipartFile archivo:listaDeArchivos) {
-                if (archivo != null && !archivo.isEmpty()) {
-                    helper.addAttachment(archivo.getOriginalFilename(), archivo);
-                }
-            }
-
-
-            mailSender.send(mensaje);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Error al enviar correo", e);
-        }
-    }
-
-
-    @Override
-    public void enviarEmailArchivos(String gmail, String nombre, List<MultipartFile> listaDeArchivos) {
-        String frontendUrl = "http://localhost:5501";
-        String link = frontendUrl + "/WEB/usuario/envio-compra/envio-compra.html";
-
-        Map<String, Object> variables = Map.of(
-                "nombre",nombre,
-                "urlValidacion", link
-        );
-
-        // Asunto y plantilla
-        String asunto = "Pedido de compra en Forma Programada";
-        String plantilla = "envio-compra";
-
-        //Enviar el email
-        enviarEmailHtmlConArchivos(gmail, asunto, variables, plantilla,listaDeArchivos);
-    }
-
-
-
-
-
-
     @Override
     public void enviarEmailVerificacion(Usuario usuario) {
         // Generar token de verificación

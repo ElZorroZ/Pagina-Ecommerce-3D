@@ -18,8 +18,5 @@ public interface EmailService {
     void confirmarCambioEmail(String token);
 
     void enviarEmailConfirmacionCompra(String gmail, String nonmbre);
-
-    void enviarEmailHtmlConArchivos(String destinatario, String asunto, Map<String, Object> variables, String plantilla, List<MultipartFile> listaDeArchivos);
-
-    void enviarEmailArchivos(String gmail, String nombre, List<MultipartFile> listaDeArchivos);
+    
 }
