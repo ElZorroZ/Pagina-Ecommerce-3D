@@ -1,82 +1,12 @@
-<<<<<<< HEAD
-=======
-// Estado global para colores y archivos
-window.colaboradorState = window.colaboradorState || {
-  archivosSeleccionados: []
-};
-
-// Función para refrescar token (la dejé igual)
-async function refreshAccessToken() {
-  const refreshToken = localStorage.getItem("refreshToken");
-  if (!refreshToken) {
-    console.warn("No hay refresh token guardado");
-    return null;
-  }
-  try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (!data.token) console.warn("No se recibió token");
-      if (!data.refreshToken) console.warn("No se recibió refreshToken");
-      localStorage.setItem("accessToken", data.token);
-      localStorage.setItem("refreshToken", data.refreshToken);
-      return data.token;
-    } else {
-      let errorBody = await response.text();
-      try { errorBody = JSON.parse(errorBody).message || errorBody; } catch {}
-      console.warn("Refresh token inválido o expirado", response.status, errorBody);
-      return null;
-    }
-  } catch (err) {
-    console.error("Error al refrescar el token", err);
-    return null;
-  }
-}
-
-let refreshInProgress = false;
-
-async function fetchConRefresh(url, options = {}) {
-  options.headers = options.headers || {};
-  if (!options.headers['Authorization']) {
-    const token = localStorage.getItem('accessToken');
-    if (token) options.headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  let response = await fetch(url, options);
-
-  if (response.status === 401 && !refreshInProgress) {
-    refreshInProgress = true;
-    const nuevoToken = await refreshAccessToken();
-    refreshInProgress = false;
-    if (nuevoToken) {
-      options.headers['Authorization'] = `Bearer ${nuevoToken}`;
-      response = await fetch(url, options);
-    } else {
-      throw new Error('No autorizado - token expirado y no se pudo refrescar');
-    }
-  }
-
-  return response;
-}
-
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 document.addEventListener("DOMContentLoaded", () => {
   const tablaBody = document.getElementById("tabla-productos");
   const categoriesDropdown = document.querySelector("#categories-dropdown .dropdown-content");
   const shopTrigger = document.getElementById("shop-trigger");
   async function cargarColaboradores() {
     try {
-<<<<<<< HEAD
       const response = await authManager.fetchWithAuth(
         `${API_BASE_URL}/api/usuario/colaboradores`
       );
-=======
-      const response = await fetchConRefresh("http://localhost:8080/api/usuario/colaboradores");
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
       if (!response.ok) throw new Error("Error al obtener los colaboradores");
 
       const colaboradores = await response.json();
@@ -123,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarConfirmacion("¿Seguro que querés quitar este colaborador?", async (confirmado) => {
         if (!confirmado) return;
 
-<<<<<<< HEAD
         try {
             const res = await authManager.fetchWithAuth(
                 `${API_BASE_URL}/api/usuario/colaboradores`,
@@ -176,15 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
         window.location.href = `/categoria.html?id=${cat.id}`;
-=======
-      const res = await fetch("http://localhost:8080/api/usuario/colaboradores", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ gmail: gmail })
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
       });
 
       categoriesDropdown.appendChild(link);

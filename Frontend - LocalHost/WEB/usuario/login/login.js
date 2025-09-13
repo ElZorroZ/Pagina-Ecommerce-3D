@@ -11,21 +11,8 @@ document.getElementById("login-form").addEventListener("submit", async function 
   }
 
   try {
-<<<<<<< HEAD
     // Usar el authManager para el login
     const result = await authManager.login(email, password);
-=======
-    const response = await fetch("http://localhost:8080/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        gmail: email,
-        password: password
-      })
-    });
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 
     if (result.success) {
       console.log("Login exitoso:", result.data);

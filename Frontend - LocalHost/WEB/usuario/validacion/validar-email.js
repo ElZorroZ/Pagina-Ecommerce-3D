@@ -1,3 +1,5 @@
+const API_BASE_URL = "http://localhost:8080";
+
 window.addEventListener('DOMContentLoaded', async () => {
   const mensaje = document.getElementById('mensaje');
   const urlParams = new URLSearchParams(window.location.search);
@@ -10,7 +12,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const res = await fetch(`http://localhost:8080/api/auth/validate?token=${token}`);
+    const res = await fetch(`${API_BASE_URL}/api/auth/validate?token=${token}`);
 
     if (res.ok) {
       mensaje.textContent = "¡Cuenta validada correctamente! Ya podés iniciar sesión.";

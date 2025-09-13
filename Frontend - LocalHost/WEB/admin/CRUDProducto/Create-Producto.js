@@ -7,20 +7,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputArchivoComprimido = document.getElementById("archivo-comprimido");
     const previewComprimido = document.getElementById("comprimido-preview");
 
-<<<<<<< HEAD
     // --- Estado global ---
     window.productoState = window.productoState || {};
     window.productoState.coloresSeleccionados = window.productoState.coloresSeleccionados || [];
     window.productoState.archivosSeleccionados = window.productoState.archivosSeleccionados || [];
     window.productoState.archivoComprimido = window.productoState.archivoComprimido || null;
-=======
-  try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
-    });
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 
     // --- Color Manager ---
     window.colorManager = window.colorManager || {};
@@ -93,69 +84,6 @@ if (inputImagenes) {
     window.actualizarPreview();
     inputImagenes.value = "";
   });
-<<<<<<< HEAD
-=======
-
-  async function cargarCategorias() {
-    try {
-      const token = localStorage.getItem("accessToken"); // o donde tengas el token guardado
-      const res = await fetch("http://localhost:8080/api/categoria/combo", {
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      });
-      if (!res.ok) throw new Error("No se pudieron cargar las categorías");
-      const categorias = await res.json();
-
-      const select = document.getElementById("categoria");
-      select.innerHTML = '<option value="">Seleccionar categoría</option>';
-
-      categorias.forEach(cat => {
-        const option = document.createElement("option");
-        option.value = cat.id;
-        option.textContent = cat.nombre;
-        select.appendChild(option);
-      });
-    } catch (err) {
-      alert("Error cargando categorías: " + err.message);
-    }
-  }
-
-
-  async function subirArchivoBackend(productoId, file, orden) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("orden", orden);
-
-    const res = await fetchConRefresh(`http://localhost:8080/api/productos/${productoId}/archivos`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      let errorText = await res.text();
-      console.error("Error backend text:", errorText);
-      try {
-        const errorData = JSON.parse(errorText);
-        throw new Error(errorData.message || "Error subiendo archivo al backend");
-      } catch {
-        throw new Error(errorText || "Error subiendo archivo al backend");
-      }
-    }
-  }
-
-  const form = document.getElementById("form-producto");
-const inputColorText = document.getElementById("input-color-text");
-  const inputColorNombre = document.getElementById("input-color-nombre");
-  const btnAgregarColor = document.getElementById("btn-agregar-color");
-  const listaColores = document.getElementById("lista-colores");
-
-// Función para convertir cualquier color a HEX
-function colorToHex(colorStr) {
-  const ctx = document.createElement("canvas").getContext("2d");
-  ctx.fillStyle = colorStr;
-  return ctx.fillStyle;
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 }
 
 window.actualizarPreview = () => {
@@ -265,30 +193,11 @@ if (form) {
       mostrarError("Por favor completa todos los campos obligatorios.");
       return;
     }
-<<<<<<< HEAD
     // 🔹 Validar que no haya imágenes de otros productos
     const archivosInvalidos = window.productoState.archivosSeleccionados.filter(f => !(f instanceof File));
     if (archivosInvalidos.length > 0) {
       mostrarError("No se puede guardar el producto con imágenes de otro producto. Elimina las imágenes antiguas.");
       return;
-=======
-
-    const backendBase = "http://localhost:8080/api/productos";
-
-    const resProducto = await fetchConRefresh(backendBase, {
-      method: "POST",
-      // NO seteamos Content-Type, fetch lo hará automáticamente con boundary correcto
-      body: formData,
-    });
-
-    if (!resProducto.ok) {
-      let errorText = await resProducto.text();
-      try {
-        const json = JSON.parse(errorText);
-        errorText = json.message || JSON.stringify(json);
-      } catch {}
-      throw new Error(errorText || "Error al guardar el producto");
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
     }
     try {
       const productoPayload = {

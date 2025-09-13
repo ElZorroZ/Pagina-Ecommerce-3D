@@ -4,10 +4,7 @@ window.productoState = window.productoState || {
   archivosSeleccionados: []
 };
 let preview;
-<<<<<<< HEAD
 
-=======
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
   // Preview archivos
   function actualizarPreview() {
     preview.innerHTML = "";
@@ -62,66 +59,6 @@ let preview;
       preview.appendChild(div);
     });
   }
-<<<<<<< HEAD
-=======
-// Función para refrescar token (la dejé igual)
-async function refreshAccessToken() {
-  const refreshToken = localStorage.getItem("refreshToken");
-  if (!refreshToken) {
-    console.warn("No hay refresh token guardado");
-    return null;
-  }
-  try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (!data.token) console.warn("No se recibió token");
-      if (!data.refreshToken) console.warn("No se recibió refreshToken");
-      localStorage.setItem("accessToken", data.token);
-      localStorage.setItem("refreshToken", data.refreshToken);
-      return data.token;
-    } else {
-      let errorBody = await response.text();
-      try { errorBody = JSON.parse(errorBody).message || errorBody; } catch {}
-      console.warn("Refresh token inválido o expirado", response.status, errorBody);
-      return null;
-    }
-  } catch (err) {
-    console.error("Error al refrescar el token", err);
-    return null;
-  }
-}
-
-let refreshInProgress = false;
-
-async function fetchConRefresh(url, options = {}) {
-  options.headers = options.headers || {};
-  if (!options.headers['Authorization']) {
-    const token = localStorage.getItem('accessToken');
-    if (token) options.headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  let response = await fetch(url, options);
-
-  if (response.status === 401 && !refreshInProgress) {
-    refreshInProgress = true;
-    const nuevoToken = await refreshAccessToken();
-    refreshInProgress = false;
-    if (nuevoToken) {
-      options.headers['Authorization'] = `Bearer ${nuevoToken}`;
-      response = await fetch(url, options);
-    } else {
-      throw new Error('No autorizado - token expirado y no se pudo refrescar');
-    }
-  }
-
-  return response;
-}
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 
 function base64UrlToBase64(base64url) {
   return base64url.replace(/-/g, '+').replace(/_/g, '/');
@@ -248,7 +185,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // Estado para producto seleccionado
 let productoSeleccionadoId = null;
 
-<<<<<<< HEAD
 // --- Cargar productos y llenar tabla ---
 async function cargarProductos() {
   try {
@@ -313,80 +249,6 @@ async function cargarProductos() {
       });
 
       tablaBody.appendChild(fila);
-=======
-  btnAgregarColor.addEventListener("click", () => {
-    console.log("Click detectado en btnAgregarColor");
-    const color = inputColor.value;
-    console.log("Valor inputColor:", `"${color}"`);
-    const colorTrim = color.trim();
-    console.log("Valor inputColor.trim():", `"${colorTrim}"`);
-
-    if (colorTrim && !window.productoState.coloresSeleccionados.includes(colorTrim)) {
-      window.productoState.coloresSeleccionados.push(colorTrim);
-      console.log("Colores seleccionados:", window.productoState.coloresSeleccionados);
-      actualizarListaColores();
-      inputColor.value = "";
-      inputColor.focus();
-    } else {
-      console.log("No se agregó el color. O estaba vacío o ya existe.");
-    }
-  });
-  // Cargar productos y llenar tabla
-  async function cargarProductos() {
-    try {
-      const response = await fetchConRefresh("http://localhost:8080/api/productos");
-      if (!response.ok) throw new Error("Error al obtener los productos");
-      const productos = await response.json();
-      tablaBody.innerHTML = "";
-      productos.forEach(producto => {
-        const fila = document.createElement("tr");
-        const estrella = producto.destacado ? "⭐" : "☆";
-        fila.innerHTML = `
-          <td>${producto.id}</td>
-          <td>${producto.nombre}</td>
-          <td>${producto.descripcion}</td>
-          <td>$${producto.precio.toFixed(2)}</td>
-          <td>
-              <button class="select">Seleccionar</button>
-              <button class="eliminar">Eliminar</button>
-              <button class="estrella">${estrella}</button>
-          </td>
-        `;
-        fila.querySelector(".select").addEventListener("click", () => selectProducto(producto.id));
-        fila.querySelector(".eliminar").addEventListener("click", () => eliminarProducto(producto.id));
-        fila.querySelector(".estrella").addEventListener("click", () => {
-          const yaEsDestacado = producto.destacado;
-          if (!yaEsDestacado) {
-            const destacadosActuales = [...document.querySelectorAll(".estrella")]
-              .filter(btn => btn.textContent === "⭐").length;
-
-            if (destacadosActuales >= 10) {
-              alert("No se pueden destacar más de 10 productos.");
-              return;
-            }
-          }
-          toggleDestacado(producto.id);
-        });
-        tablaBody.appendChild(fila);
-      });
-    } catch (error) {
-      console.error("Error al cargar productos:", error.message);
-      alert("No se pudieron cargar los productos");
-    }
-    window.cargarProductos = cargarProductos;
-  }
-
-  cargarProductos();
-
-  async function toggleDestacado(productoId) {
-  try {
-    const token = localStorage.getItem("accessToken");
-    const res = await fetch(`http://localhost:8080/api/productos/${productoId}/destacado`, {
-      method: "POST", // puede ser POST o PUT según cómo lo manejes
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
     });
 
   } catch (error) {
@@ -394,7 +256,6 @@ async function cargarProductos() {
     mostrarError("No se pudieron cargar los productos");
   }
 }
-<<<<<<< HEAD
 
 
   // Hacemos pública la función por si la necesitás desde otro script
@@ -442,22 +303,6 @@ async function selectProducto(productoId) {
 
     // Archivos
     window.productoState.archivosSeleccionados = Array.isArray(data.archivos) && data.archivos.length > 0
-=======
-  // Seleccionar producto y cargar en formulario + preview
-  async function selectProducto(productoId) {
-    try {
-      const token = localStorage.getItem("accessToken");
-      const res = await fetch(`http://localhost:8080/api/productos/${productoId}`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error("No se pudo cargar el producto");
-      const data = await res.json();
-      console.log('ProductoCompletoDTO recibido:', data);
-      window.productoState.coloresSeleccionados = Array.isArray(data.colores)
-      ? [...data.colores]  // si es array (vacío o con elementos), actualiza
-      : [];                // si no es array, limpiar (opcional)
-      window.productoState.archivosSeleccionados = Array.isArray(data.archivos) && data.archivos.length > 0
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
       ? data.archivos.map(a => ({
           id: a.id,
           linkArchivo: a.linkArchivo || a.url,
@@ -503,21 +348,10 @@ async function cargarCategoriasYSeleccionar(categoriaIdSeleccionada) {
 
     const categorias = await res.json();
 
-<<<<<<< HEAD
     // Actualizar <select>
     const select = document.getElementById("categoria");
     if (!select) return;
     select.innerHTML = '<option value="">Seleccionar categoría</option>';
-=======
-  async function cargarCategoriasYSeleccionar(categoriaIdSeleccionada) {
-    try {
-      const token = localStorage.getItem("accessToken");
-      const res = await fetch("http://localhost:8080/api/categoria/combo", {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error("No se pudieron cargar las categorías");
-      const categorias = await res.json();
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 
     categorias.forEach(cat => {
       const option = document.createElement("option");
@@ -798,21 +632,8 @@ async function eliminarProducto(id) {
     if (!confirmado) return;
 
     try {
-<<<<<<< HEAD
       const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productos/${id}`, {
         method: "DELETE"
-=======
-      console.log("Colores antes de enviar:", window.productoState.coloresSeleccionados);
-      console.log("Archivos antes de enviar:", window.productoState.archivosSeleccionados);
-
-      for (const pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-      console.log("DTO que envío:", productoCompletoDTO);
-      const res = await fetchConRefresh(`http://localhost:8080/api/productos/${id}`, {
-        method: "PUT",
-        body: formData,
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
       });
 
       if (!res.ok) {
@@ -857,25 +678,5 @@ async function eliminarProducto(id) {
   });
 }
 
-<<<<<<< HEAD
-=======
-async function eliminarProducto(id) {
-  if (!confirm("¿Seguro que querés eliminar este producto?")) return;
-  try {
-    const token = localStorage.getItem("accessToken");
-    const res = await fetch(`http://localhost:8080/api/productos/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
-    });
-    if (!res.ok) throw new Error("Error al eliminar producto");
-    alert("Producto eliminado correctamente");
-    cargarProductos(); // refrescar la tabla
-  } catch (error) {
-    alert("Error: " + error.message);
-  }
-}
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 
 });

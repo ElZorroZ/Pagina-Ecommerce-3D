@@ -477,7 +477,7 @@ async eliminarReview(reviewId) {
   try {
     const token = localStorage.getItem('accessToken'); // tu JWT
 
-    const response = await fetch(`http://localhost:8080/api/pedido/crearPedido`, {
+    const response = await fetch(`${API_BASE_URL}/api/pedido/crearPedido`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -530,7 +530,36 @@ async eliminarReview(reviewId) {
         console.error("Error en confirmarPedido API:", error);
         throw error;
     }
+},
+async verPedidosDeUsuario(userId) {
+    try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) throw new Error("No se encontró token de acceso");
+
+        const response = await fetch(`${API_BASE_URL}/api/pedido/verPedidosDeUsuario?id=${userId}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            let errorMsg = response.statusText;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.error) errorMsg = errorData.error;
+            } catch {}
+            throw new Error(`Error al obtener pedidos: ${errorMsg}`);
+        }
+
+        const pedidos = await response.json();
+        return pedidos; // 👈 Devuelve array de PedidoDTO
+    } catch (error) {
+        console.error("Error en verPedidosDeUsuario API:", error);
+        throw error;
+    }
 }
+
 
 
 

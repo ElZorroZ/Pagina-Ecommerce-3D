@@ -4,10 +4,7 @@ window.productoState = window.productoState || {
   archivosSeleccionados: []
 };
 let preview;
-<<<<<<< HEAD
 
-=======
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
   // Preview archivos
 function actualizarPreview() {
   preview.innerHTML = "";
@@ -86,70 +83,6 @@ function actualizarPreview() {
     preview.appendChild(div);
   });
 }
-<<<<<<< HEAD
-=======
-
-
-
-// Función para refrescar token (la dejé igual)
-async function refreshAccessToken() {
-  const refreshToken = localStorage.getItem("refreshToken");
-  if (!refreshToken) {
-    console.warn("No hay refresh token guardado");
-    return null;
-  }
-  try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (!data.token) console.warn("No se recibió token");
-      if (!data.refreshToken) console.warn("No se recibió refreshToken");
-      localStorage.setItem("accessToken", data.token);
-      localStorage.setItem("refreshToken", data.refreshToken);
-      return data.token;
-    } else {
-      let errorBody = await response.text();
-      try { errorBody = JSON.parse(errorBody).message || errorBody; } catch {}
-      console.warn("Refresh token inválido o expirado", response.status, errorBody);
-      return null;
-    }
-  } catch (err) {
-    console.error("Error al refrescar el token", err);
-    return null;
-  }
-}
-
-let refreshInProgress = false;
-
-async function fetchConRefresh(url, options = {}) {
-  options.headers = options.headers || {};
-  if (!options.headers['Authorization']) {
-    const token = localStorage.getItem('accessToken');
-    if (token) options.headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  let response = await fetch(url, options);
-
-  if (response.status === 401 && !refreshInProgress) {
-    refreshInProgress = true;
-    const nuevoToken = await refreshAccessToken();
-    refreshInProgress = false;
-    if (nuevoToken) {
-      options.headers['Authorization'] = `Bearer ${nuevoToken}`;
-      response = await fetch(url, options);
-    } else {
-      throw new Error('No autorizado - token expirado y no se pudo refrescar');
-    }
-  }
-
-  return response;
-}
-
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 function base64UrlToBase64(base64url) {
   return base64url.replace(/-/g, '+').replace(/_/g, '/');
 }
@@ -250,11 +183,7 @@ async function cargarProductos() {
     const usuarioId = parseInt(authManager.getUserId(), 10);
     if (!usuarioId) throw new Error("Usuario no logueado");
 
-<<<<<<< HEAD
     const response = await fetchWithAuth(`${API_BASE_URL}/api/productosAprobacion/VerProductos_de/${usuarioId}`);
-=======
-    const response = await fetchConRefresh(`http://localhost:8080/api/productosAprobacion/VerProductos_de/${usuarioId}`);
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
     if (!response.ok) throw new Error("Error al obtener los productos");
 
     const productos = await response.json();
@@ -314,7 +243,6 @@ async function cargarProductos() {
 window.cargarProductos = cargarProductos;
 cargarProductos();
 
-<<<<<<< HEAD
 // --- Seleccionar producto y cargar en formulario + preview ---
 async function selectProducto(productoId) {
   try {
@@ -323,14 +251,6 @@ async function selectProducto(productoId) {
       .then(res => {
         if (!res.ok) throw new Error("No se pudo cargar el producto");
         return res.json();
-=======
-  // Seleccionar producto y cargar en formulario + preview
-  async function selectProducto(productoId) {
-    try {
-      const token = localStorage.getItem("accessToken");
-      const res = await fetch(`http://localhost:8080/api/productosAprobacion/VerProductoCompleto/${productoId}`, {
-        headers: { "Authorization": `Bearer ${token}` }
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
       });
 
     console.log('ProductoCompletoDTO recibido:', data);
@@ -367,22 +287,11 @@ async function selectProducto(productoId) {
   }
 }
 
-<<<<<<< HEAD
    
 async function cargarCategoriasYSeleccionar(categoriaIdSeleccionada) {
   try {
     const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/categoria/combo`);
     if (!res.ok) throw new Error("No se pudieron cargar las categorías");
-=======
-  async function cargarCategoriasYSeleccionar(categoriaIdSeleccionada) {
-    try {
-      const token = localStorage.getItem("accessToken");
-      const res = await fetch("http://localhost:8080/api/categoria/combo", {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error("No se pudieron cargar las categorías");
-      const categorias = await res.json();
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 
     const categorias = await res.json();
 
@@ -557,7 +466,6 @@ async function actualizarProducto() {
   }
 
   try {
-<<<<<<< HEAD
     // Usando authManager para manejar tokens
     const res = await authManager.fetchWithAuth(
       `${API_BASE_URL}/api/productosAprobacion/ActualizarProductoAprobar/${id}`,
@@ -566,13 +474,6 @@ async function actualizarProducto() {
         body: formData
       }
     );
-=======
-    const res = await fetchConRefresh(`http://localhost:8080/api/productosAprobacion/ActualizarProductoAprobar/${id}`, {
-      method: "PUT",
-      body: formData,
-      // NO configures Content-Type, el navegador lo hace automáticamente para multipart/form-data
-    });
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 
     if (!res.ok) {
       let errorMessage = "Error actualizando producto";
@@ -691,7 +592,6 @@ function cargarProductoPreview(producto, colores = [], archivos = []) {
       colorDiv.appendChild(div);
     });
   }
-<<<<<<< HEAD
 
   // --- Formatos ---
   const formatButtons = document.querySelectorAll(".format-option");
@@ -717,17 +617,6 @@ function cargarProductoPreview(producto, colores = [], archivos = []) {
         if (document.getElementById("precio")) document.getElementById("precio").value = producto.precio;
 
         actualizarColores(true); // mostrar colores
-=======
-}
-async function eliminarProducto(id) {
-  if (!confirm("¿Seguro que querés eliminar este producto?")) return;
-  try {
-    const token = localStorage.getItem("accessToken");
-    const res = await fetch(`http://localhost:8080/api/productosAprobacion/BorrarProducto/Colaborador?id=${id}`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": `Bearer ${token}`
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
       }
     });
   });

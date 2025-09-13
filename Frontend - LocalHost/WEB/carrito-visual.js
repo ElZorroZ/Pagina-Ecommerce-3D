@@ -1,12 +1,5 @@
 const cartCount = document.querySelector('.cart-count');
-<<<<<<< HEAD
 async function actualizarCantidadCarrito() {
-=======
-
-function actualizarCantidadCarrito() {
-  const usuarioId = localStorage.getItem('usuarioId');
-  const token = localStorage.getItem('accessToken');
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
   const cartCount = document.querySelector('#cart-count'); // Ajusta el selector a tu HTML
 
   // Verificar autenticación usando el authManager
@@ -18,7 +11,6 @@ function actualizarCantidadCarrito() {
     return;
   }
 
-<<<<<<< HEAD
   const usuarioId = authManager.getUserId();
 
   try {
@@ -26,11 +18,6 @@ function actualizarCantidadCarrito() {
     
     if (!response.ok) {
       throw new Error(`Error en la respuesta del servidor: ${response.status}`);
-=======
-  fetch(`http://localhost:8080/api/carrito/verCarrito/${usuarioId}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`
->>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
     }
 
     const data = await response.json();

@@ -1,3 +1,5 @@
+const API_BASE_URL = "http://localhost:8080";
+
 window.addEventListener('DOMContentLoaded', async () => {
   const mensaje = document.getElementById('mensaje');
   const urlParams = new URLSearchParams(window.location.search);
@@ -11,7 +13,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   try {
     // Cambié la URL para apuntar a tu endpoint de confirmación de email
-    const res = await fetch(`http://localhost:8080/api/usuario/confirmar-email?token=${encodeURIComponent(token)}`);
+    const res = await fetch(`${API_BASE_URL}/api/usuario/confirmar-email?token=${encodeURIComponent(token)}`);
 
     if (res.ok) {
       mensaje.textContent = "¡Email cambiado correctamente! Ya podés iniciar sesión.";
