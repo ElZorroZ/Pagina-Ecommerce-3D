@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 // Estado global para colores y archivos
 window.colaboradorState = window.colaboradorState || {
   archivosSeleccionados: []
@@ -61,18 +63,26 @@ async function fetchConRefresh(url, options = {}) {
   return response;
 }
 
+>>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 document.addEventListener("DOMContentLoaded", () => {
   const tablaBody = document.getElementById("tabla-productos");
-
+  const categoriesDropdown = document.querySelector("#categories-dropdown .dropdown-content");
+  const shopTrigger = document.getElementById("shop-trigger");
   async function cargarColaboradores() {
     try {
+<<<<<<< HEAD
+      const response = await authManager.fetchWithAuth(
+        `${API_BASE_URL}/api/usuario/colaboradores`
+      );
+=======
       const response = await fetchConRefresh("http://localhost:8080/api/usuario/colaboradores");
+>>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
       if (!response.ok) throw new Error("Error al obtener los colaboradores");
 
       const colaboradores = await response.json();
       tablaBody.innerHTML = "";
 
-      colaboradores.forEach(colaborador => {
+      colaboradores.forEach((colaborador) => {
         const fila = document.createElement("tr");
 
         fila.innerHTML = `
@@ -82,36 +92,91 @@ document.addEventListener("DOMContentLoaded", () => {
           <td>
             ${
               colaborador.id === 1
-                ? ''
+                ? ""
                 : `<button class="eliminar">Eliminar</button>`
             }
           </td>
         `;
 
         if (colaborador.id !== 1) {
-          // Le pasás directamente el email
-          fila.querySelector(".eliminar").addEventListener("click", () => eliminarColaborador(colaborador.id, colaborador.gmail));
+          fila
+            .querySelector(".eliminar")
+            .addEventListener("click", () =>
+              eliminarColaborador(colaborador.gmail)
+            );
         }
 
         tablaBody.appendChild(fila);
       });
     } catch (error) {
       console.error("Error al cargar colaboradores:", error.message);
-      alert("No se pudieron cargar los colaboradores");
+      mostrarError("❌ No se pudieron cargar los colaboradores");
     }
   }
 
-
   window.cargarColaboradores = cargarColaboradores;
-
 
   cargarColaboradores();
 
-  async function eliminarColaborador(id, gmail) {
-    if (!confirm("¿Seguro que querés quitar este colaborador?")) return;
-    try {
-      const token = localStorage.getItem("accessToken");
+  async function eliminarColaborador(gmail) {
+    // Mostrar confirmación estilo modal
+    mostrarConfirmacion("¿Seguro que querés quitar este colaborador?", async (confirmado) => {
+        if (!confirmado) return;
 
+<<<<<<< HEAD
+        try {
+            const res = await authManager.fetchWithAuth(
+                `${API_BASE_URL}/api/usuario/colaboradores`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ gmail }),
+                }
+            );
+
+            if (!res.ok) {
+                let errorMessage = "Error al eliminar colaborador.";
+                try {
+                    const text = await res.text();
+                    const data = JSON.parse(text);
+                    if (data.message) errorMessage = data.message;
+                } catch {
+                    // Mantener el mensaje por defecto
+                }
+                throw new Error(errorMessage);
+            }
+
+            mostrarExito("Colaborador removido correctamente");
+            cargarColaboradores(); // refresca la tabla
+        } catch (error) {
+            mostrarError("Error: " + error.message);
+        }
+    });
+}
+
+
+  // --- Carga de categorías ---
+  async function loadCategories() {
+    const categories = await API.getCategories();
+    renderCategories(categories);
+  }
+
+  function renderCategories(categorias) {
+    if (!Array.isArray(categorias)) return;
+    categoriesDropdown.innerHTML = "";
+
+    categorias.forEach(cat => {
+      const link = document.createElement("a");
+      link.href = "#";
+      link.className = "dropdown-category";
+      link.textContent = cat.nombre;
+      link.dataset.categoryId = cat.id;
+
+      // 🔑 Redirección al hacer click
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.location.href = `/categoria.html?id=${cat.id}`;
+=======
       const res = await fetch("http://localhost:8080/api/usuario/colaboradores", {
         method: "POST",
         headers: {
@@ -119,16 +184,28 @@ document.addEventListener("DOMContentLoaded", () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ gmail: gmail })
+>>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
       });
 
-      if (!res.ok) throw new Error(await res.text());
-
-      alert("Colaborador removido correctamente");
-      cargarColaboradores(); // refresca la tabla
-    } catch (error) {
-      alert("Error: " + error.message);
-    }
+      categoriesDropdown.appendChild(link);
+    });
   }
 
 
+  function initializeDropdown() {
+    if (!shopTrigger) return;
+    const categoriesDropdownMenu = document.getElementById("categories-dropdown");
+
+    shopTrigger.addEventListener("mouseenter", () => {
+      categoriesDropdownMenu.classList.add("show");
+    });
+
+    const navDropdown = shopTrigger.parentElement;
+    navDropdown.addEventListener("mouseleave", () => {
+      categoriesDropdownMenu.classList.remove("show");
+    });
+  }
+
+  loadCategories();
+  initializeDropdown();
 });

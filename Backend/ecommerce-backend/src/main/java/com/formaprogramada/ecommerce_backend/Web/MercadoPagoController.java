@@ -39,10 +39,92 @@ public class MercadoPagoController {
         BigDecimal price = BigDecimal.valueOf(pedido.getTotal());
         String initPoint = mercadoPagoService.confirmarPedido(mercadolibreToken, title, price, pedido.getId().toString(), quantity);
 
+<<<<<<< HEAD
+            // Parseo JSON
+            if (body != null && !body.isEmpty()) {
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode rootNode = mapper.readTree(body);
+
+                    if (rootNode.has("type") && "payment".equals(rootNode.get("type").asText())) {
+                        if (rootNode.has("data") && rootNode.get("data").has("id")) {
+                            paymentId = rootNode.get("data").get("id").asText();
+                            System.out.println("💳 Payment ID extraído del JSON: " + paymentId);
+                        }
+                    }
+                } catch (Exception jsonEx) {
+                    System.err.println("❌ Error parseando JSON: " + jsonEx.getMessage());
+                }
+            }
+
+            // Fallback
+            if (paymentId == null && id != null) {
+                paymentId = id;
+                System.out.println("💳 Usando Payment ID de parámetro: " + paymentId);
+            }
+
+            if (paymentId == null || paymentId.isEmpty()) {
+                System.err.println("❌ No se pudo extraer Payment ID");
+                return ResponseEntity.ok("NO_PAYMENT_ID");
+            }
+
+            // 🔑 Configurar token
+            if (mercadolibreToken == null || mercadolibreToken.isEmpty()) {
+                System.err.println("❌ Token de MercadoPago no configurado");
+                return ResponseEntity.ok("NO_TOKEN");
+            }
+            MercadoPagoConfig.setAccessToken(mercadolibreToken);
+
+            // 👉 Consultar el pago
+            PaymentClient paymentClient = new PaymentClient();
+            Payment payment = paymentClient.get(Long.valueOf(paymentId));
+
+            System.out.println("💰 Estado real del pago: " + payment.getStatus());
+            System.out.println("📅 Fecha: " + payment.getDateApproved());
+            System.out.println("🔗 Pedido asociado (externalReference): " + payment.getExternalReference());
+
+            // 🔄 Mapear estado de MercadoPago a estado interno
+            String estadoInterno = mapearEstadoPago(payment.getStatus());
+            System.out.println("🔄 Estado mapeado: " + estadoInterno);
+
+            // Actualizar estado en DB
+            pedidoService.CambiarEstado(
+                    estadoInterno,                        // estado mapeado
+                    Integer.parseInt(payment.getExternalReference()) // id convertido a int
+            );
+
+        } catch (Exception e) {
+            System.err.println("❌ ERROR EN WEBHOOK: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.ok("ERROR_HANDLED");
+        }
+        return ResponseEntity.ok("PROCESSED");
+    }
+
+    // 🔥 MÉTODO AUXILIAR - Mapear estados de MercadoPago a nuestros estados
+    private String mapearEstadoPago(String estadoMercadoPago) {
+        switch (estadoMercadoPago) {
+            case "approved":
+                return "PAGADO";
+            case "pending":
+            case "in_process":
+                return "PENDIENTE";
+            case "rejected":
+            case "cancelled":
+                return "CANCELADO";
+            default:
+                return "PROCESANDO";
+        }
+    }
+
+
+    // 🔥 ENDPOINTS DE REDIRECCIÓN MEJORADOS
+=======
         return ResponseEntity.ok(Map.of("initPoint", initPoint));
     }
 
     // URLs para redirección después del pago
+>>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
     @GetMapping("/pago-exitoso")
     public String pagoExitoso(@RequestParam int pedidoId) {
         pedidoService.CambiarEstado("PAGADO", pedidoId);

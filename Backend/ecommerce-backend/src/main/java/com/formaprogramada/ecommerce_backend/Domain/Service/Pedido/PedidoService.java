@@ -18,7 +18,7 @@ public interface PedidoService {
     List<PedidoDTO> verPedidosDeUsuario(int id);
     void ModificarPedido(UsuarioUpdatePedido usuario);
     void CambiarEstado(String estado,int id);
-    Pedido obtenerPedidoPorId(String pedidoId);
+    Pedido obtenerPedidoPorMercadoPagoId(String pedidoId);
     List<String> EnviarPedidoOnline(int idPedido);
 
     }

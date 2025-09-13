@@ -1,109 +1,55 @@
 document.addEventListener("DOMContentLoaded", () => {
-// Función para refrescar el access token usando el refresh token
-async function refreshAccessToken() {
-  const refreshToken = localStorage.getItem("refreshToken");
-  if (!refreshToken) {
-    // No redirige automáticamente, podés agregarlo si querés
-    return null;
-  }
+  (async () => {
 
+<<<<<<< HEAD
+    window.categoriaState = window.categoriaState || {};
+    const form = document.getElementById("form-producto");
+    if (!form) return;
+=======
   try {
     const response = await fetch("http://localhost:8080/api/auth/refresh", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
     });
+>>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem("accessToken", data.token);      // ojo que el token viene como "token"
-      localStorage.setItem("refreshToken", data.refreshToken);
-      return data.token;
-    } else {
-      return null;
-    }
-  } catch (err) {
-    console.error("Error al refrescar el token", err);
-    return null;
-  }
-}
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-async function fetchConRefresh(url, options = {}) {
-  options.headers = options.headers || {};
+      const nombre = document.getElementById("nombre").value.trim();
+      if (!nombre) {
+        mostrarError("Por favor completa todos los campos obligatorios.");
+        return;
+      }
 
-  // Agregar Authorization si falta
-  if (!options.headers['Authorization']) {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      options.headers['Authorization'] = `Bearer ${token}`;
-    }
-  }
+      const backendBaseSinImagen = `${API_BASE_URL}/api/categoria`;
+      const categoriaPayload = { nombre };
 
-  // Controlar Content-Type solo si body NO es FormData
-  if (!(options.body instanceof FormData)) {
-    // Si no existe Content-Type, se lo ponemos JSON (o el que quieras)
-    if (!options.headers['Content-Type']) {
-      options.headers['Content-Type'] = 'application/json';
-    }
-  } else {
-    // Si body es FormData, eliminar cualquier Content-Type para evitar conflictos
-    if ('Content-Type' in options.headers) {
-      delete options.headers['Content-Type'];
-    }
-  }
+      try {
+        const res = await authManager.fetchWithAuth(backendBaseSinImagen, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(categoriaPayload)
+        });
 
-  let response = await fetch(url, options);
-
-  // Si el token expiró o es inválido, intentamos refrescar
-  if (response.status === 401) {
-    const nuevoToken = await refreshAccessToken();
-    if (nuevoToken) {
-      // Clonamos las opciones para evitar problemas con body reutilizable
-      const newOptions = {
-        ...options,
-        headers: {
-          ...options.headers,
-          'Authorization': `Bearer ${nuevoToken}`
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(errorText || "Error al guardar la categoría");
         }
-      };
-      response = await fetch(url, newOptions);
-    } else {
-      // No se pudo refrescar el token
-      throw new Error('No autorizado - token expirado y no se pudo refrescar');
-    }
-  }
 
-  return response;
-}
-
-(() => {
-  const inputImagenes = document.getElementById('imagenes');
-  const preview = document.getElementById('preview-imagenes'); // ✅ agregado
-
-  // Estado global
-  window.categoriaState = window.categoriaState || {};
-  window.categoriaState.archivosSeleccionados = window.categoriaState.archivosSeleccionados || [];
-
-  inputImagenes.addEventListener('change', () => {
-    const files = Array.from(inputImagenes.files);
-
-    // Si ya hay una imagen o se intenta cargar más de una
-    if (
-      window.categoriaState.archivosSeleccionados.length >= 1 ||
-      files.length > 1
-    ) {
-      alert("Solo se permite subir una imagen. Primero eliminá la actual para agregar otra.");
-      inputImagenes.value = ""; // Limpio el input
-      return;
-    }
-
-    files.forEach(file => {
-      const existe = window.categoriaState.archivosSeleccionados.some(
-        f => f.name === file.name && f.size === file.size
-      );
-      if (!existe) window.categoriaState.archivosSeleccionados.push(file);
+        mostrarExito("Categoría guardada con éxito!");
+        form.reset();
+        await cargarCategorias();
+      } catch (error) {
+        mostrarError("Error: " + error.message);
+        console.error(error);
+      }
     });
 
+<<<<<<< HEAD
+  })();
+=======
     actualizarPreview();
     inputImagenes.value = "";
   });
@@ -232,4 +178,5 @@ async function fetchConRefresh(url, options = {}) {
 });
 })();
 
+>>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 });

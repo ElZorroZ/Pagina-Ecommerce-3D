@@ -1,4 +1,9 @@
+<<<<<<< HEAD
+
+   async function validarToken() {
+=======
     async function validarToken() {
+>>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
 
@@ -105,15 +110,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (roles.includes("ROLE_ADMIN")) {
                     adminOptions.innerHTML = `
+<<<<<<< HEAD
+                        <a href="/admin/CRUDCategoria/CRUDcategoria.html" class="dropdown-category">Gestionar categorías</a>
+                        <a href="/admin/CRUDProducto/CRUDproducto.html" class="dropdown-category">Gestionar productos</a>
+                        <a href="/admin/Pedidos/pedidos.html" class="dropdown-category">Gestionar pedidos</a>
+                        <a href="/admin/Aprobacion/CRUDaprobacion.html" class="dropdown-category">Gestionar colaboradores</a>
+                        <a href="/admin/AprobacionProducto/CRUDaprobacionProducto.html" class="dropdown-category">Gestionar productos sin aprobar</a>
+=======
                         <a href="/WEB/admin/CRUDCategoria/CRUDcategoria.html" class="dropdown-category">Gestionar categorías</a>
                         <a href="/WEB/admin/CRUDProducto/CRUDproducto.html" class="dropdown-category">Gestionar productos</a>
                         <a href="/admin/pedidos.html" class="dropdown-category">Gestionar pedidos</a>
                         <a href="/WEB/admin/Aprobacion/CRUDaprobacion.html" class="dropdown-category">Gestionar colaboradores</a>
                         <a href="/WEB/admin/AprobacionProducto/CRUDaprobacionProducto.html" class="dropdown-category">Gestionar productos sin aprobar</a>
+>>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
                     `;
                 } else {
                     adminOptions.innerHTML = `
-                        <a href="/WEB/admin/CRUDColaboradorProducto/CRUDproductoC.html" class="dropdown-category">Gestionar productos</a>
+                        <a href="/admin/CRUDColaboradorProducto/CRUDproductoC.html" class="dropdown-category">Gestionar productos</a>
                     `;
                 }
 

@@ -4,7 +4,17 @@ document.getElementById("login-form").addEventListener("submit", async function 
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
+  // Validación básica del frontend
+  if (!email || !password) {
+    alert("Por favor, completa todos los campos");
+    return;
+  }
+
   try {
+<<<<<<< HEAD
+    // Usar el authManager para el login
+    const result = await authManager.login(email, password);
+=======
     const response = await fetch("http://localhost:8080/api/auth/login", {
       method: "POST",
       headers: {
@@ -15,36 +25,55 @@ document.getElementById("login-form").addEventListener("submit", async function 
         password: password
       })
     });
+>>>>>>> parent of 391f6a9 (Merge branch 'main' of https://github.com/ElZorroZ/Pagina-Ecommerce-3D)
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      alert("Error al iniciar sesión: " + errorText);
-      return;
-    }
+    if (result.success) {
+      console.log("Login exitoso:", result.data);
+      
+      // Mostrar mensaje de éxito (opcional)
+      // alert("¡Login exitoso! Bienvenido/a");
 
-    const data = await response.json();
-  console.log("Respuesta del login:", data);
-
-    localStorage.setItem("accessToken", data.accessToken);
-    localStorage.setItem("refreshToken", data.refreshToken);
-
-    if (data.usuarioId !== undefined) {
-      localStorage.setItem("usuarioId", data.usuarioId.toString());
-
-      alert("Usuario ID guardado: " + data.usuarioId);
+      // Redirigir a la última página visitada o al inicio
+      const lastPage = localStorage.getItem("lastPage");
+      if (lastPage) {
+        localStorage.removeItem("lastPage"); // Limpiar después de usar
+        window.location.href = lastPage;
+      } else {
+        window.location.href = "/index.html";
+      }
     } else {
-      alert("No se recibió usuarioId en la respuesta");
+      // Mostrar error específico del servidor
+      alert("Error al iniciar sesión: " + result.error);
+      console.error("Error de login:", result.error);
     }
 
-
-    const lastPage = localStorage.getItem("lastPage");
-    if (lastPage) {
-      window.location.href = lastPage;
-    } else {
-      window.location.href = "/WEB/index.html";
-    }
   } catch (error) {
-    console.error("Error en la solicitud:", error);
-    alert("Ocurrió un error al intentar iniciar sesión.");
+    console.error("Error inesperado en login:", error);
+    alert("Ocurrió un error inesperado al intentar iniciar sesión. Por favor, intenta nuevamente.");
   }
 });
+
+// Opcional: Verificar si el usuario ya está autenticado al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+  if (authManager.isAuthenticated()) {
+    console.log('Usuario ya autenticado, redirigiendo...');
+    
+    // Redirigir a la última página o al inicio
+    const lastPage = localStorage.getItem("lastPage");
+    if (lastPage) {
+      localStorage.removeItem("lastPage");
+      window.location.href = lastPage;
+    } else {
+      window.location.href = "/index.html";
+    }
+  }
+});
+
+// Opcional: Manejar el botón "Recordarme" si lo tienes
+// const rememberCheckbox = document.getElementById("remember-me");
+// if (rememberCheckbox) {
+//   rememberCheckbox.addEventListener('change', function() {
+//     // Implementar lógica de "recordarme" si es necesario
+//     console.log('Recordarme:', this.checked);
+//   });
+// }

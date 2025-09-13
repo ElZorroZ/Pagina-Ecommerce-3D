@@ -46,7 +46,6 @@ public class PedidoServiceImpl implements PedidoService {
     public PedidoUsuarioDTO verPedido(int id) {
         return pedidoRepository.verPedido(id);
     }
-
     public Pedido obtenerPedidoPorMercadoPagoId(String pedidoId) {
         try {
             int id = Integer.parseInt(pedidoId);
