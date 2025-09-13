@@ -2,6 +2,7 @@ package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Reposit
 
 
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Pedido.PedidoEntity;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Usuario.UsuarioEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 
 public interface JpaPedidoRepository extends JpaRepository<PedidoEntity, Integer> {
@@ -21,5 +23,19 @@ public interface JpaPedidoRepository extends JpaRepository<PedidoEntity, Integer
 
     @Query("SELECT p FROM PedidoEntity p WHERE p.usuarioId= :id")
     List<PedidoEntity> PedidosDeUsuario(@Param("id")UsuarioEntity id);
+
+    @Query("SELECT p FROM PedidoEntity p LEFT JOIN FETCH p.productos WHERE p.usuarioId.id = :usuarioId")
+    List<PedidoEntity> findPedidosConProductosPorUsuario(@Param("usuarioId") Integer usuarioId);
+    @Query("""
+    SELECT prod 
+    FROM ProductoEntity prod
+    LEFT JOIN FETCH prod.archivos
+    WHERE prod.id IN :ids
+""")
+    List<ProductoEntity> findProductosConArchivos(@Param("ids") List<Integer> ids);
+
+    Optional<PedidoEntity> findByExternalPaymentId(String externalPaymentId);
+    @Query("SELECT DISTINCT p.usuarioId.id FROM PedidoEntity p")
+    List<Integer> findAllUsuariosConPedidos();
 
 }

@@ -1,3 +1,5 @@
+const API_BASE_URL = "https://forma-programada.onrender.com";
+
 document.addEventListener("DOMContentLoaded", () => {
 // Función para refrescar el access token usando el refresh token
 async function refreshAccessToken() {
@@ -8,7 +10,7 @@ async function refreshAccessToken() {
   }
 
   try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -102,7 +104,7 @@ async function fetchConRefresh(url, options = {}) {
   async function cargarCategorias() {
     try {
       const token = localStorage.getItem("accessToken"); // o donde tengas el token guardado
-      const res = await fetch("http://localhost:8080/api/categoria/combo", {
+      const res = await fetch(`${API_BASE_URL}/api/categoria/combo`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -130,7 +132,7 @@ async function fetchConRefresh(url, options = {}) {
     formData.append("file", file);
     formData.append("orden", orden);
 
-    const res = await fetchConRefresh(`http://localhost:8080/api/productos/${productoId}/archivos`, {
+    const res = await fetchConRefresh(`${API_BASE_URL}/api/productos/${productoId}/archivos`, {
       method: "POST",
       body: formData,
     });
@@ -415,7 +417,7 @@ actualizarListaColores();
       formData.append("archivo", archivoComprimidoInput.files[0]);
     }
 
-    const backendBase = "http://localhost:8080/api/productos";
+    const backendBase = `${API_BASE_URL}/api/productos`;
 
     const resProducto = await fetchConRefresh(backendBase, {
       method: "POST",

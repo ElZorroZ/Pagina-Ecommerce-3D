@@ -1,3 +1,4 @@
+const API_BASE_URL = "https://forma-programada.onrender.com";
 document.getElementById("login-form").addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -5,7 +6,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
   const password = document.getElementById("password").value;
 
   try {
-    const response = await fetch("https://forma-programada.onrender.com/api/auth/login", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

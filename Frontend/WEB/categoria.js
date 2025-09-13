@@ -143,7 +143,7 @@ class CategoryPage {
             const categorySlug = this.slugify(category.nombre);
 
             const categoryLink = document.createElement('a');
-            categoryLink.href = `/categoria.html?categoria=${encodeURIComponent(categorySlug)}`;
+            categoryLink.href = `/WEB/categoria.html?categoria=${encodeURIComponent(categorySlug)}`;
             categoryLink.className = 'dropdown-category';
             categoryLink.textContent = category.nombre;
             categoryLink.dataset.categoryId = category.id;

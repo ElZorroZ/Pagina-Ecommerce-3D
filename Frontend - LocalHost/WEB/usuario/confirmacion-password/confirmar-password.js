@@ -1,3 +1,5 @@
+const API_BASE_URL = "http://localhost:8080";
+
 window.addEventListener('DOMContentLoaded', () => {
   const mensaje = document.getElementById('mensaje');
   const formulario = document.getElementById('formularioCambioPassword');
@@ -36,7 +38,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     try {
       // Enviar el cambio de contraseña al backend (POST)
-      const cambiarRes = await fetch('http://localhost:8080/api/auth/reset-password/confirm', {
+      const cambiarRes = await fetch(`${API_BASE_URL}/api/auth/reset-password/confirm`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

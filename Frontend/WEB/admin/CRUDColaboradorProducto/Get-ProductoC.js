@@ -4,6 +4,8 @@ window.productoState = window.productoState || {
   archivosSeleccionados: []
 };
 let preview;
+const API_BASE_URL = "https://forma-programada.onrender.com";
+
   // Preview archivos
 function actualizarPreview() {
   preview.innerHTML = "";
@@ -92,7 +94,7 @@ async function refreshAccessToken() {
     return null;
   }
   try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -237,7 +239,7 @@ async function cargarProductos() {
     // Tomo el id del usuario desde localStorage
   const usuarioId = parseInt(localStorage.getItem("usuarioId"), 10);
 
-    const response = await fetchConRefresh(`http://localhost:8080/api/productosAprobacion/VerProductos_de/${usuarioId}`);
+    const response = await fetchConRefresh(`${API_BASE_URL}/api/productosAprobacion/VerProductos_de/${usuarioId}`);
     if (!response.ok) throw new Error("Error al obtener los productos");
 
     const productos = await response.json();
@@ -278,7 +280,7 @@ cargarProductos();
   async function selectProducto(productoId) {
     try {
       const token = localStorage.getItem("accessToken");
-      const res = await fetch(`http://localhost:8080/api/productosAprobacion/VerProductoCompleto/${productoId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/productosAprobacion/VerProductoCompleto/${productoId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("No se pudo cargar el producto");
@@ -313,7 +315,7 @@ cargarProductos();
   async function cargarCategoriasYSeleccionar(categoriaIdSeleccionada) {
     try {
       const token = localStorage.getItem("accessToken");
-      const res = await fetch("http://localhost:8080/api/categoria/combo", {
+      const res = await fetch(`${API_BASE_URL}/api/categoria/combo`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("No se pudieron cargar las categorías");
@@ -446,7 +448,7 @@ const archivosExistentes = window.productoState.archivosSeleccionados
     formData.append("eliminarArchivoComprimido", "true");
 }
   try {
-    const res = await fetchConRefresh(`http://localhost:8080/api/productosAprobacion/ActualizarProductoAprobar/${id}`, {
+    const res = await fetchConRefresh(`${API_BASE_URL}/api/productosAprobacion/ActualizarProductoAprobar/${id}`, {
       method: "PUT",
       body: formData,
       // NO configures Content-Type, el navegador lo hace automáticamente para multipart/form-data
@@ -553,7 +555,7 @@ async function eliminarProducto(id) {
   if (!confirm("¿Seguro que querés eliminar este producto?")) return;
   try {
     const token = localStorage.getItem("accessToken");
-    const res = await fetch(`http://localhost:8080/api/productosAprobacion/BorrarProducto/Colaborador?id=${id}`, {
+    const res = await fetch(`${API_BASE_URL}/api/productosAprobacion/BorrarProducto/Colaborador?id=${id}`, {
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`

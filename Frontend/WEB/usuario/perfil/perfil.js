@@ -1,4 +1,5 @@
 const categoriesDropdown = document.getElementById('categories-dropdown');
+const API_BASE_URL = "https://forma-programada.onrender.com";
 
 // Load categories from API
 async function loadCategories() {
@@ -84,7 +85,7 @@ async function refreshAccessToken() {
   if (!refreshToken) return null;
 
   try {
-    const res = await fetch('https://forma-programada.onrender.com/api/auth/refresh-token', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/refresh-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken })
@@ -108,7 +109,7 @@ async function refreshAccessToken() {
 
 function redirigirALogin() {
   eliminarTokens();
-  window.location.href = '/usuario/login/login.html'; // Cambiar según ruta real
+  window.location.href = '/WEB/usuario/login/login.html'; // Cambiar según ruta real
 }
 
 // --- Función fetch con refresh automático ---
@@ -205,7 +206,7 @@ formCambiarPassword.addEventListener('submit', async (e) => {
       nuevaPassword,
     };
 
-    const res = await fetchConRefresh(`https://forma-programada.onrender.com/api/usuario/${encodeURIComponent(gmail)}/password-directo`, {
+    const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${encodeURIComponent(gmail)}/password-directo`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -259,7 +260,7 @@ btnEnviarCambioEmail.addEventListener('click', async () => {
   }
 
   try {
-    const res = await fetchConRefresh(`https://forma-programada.onrender.com/api/usuario/${encodeURIComponent(gmail)}/email`, {
+    const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${encodeURIComponent(gmail)}/email`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -305,7 +306,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Cargar datos del usuario
   try {
-    const res = await fetchConRefresh(`https://forma-programada.onrender.com/api/usuario/${gmail}`);
+    const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${gmail}`);
     const usuario = await res.json();
 
     form.nombre.value = usuario.nombre ?? "";
@@ -336,7 +337,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     try {
-      const res = await fetchConRefresh(`https://forma-programada.onrender.com/api/usuario/${gmail}`, {
+      const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${gmail}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos)

@@ -2,6 +2,7 @@
 window.colaboradorState = window.colaboradorState || {
   archivosSeleccionados: []
 };
+const API_BASE_URL = "http://localhost:8080";
 
 // Función para refrescar token (la dejé igual)
 async function refreshAccessToken() {
@@ -11,7 +12,7 @@ async function refreshAccessToken() {
     return null;
   }
   try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -66,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function cargarColaboradores() {
     try {
-      const response = await fetchConRefresh("http://localhost:8080/api/usuario/colaboradores");
+      const response = await fetchConRefresh(`${API_BASE_URL}/api/usuario/colaboradores`);
       if (!response.ok) throw new Error("Error al obtener los colaboradores");
 
       const colaboradores = await response.json();
@@ -112,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      const res = await fetch("http://localhost:8080/api/usuario/colaboradores", {
+      const res = await fetch(`${API_BASE_URL}/api/usuario/colaboradores`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

@@ -1,0 +1,387 @@
+/* --- Estilos generales --- */
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  padding-top: 80px;
+  background-color: #f9f9f9;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+
+/* --- Header --- */
+
+.main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 20px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.left-header {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.nav a:hover {
+  color: #000;
+}
+
+.right-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.right-header a,
+.icons a {
+  text-decoration: none;
+  font-size: 18px;
+  color: #333;
+  transition: color 0.3s;
+}
+
+.right-header a:hover,
+.icons a:hover {
+  color: #000;
+}
+
+.main-header .container.header-inner {
+  display: flex;
+}
+
+.main-header .alt-header.mobile-header {
+  display: none;
+}
+
+
+/* --- CRUD Productos --- */
+
+.crud-productos {
+  margin: 40px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.crud-productos h2 {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.crud-productos form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.crud-productos form label {
+  flex: 1 1 100%;
+  font-weight: bold;
+}
+
+.crud-productos form input[type="text"],
+.crud-productos form input[type="number"] {
+  padding: 8px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Botón común para seleccionar y guardar */
+button.select,
+button.guardar-estado {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #4CAF50, #388E3C);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  height: 40px; /* Igual altura para uniformidad */
+}
+
+/* Hover */
+button.select:hover,
+button.guardar-estado:hover {
+  background: linear-gradient(135deg, #45A049, #2E7D32);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Focus */
+button.select:focus,
+button.guardar-estado:focus {
+  outline: none;
+  box-shadow: 0 0 4px #388E3C;
+}
+
+
+
+
+/* Input de archivos mejorado */
+input[type="file"]::-webkit-file-upload-button {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+  background: linear-gradient(135deg, #163562, #244b93);
+  transform: scale(1.05);
+}
+
+input[type="file"] {
+  font-family: inherit;
+  color: #333;
+}
+
+.crud-productos table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.crud-productos th,
+.crud-productos td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.crud-productos th {
+  background-color: #f0f0f0;
+}
+
+.crud-productos button {
+  padding: 8px 14px;
+  margin-right: 6px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #222, #555);
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.crud-productos button:hover {
+  background: linear-gradient(135deg, #000, #333);
+  transform: scale(1.05);
+}
+
+.crud-productos form select {
+  padding: 8px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+/* --- TABLA --- */
+/* Tabla general */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+/* Cabecera */
+thead {
+  background-color: #f8f9fa;
+  color: #333;
+  text-align: left;
+}
+
+th, td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Última fila sin borde */
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Hover en filas */
+tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Botones */
+button {
+  padding: 6px 12px;
+  margin-right: 5px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Select estilo moderno azul ocupando todo el ancho */
+select.estado-select {
+  appearance: none; /* Quita estilo nativo */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  width: 45%; /* Ocupa todo el espacio del contenedor */
+  box-sizing: border-box; /* Incluye padding y borde en el ancho */
+
+  background-color: #2196F3; /* azul principal */
+  color: white;
+  border: 1px solid #1976D2;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+/* Hover sobre select */
+select.estado-select:hover {
+  background-color: #1976D2;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Cuando está enfocado */
+select.estado-select:focus {
+  outline: none;
+  border-color: #0D47A1;
+  box-shadow: 0 0 5px #0D47A1;
+}
+
+/* Opciones dentro del select */
+select.estado-select option {
+  background-color: #2196F3;
+  color: white;
+  padding: 8px;
+}
+/* Botón Seleccionar (verde moderno) */
+button.btn-seleccionar {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  height: 40px; /* Igual altura que el select si querés */
+}
+
+/* Hover sobre botón */
+button.btn-seleccionar:hover {
+  background-color: #388E3C;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Cuando está enfocado */
+button.btn-seleccionar:focus {
+  outline: none;
+  box-shadow: 0 0 4px #388E3C;
+}
+/* Botón Seleccionar (verde moderno) */
+button.estado-select {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  height: 40px; /* Igual altura que el select si querés */
+}
+
+/* Hover sobre botón */
+button.estado-select:hover {
+  background-color: #388E3C;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Cuando está enfocado */
+button.estado-select:focus {
+  outline: none;
+  box-shadow: 0 0 4px #388E3C;
+}
+/* Estilo para el filtro de estado */
+#filtro-estado {
+  width: 100%;
+  max-width: 250px; /* Ajustable según el diseño */
+  padding: 10px 15px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  background-color: #f0f4f8;
+  border: 2px solid #4A90E2; /* borde azul */
+  border-radius: 8px;
+  appearance: none; /* Quita estilo nativo del navegador */
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Hover y focus */
+#filtro-estado:hover,
+#filtro-estado:focus {
+  border-color: #357ABD;
+  background-color: #e6f0fa;
+  outline: none;
+}
+
+/* Flecha personalizada */
+#filtro-estado {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><polygon points='0,0 12,0 6,6' fill='%23357ABD'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}

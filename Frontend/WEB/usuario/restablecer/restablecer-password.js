@@ -1,3 +1,5 @@
+const API_BASE_URL = "https://forma-programada.onrender.com";
+
 document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const messageDiv = document.getElementById('message');
@@ -12,7 +14,7 @@ document.getElementById('reset-password-form').addEventListener('submit', async 
   }
 
   try {
-    const res = await fetch('https://forma-programada.onrender.com/api/auth/reset-password-request', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/reset-password-request`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

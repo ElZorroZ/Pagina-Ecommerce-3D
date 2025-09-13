@@ -2,6 +2,8 @@
 window.productoState = window.productoState || {
   archivosSeleccionados: []
 };
+const API_BASE_URL = "https://forma-programada.onrender.com";
+
 let preview;
   // Preview archivos
   function actualizarPreview() {
@@ -68,7 +70,7 @@ async function refreshAccessToken() {
     return null;
   }
   try {
-    const response = await fetch("http://localhost:8080/api/auth/refresh", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -141,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Cargar productos y llenar tabla
   async function cargarCategorias() {
     try {
-      const response = await fetchConRefresh("http://localhost:8080/api/categoria");
+      const response = await fetchConRefresh(`${API_BASE_URL}/api/categoria`);
       if (!response.ok) throw new Error("Error al obtener las categorías");
       const categorias = await response.json();
       tablaBody.innerHTML = "";
@@ -208,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function toggleCategoriaDestacada(categoriaId) {
         try {
             const token = localStorage.getItem("accessToken");
-            const res = await fetch(`http://localhost:8080/api/categoria/toggleCategoriaDestacada/${categoriaId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/categoria/toggleCategoriaDestacada/${categoriaId}`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -230,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function selectCategoria(categoriaId) {
         try {
             const token = localStorage.getItem("accessToken");
-            const res = await fetch(`http://localhost:8080/api/categoria/${categoriaId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/categoria/${categoriaId}`, {
             headers: { "Authorization": `Bearer ${token}` }
             });
 
@@ -299,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const token = localStorage.getItem("accessToken");
 
-        const res = await fetch(`http://localhost:8080/api/categoria/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/categoria/${id}`, {
             method: "PUT",
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -331,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!confirm("¿Seguro que querés eliminar esta categoría?")) return;
         try {
             const token = localStorage.getItem("accessToken");
-            const res = await fetch(`http://localhost:8080/api/categoria/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/categoria/${id}`, {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${token}`
