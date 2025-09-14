@@ -54,18 +54,7 @@ function initializeDropdown() {
     });
   }
 }
-// --- Función helper mínima para 403 ---
-async function fetchCon403(url, opciones = {}) {
-  const res = await authManager.fetchWithAuth(url, opciones);
 
-  if (res.status === 403) {
-    alert("No autorizado. Redirigiendo al login...");
-    window.location.href = '/usuario/login/login.html';
-    throw new Error("No autorizado");
-  }
-
-  return res;
-}
 // --- Modal cambio de contraseña ---
 const btnEditarPassword = document.getElementById('btnEditarPassword');
 const modalPassword = document.getElementById('modalCambiarPassword');
@@ -242,18 +231,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadCategories();
   document.addEventListener('click', handleClicks);
 
-  if (!authManager.isAuthenticated()) {
-    alert("No estás autenticado");
+ if (!authManager.isAuthenticated()) {
+  mostrarError("No estás autenticado");
+  setTimeout(() => {
     authManager.redirigirALogin();
-    return;
-  }
+  }, 1500);
+  return;
+}
 
-  const user = authManager.getUserInfo();
-  if (!user?.gmail) {
-    alert("Token inválido");
+const user = authManager.getUserInfo();
+if (!user?.gmail) {
+  mostrarError("Token inválido");
+  setTimeout(() => {
     authManager.redirigirALogin();
-    return;
-  }
+  }, 1500);
+  return;
+}
+
 
   const telInput = document.getElementById("telefono");
   telInput.addEventListener("input", () => {
@@ -263,13 +257,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   const form = document.getElementById("perfil-form");
 
   try {
+    mostrarCarga("Cargando perfil...");
+
     const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/usuario/${user.gmail}`);
 
-      if (!res.ok) {
-          throw new Error(`Error ${res.status}: ${res.statusText}`);
-      }
+    ocultarCarga();
 
-      const usuario = await res.json();
+    if (!res.ok) {
+        if (res.status === 403) {
+            mostrarError("Sesión expirada. Por favor inicia sesión nuevamente.");
+            setTimeout(() => {
+                window.location.href = "/usuario/login/login.html";
+            }, 2000);
+        } else {
+            throw new Error(`Error ${res.status}: ${res.statusText}`);
+        }
+        return;
+    }
+
+    const usuario = await res.json();
+
     form.nombre.value = usuario.nombre ?? "";
     form.apellido.value = usuario.apellido ?? "";
     form.direccion.value = usuario.direccion ?? "";
@@ -279,9 +286,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("email").value = usuario.gmail ?? "";
 
-  } catch (err) {
+    mostrarExito("Perfil cargado correctamente ✅");
+
+} catch (err) {
+    ocultarCarga();
     console.error(err);
-    alert("Error al cargar el perfil: " + err.message);
+    mostrarError("Error al cargar el perfil: " + err.message);
+}finally{
+      ocultarCarga();
   }
 
   form.addEventListener("submit", async e => {

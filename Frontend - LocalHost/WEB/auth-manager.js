@@ -1,11 +1,19 @@
-// auth-manager.js - Gestor centralizado de autenticación
+// auth-manager.js - Gestor optimizado para tokens de 15 minutos
 const API_BASE_URL = "http://localhost:8080";
 
 class AuthManager {
   constructor() {
     this.refreshPromise = null;
     this.isRefreshing = false;
-    this.pendingRequests = []; // Cola de peticiones esperando refresh
+    this.pendingRequests = [];
+    this.lastRefreshTime = 0;
+    
+    // ⏰ Para tokens de 15 min, ser más agresivo en la renovación
+    this.REFRESH_BUFFER = 2 * 60 * 1000; // 2 minutos antes de expirar
+    this.MIN_REFRESH_INTERVAL = 30 * 1000; // Mínimo 30 segundos entre refresh
+    
+    // 🚀 Iniciar renovación proactiva
+    this.startProactiveRefresh();
   }
 
   getAccessToken() {
@@ -25,13 +33,13 @@ class AuthManager {
   }
   
   getUserInfo() {
-    const token = this.getAccessToken(); // ✅ obtener token
+    const token = this.getAccessToken();
     if (!token) return null;
 
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       return {
-        gmail: payload.sub, // depende de cómo armes el JWT
+        gmail: payload.sub,
         roles: payload.roles || []
       };
     } catch (e) {
@@ -40,11 +48,14 @@ class AuthManager {
     }
   }
 
-
   saveAuthData(accessToken, refreshToken, usuarioId) {
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("usuarioId", usuarioId.toString());
+    
+    // 🚀 Reiniciar el ciclo de renovación proactiva
+    this.startProactiveRefresh();
+    
     console.log("✅ Datos guardados:", { usuarioId });
   }
 
@@ -55,10 +66,82 @@ class AuthManager {
     this.refreshPromise = null;
     this.isRefreshing = false;
     this.pendingRequests = [];
+    this.lastRefreshTime = 0;
+    
+    // 🛑 Detener renovación proactiva
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+    
     console.log("🗑️ Datos limpiados");
   }
 
+  // 🚀 Sistema de renovación proactiva para tokens de 15 minutos
+  startProactiveRefresh() {
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+    }
+
+    const token = this.getAccessToken();
+    if (!token) return;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expirationTime = payload.exp * 1000;
+      const currentTime = Date.now();
+      const timeUntilExpiration = expirationTime - currentTime;
+      const timeUntilRefresh = Math.max(timeUntilExpiration - this.REFRESH_BUFFER, 30000); // Mínimo 30s
+
+      if (timeUntilRefresh > 0 && timeUntilRefresh < 20 * 60 * 1000) { // Máximo 20 min
+        console.log(`⏰ Renovación programada en ${Math.round(timeUntilRefresh / 1000)} segundos`);
+        
+        this.refreshTimer = setTimeout(() => {
+          this.refreshAccessTokenProactively();
+        }, timeUntilRefresh);
+      }
+    } catch (error) {
+      console.error('Error programando renovación:', error);
+    }
+  }
+
+  // 🔄 Renovación proactiva (antes de que expire)
+  async refreshAccessTokenProactively() {
+    console.log('🔄 Iniciando renovación proactiva...');
+    const newToken = await this.refreshAccessToken();
+    if (newToken) {
+      console.log('✅ Renovación proactiva exitosa');
+      // Programar la siguiente renovación
+      this.startProactiveRefresh();
+    }
+  }
+
+  // ⚡ Verificar si necesita refresh urgente (para requests inmediatos)
+  needsImmediateRefresh() {
+    const token = this.getAccessToken();
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expirationTime = payload.exp * 1000;
+      const currentTime = Date.now();
+      const timeUntilExpiration = expirationTime - currentTime;
+      
+      // Necesita refresh si expira en menos de 1 minuto
+      return timeUntilExpiration < 60 * 1000;
+    } catch (error) {
+      return true;
+    }
+  }
+
   async refreshAccessToken() {
+    // ⚡ Evitar refresh muy frecuentes
+    const now = Date.now();
+    if (now - this.lastRefreshTime < this.MIN_REFRESH_INTERVAL) {
+      console.log("⏳ Refresh muy reciente, usando token actual");
+      return this.getAccessToken();
+    }
+
     // Si ya hay un refresh en progreso, retornar esa promesa
     if (this.refreshPromise) {
       console.log("⏳ Refresh en progreso, esperando...");
@@ -76,6 +159,7 @@ class AuthManager {
     
     try {
       const result = await this.refreshPromise;
+      this.lastRefreshTime = now;
       return result;
     } finally {
       // Limpiar la promesa al finalizar
@@ -115,6 +199,12 @@ class AuthManager {
       console.log("❌ No autenticado");
       this.redirectToLogin();
       throw new Error('Usuario no autenticado');
+    }
+
+    // 🚀 Refresh proactivo si el token expira muy pronto
+    if (this.needsImmediateRefresh()) {
+      console.log("⚡ Token expira pronto, refrescando antes del request");
+      await this.refreshAccessToken();
     }
 
     // Crear opciones limpias
@@ -195,12 +285,32 @@ class AuthManager {
   }
 
   debugAuthStatus() {
+    const token = this.getAccessToken();
+    let tokenInfo = null;
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expirationTime = payload.exp * 1000;
+        const currentTime = Date.now();
+        const timeUntilExpiration = expirationTime - currentTime;
+        
+        tokenInfo = {
+          expiresIn: Math.round(timeUntilExpiration / 1000),
+          needsRefresh: this.needsImmediateRefresh()
+        };
+      } catch (e) {
+        tokenInfo = { error: 'Token inválido' };
+      }
+    }
+
     console.log('🔍 Estado:', {
       accessToken: !!this.getAccessToken(),
       refreshToken: !!this.getRefreshToken(),
       usuarioId: this.getUserId(),
       isAuthenticated: this.isAuthenticated(),
-      isRefreshing: !!this.refreshPromise
+      isRefreshing: !!this.refreshPromise,
+      tokenInfo
     });
   }
 }

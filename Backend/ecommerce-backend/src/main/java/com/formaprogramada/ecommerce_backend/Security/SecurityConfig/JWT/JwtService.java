@@ -19,7 +19,7 @@ public class JwtService {
     // Duraciones en milisegundos
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 15; // 15 minutos
     private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 días
-    
+
     // Clave de firma
     private Key getSignInKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
@@ -42,18 +42,44 @@ public class JwtService {
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
+                // ⏰ Clock skew de 60 segundos para tokens de 15 minutos
+                .setAllowedClockSkewSeconds(60)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
     public boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        try {
+            return extractExpiration(token).before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception e) {
+            // Cualquier otro error del token lo consideramos como expirado
+            return true;
+        }
+    }
+
+    /**
+     * ⏰ Verifica si el token expirará en los próximos minutos (útil para renovación proactiva)
+     */
+    public boolean isTokenNearExpiration(String token, int minutesThreshold) {
+        try {
+            Date expiration = extractExpiration(token);
+            long timeToExpire = expiration.getTime() - System.currentTimeMillis();
+            return timeToExpire < (minutesThreshold * 60 * 1000);
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     public boolean isTokenValid(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-        return extractedUsername.equals(username) && !isTokenExpired(token);
+        try {
+            final String extractedUsername = extractUsername(token);
+            return extractedUsername.equals(username) && !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     // ========== Generación de Tokens ==========

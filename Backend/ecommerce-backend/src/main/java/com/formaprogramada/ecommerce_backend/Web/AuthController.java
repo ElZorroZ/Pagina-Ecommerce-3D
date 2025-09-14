@@ -23,6 +23,8 @@ import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioRegistroMapper;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.PessimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +105,6 @@ public class AuthController {
         try {
             log.info("Intento de login para: {}", request.getGmail());
 
-            // Buscar usuario en la base de datos
             Optional<Usuario> optUser = usuarioRepository.buscarPorGmail(request.getGmail());
             if (optUser.isEmpty()) {
                 log.warn("Usuario no encontrado: {}", request.getGmail());
@@ -113,14 +114,12 @@ public class AuthController {
 
             Usuario usuario = optUser.get();
 
-            // Verificar si está marcado como verificado
             if (!usuario.isVerificado()) {
                 log.warn("Usuario no verificado: {}", request.getGmail());
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Usuario no verificado");
             }
 
-            // Autenticación
             var authToken = new UsernamePasswordAuthenticationToken(
                     request.getGmail(),
                     request.getPassword()
@@ -149,13 +148,21 @@ public class AuthController {
         }
     }
 
-
-
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        return refreshTokenWithRetry(request, 0);
+    }
+
+    /**
+     * 🔄 Refresh con retry logic para manejar concurrencia
+     */
+    private ResponseEntity<?> refreshTokenWithRetry(RefreshTokenRequest request, int attempt) {
+        final int MAX_RETRIES = 3;
+        final long RETRY_DELAY_MS = 100; // 100ms entre intentos
+
         try {
             String username = jwtService.extractUsername(request.getRefreshToken());
-            log.info("Procesando refresh para usuario: {}", username);
+            log.info("Procesando refresh para usuario: {} (intento {})", username, attempt + 1);
 
             AuthResponse response = jwtTokenService.refrescarTokens(request.getRefreshToken());
 
@@ -170,13 +177,42 @@ public class AuthController {
         } catch (RefreshTokenExpiredException | RefreshTokenNotFoundException e) {
             log.warn("Refresh fallido: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+
         } catch (Exception e) {
-            log.error("Error inesperado en refresh: {}", e.getMessage());
+            // 🔄 Retry logic para errores de concurrencia
+            if (attempt < MAX_RETRIES && isConcurrencyError(e)) {
+                log.warn("Error de concurrencia en refresh (intento {}), reintentando: {}",
+                        attempt + 1, e.getMessage());
+
+                try {
+                    Thread.sleep(RETRY_DELAY_MS * (attempt + 1)); // Backoff exponencial
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Proceso interrumpido");
+                }
+
+                return refreshTokenWithRetry(request, attempt + 1);
+            }
+
+            log.error("Error inesperado en refresh (intento {}): {}", attempt + 1, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error interno del servidor");
         }
     }
 
+    /**
+     * 🔍 Determina si es un error relacionado con concurrencia
+     */
+    private boolean isConcurrencyError(Exception e) {
+        String message = e.getMessage().toLowerCase();
+        return message.contains("lock") ||
+                message.contains("timeout") ||
+                message.contains("deadlock") ||
+                message.contains("concurrent") ||
+                e instanceof OptimisticLockException ||
+                e instanceof PessimisticLockException;
+    }
 
 
     @PostMapping("/reset-password-request")
