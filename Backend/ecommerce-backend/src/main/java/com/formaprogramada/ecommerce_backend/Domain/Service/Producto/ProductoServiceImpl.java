@@ -222,10 +222,7 @@ public class ProductoServiceImpl implements ProductoService {
             Integer id,
             ProductoCompletoDTO dto,
             List<MultipartFile> archivosNuevos, MultipartFile archivoComprimido) throws IOException {
-        System.out.println("DTO Archivos:");
-        dto.getArchivos().forEach(a -> System.out.println(a.getLinkArchivo()));
-        System.out.println("DTO Colores:");
-        dto.getColores().forEach(System.out::println);
+
         try {
             System.out.println("⚠️ Actualizando producto");
             // 1. Buscar producto existente
