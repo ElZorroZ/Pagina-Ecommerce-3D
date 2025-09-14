@@ -152,6 +152,21 @@ public class EmailServiceImpl implements EmailService {
         jpaUsuarioRepository.save(usuario);
     }
 
+    @Override
+    public void enviarConfirmacionCompra(String gmail) {
+
+        String token = jwtSpecialTokenService.generateResetPasswordToken(gmail);
+
+        String frontendUrl = "http://localhost:5501";
+        String link = frontendUrl + "/usuario/confirmacion-compra/confirmar-compra.html";
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("link", link);
+
+        String asunto = "Confirmación de compra";
+
+        enviarEmailHtml(gmail, asunto, variables, "confirmar-compra");
+    }
 
 
 }

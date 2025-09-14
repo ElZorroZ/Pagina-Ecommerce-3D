@@ -18,6 +18,6 @@ public interface UsuarioService {
     void cambiarPassword(String gmail, CambioPasswordRequest request);
     Boolean actualizarUsuarioAlComprar(Usuario usuario);
     Boolean modificarPermisoUsuario(int id, int permiso);
-
+    String existePorId(int id);
 
 }

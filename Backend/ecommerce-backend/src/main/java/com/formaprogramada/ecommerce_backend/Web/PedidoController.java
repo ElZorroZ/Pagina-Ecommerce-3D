@@ -3,7 +3,9 @@ package com.formaprogramada.ecommerce_backend.Web;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.Pedido;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Carrito.CarritoService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Email.EmailService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Pedido.PedidoService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Usuario.UsuarioService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoAgregarRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoCompletoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoDTO;
@@ -30,6 +32,8 @@ public class PedidoController {
 
     private final PedidoService pedidoService;
     private final CarritoController carritoController;
+    private final EmailService emailService;
+    private final UsuarioService usuarioService;
 
     @PostMapping("/crearPedido")
     public ResponseEntity<Pedido> crearPedido(@Valid @RequestBody List<CarritoCompletoDTO> lista) {
@@ -44,7 +48,8 @@ public class PedidoController {
             Pedido pedidoFinal= pedidoService.CrearPedido(pedido,id);
 
             carritoController.VaciarCarrito(pedidoFinal.getUsuarioId());
-
+            
+            emailService.enviarConfirmacionCompra(usuarioService.existePorId(id));
             return ResponseEntity.ok(pedidoFinal);
         } catch (Exception e) {
             throw new RuntimeException(e);

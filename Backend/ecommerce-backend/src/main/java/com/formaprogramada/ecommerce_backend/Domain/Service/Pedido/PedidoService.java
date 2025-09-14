@@ -19,7 +19,7 @@ public interface PedidoService {
     void ModificarPedido(UsuarioUpdatePedido usuario);
     void CambiarEstado(String estado,int id);
     Pedido obtenerPedidoPorMercadoPagoId(String externalPaymentId);
-        void guardarMercadoPagoId(String pedidoId, String mpId);
+    void guardarMercadoPagoId(String pedidoId, String mpId);
     Pedido obtenerPedidoPorId(Integer pedidoId);
 
 }
