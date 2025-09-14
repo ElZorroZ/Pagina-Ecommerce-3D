@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.7</version> <!-- o la última versión estable -->
+			<version>2.0.7</version>
 		</dependency>
 
 		<dependency>
@@ -66,6 +66,12 @@
 			<artifactId>sdk-java</artifactId>
 			<version>2.1.21</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
+
 
 		<!-- Implementación Logback -->
 		<dependency>

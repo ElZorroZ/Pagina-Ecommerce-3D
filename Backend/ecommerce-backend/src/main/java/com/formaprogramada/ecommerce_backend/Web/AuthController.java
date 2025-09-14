@@ -34,6 +34,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -272,6 +273,15 @@ public class AuthController {
         }else{
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/oauth2/success")
+    public ResponseEntity<String> getUserInfo(OAuth2AuthenticationToken authentication) {
+        Map<String, Object> attributes = authentication.getPrincipal().getAttributes();
+        String email = (String) attributes.get("email");
+        String nombre = (String) attributes.get("name");
+
+        return ResponseEntity.ok("Hola " + nombre + " (" + email + ")");
     }
 
 

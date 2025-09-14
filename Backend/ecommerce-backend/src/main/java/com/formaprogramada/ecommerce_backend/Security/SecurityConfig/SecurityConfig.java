@@ -44,7 +44,8 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // ENDPOINTS PÚBLICOS
+                        .requestMatchers("/api/auth/oauth2/success").permitAll()
+                        .requestMatchers("/login/**", "/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/auth/register", "/api/auth/validate", "/api/auth/login",
                                 "/api/auth/refresh", "/api/usuario/confirmar-email",
                                 "/api/auth/reset-password-request",
@@ -87,10 +88,14 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                .authenticationProvider(daoAuthenticationProvider) // Login clásico
-                .authenticationProvider(jwtProvider)              // JWT
+                .authenticationProvider(daoAuthenticationProvider) // Login con BD
+                .authenticationProvider(jwtProvider)               // Login con JWT
                 .cors(Customizer.withDefaults())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login") // Podés customizar tu página de login
+                        .defaultSuccessUrl("/api/auth/oauth2/success", true) // redirigir después de login
+                )
                 .build();
     }
 
