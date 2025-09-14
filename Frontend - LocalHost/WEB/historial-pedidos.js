@@ -187,10 +187,8 @@ function createProductHTML(product) {
             <span>${product.colorNombre}</span>
         </div>` : '';
 
-    // Usamos precio * cantidad si no existe precioTotal
     const precioFinal = product.precioTotal ?? (product.precio * product.cantidad);
 
-    // Imagen: si existe product.imagen usamos <img>, si no usamos SVG placeholder
     const imageHTML = product.imagen
         ? `<img src="${product.imagen}" alt="${product.nombre ?? 'Producto'}" />`
         : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -198,6 +196,16 @@ function createProductHTML(product) {
                 <circle cx="9" cy="9" r="2"/>
                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
            </svg>`;
+
+    // Botón de descarga para productos digitales
+    const downloadButton = product.esDigital && product.archivoBase64
+        ? `<a href="data:application/zip;base64,${product.archivoBase64}" 
+            download="${product.nombre || 'archivo'}.zip" 
+            class="download-btn">
+            Descargar ZIP
+        </a>`
+        : '';
+
 
     return `
         <div class="product-item">
@@ -210,6 +218,7 @@ function createProductHTML(product) {
                     ${colorHTML}
                     <div class="product-quantity">Cantidad: ${product.cantidad}</div>
                 </div>
+                ${downloadButton}
             </div>
             <div class="product-price">$${precioFinal.toLocaleString('es-ES')}</div>
         </div>
@@ -285,7 +294,51 @@ async function handleRetryPayment(orderId) {
         alert("Ocurrió un error al intentar reintentar el pago.");
     }
 }
+ const categoriesDropdown = document.querySelector("#categories-dropdown .dropdown-content");
+  const shopTrigger = document.getElementById("shop-trigger");
+  // --- Carga de categorías ---
+  async function loadCategories() {
+    const categories = await API.getCategories();
+    renderCategories(categories);
+  }
 
+  function renderCategories(categorias) {
+    if (!Array.isArray(categorias)) return;
+    categoriesDropdown.innerHTML = "";
+
+    categorias.forEach(cat => {
+      const link = document.createElement("a");
+      link.href = "#";
+      link.className = "dropdown-category";
+      link.textContent = cat.nombre;
+      link.dataset.categoryId = cat.id;
+
+      // 🔑 Redirección al hacer click
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.location.href = `/categoria.html?id=${cat.id}`;
+      });
+
+      categoriesDropdown.appendChild(link);
+    });
+  }
+
+  function initializeDropdown() {
+    if (!shopTrigger) return;
+    const categoriesDropdownMenu = document.getElementById("categories-dropdown");
+
+    shopTrigger.addEventListener("mouseenter", () => {
+      categoriesDropdownMenu.classList.add("show");
+    });
+
+    const navDropdown = shopTrigger.parentElement;
+    navDropdown.addEventListener("mouseleave", () => {
+      categoriesDropdownMenu.classList.remove("show");
+    });
+  }
+
+  loadCategories();
+  initializeDropdown();
 // Función para agregar event listeners
 function attachEventListeners() {
     // Event listeners para botones de reintentar pago

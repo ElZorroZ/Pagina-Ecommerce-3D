@@ -188,6 +188,7 @@ let productoSeleccionadoId = null;
 // --- Cargar productos y llenar tabla ---
 async function cargarProductos() {
   try {
+    mostrarCarga("Cargando productos..."); // Mostrar overlay
     const response = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productos`);
     if (!response.ok) throw new Error("Error al obtener los productos");
     const productos = await response.json();
@@ -254,6 +255,8 @@ async function cargarProductos() {
   } catch (error) {
     console.error("Error al cargar productos:", error);
     mostrarError("No se pudieron cargar los productos");
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
   }
 }
 
@@ -266,6 +269,7 @@ async function cargarProductos() {
 // Cambiar estado de destacado
 async function toggleDestacado(productoId) {
   try {
+    mostrarCarga("Destacando el producto..."); // Mostrar overlay
     const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productos/${productoId}/destacado`, {
       method: "POST" // o PUT según tu API
     });
@@ -280,12 +284,15 @@ async function toggleDestacado(productoId) {
   } catch (error) {
     console.error(error);
     mostrarError("Error al actualizar destacado: " + error.message);
-  }
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
 
 // Seleccionar producto y cargar en formulario + preview
 async function selectProducto(productoId) {
   try {
+    mostrarCarga("Seleccionando producto..."); // Mostrar overlay
     const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productos/${productoId}`);
     if (!res.ok) throw new Error("No se pudo cargar el producto");
 
@@ -337,7 +344,9 @@ async function selectProducto(productoId) {
   } catch (error) {
     console.error(error);
     mostrarError("Error al cargar el producto: " + error.message);
-  }
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
 
    
@@ -480,6 +489,7 @@ async function actualizarProducto() {
   }
 
   try {
+    mostrarCarga("Actualizando producto..."); // Mostrar overlay
     console.log("Enviando DTO:", productoCompletoDTO);
 
     const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productos/${id}`, {
@@ -510,7 +520,9 @@ async function actualizarProducto() {
 
   } catch (error) {
     mostrarError("❌ Error: " + error.message);
-  }
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
 
 
@@ -632,6 +644,7 @@ async function eliminarProducto(id) {
     if (!confirmado) return;
 
     try {
+      mostrarCarga("Eliminando producto..."); // Mostrar overlay
       const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productos/${id}`, {
         method: "DELETE"
       });
@@ -674,9 +687,9 @@ async function eliminarProducto(id) {
 
     } catch (error) {
       mostrarError("Error: " + error.message);
+    }finally {
+        ocultarCarga(); // Ocultar overlay siempre
     }
   });
 }
-
-
 });

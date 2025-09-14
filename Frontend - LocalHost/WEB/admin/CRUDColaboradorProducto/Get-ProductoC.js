@@ -174,12 +174,12 @@ document.addEventListener("DOMContentLoaded", () => {
     e.target.value = ""; // para poder subir más archivos luego
   });
 // --- Cargar productos y llenar tabla ---
-// --- Cargar productos y llenar tabla ---
 let selectedProductoId = null; // Guardamos el producto seleccionado
 
 
 async function cargarProductos() {
   try {
+    mostrarCarga("Cargando productos..."); // Mostrar overlay
     const usuarioId = parseInt(authManager.getUserId(), 10);
     if (!usuarioId) throw new Error("Usuario no logueado");
 
@@ -236,7 +236,9 @@ async function cargarProductos() {
   } catch (error) {
     console.error("Error al cargar productos frontend:", error);
     mostrarError("No se pudieron cargar los productos: " + (error.message || "Error desconocido"));
-  }
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
 
 // Exponer globalmente
@@ -246,6 +248,7 @@ cargarProductos();
 // --- Seleccionar producto y cargar en formulario + preview ---
 async function selectProducto(productoId) {
   try {
+    mostrarCarga("Seleccionando producto..."); // Mostrar overlay
     // Usar fetchWithAuth para manejar tokens automáticamente
     const data = await fetchWithAuth(`${API_BASE_URL}/api/productosAprobacion/VerProductoCompleto/${productoId}`)
       .then(res => {
@@ -284,7 +287,9 @@ async function selectProducto(productoId) {
   } catch (error) {
     console.error("Error al cargar producto:", error);
     mostrarError("No se pudo cargar el producto: " + (error.message || "Error desconocido"));
-  }
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
 
    
@@ -466,6 +471,7 @@ async function actualizarProducto() {
   }
 
   try {
+    mostrarCarga("Actualizando producto..."); // Mostrar overlay
     // Usando authManager para manejar tokens
     const res = await authManager.fetchWithAuth(
       `${API_BASE_URL}/api/productosAprobacion/ActualizarProductoAprobar/${id}`,
@@ -493,7 +499,9 @@ async function actualizarProducto() {
   } catch (error) {
     mostrarError("Error al actualizar producto: " + error.message);
     console.error(error);
-  }
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
 
 
@@ -639,6 +647,7 @@ async function eliminarProducto(id) {
   if (!confirmacion) return;
 
   try {
+    mostrarCarga("Eliminando producto..."); // Mostrar overlay
     const res = await authManager.fetchWithAuth(
       `${API_BASE_URL}/api/productosAprobacion/BorrarProducto?id=${id}`,
       { method: "DELETE" }
@@ -658,9 +667,8 @@ async function eliminarProducto(id) {
     cargarProductos(); // refrescar tabla
   } catch (error) {
     mostrarError("Error: " + error.message);
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
   }
 }
-
-
-
 });

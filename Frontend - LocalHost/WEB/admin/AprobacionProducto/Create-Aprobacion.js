@@ -187,6 +187,7 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
   const productoId = document.getElementById("producto-id").value;
 
   try {
+  mostrarCarga("Aprobando producto..."); // Mostrar overlay
   const backendBase = `${API_BASE_URL}/api/productosAprobacion/AprobarProducto`;
 
   const url = new URL(backendBase);
@@ -216,7 +217,9 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
 } catch (error) {
   console.error("Error al aprobar producto:", error);
   mostrarError("Error: " + error.message);
-}
+} finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 
 
 });

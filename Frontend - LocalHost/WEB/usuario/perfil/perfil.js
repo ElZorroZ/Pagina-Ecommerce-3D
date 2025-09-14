@@ -1,171 +1,83 @@
 const categoriesDropdown = document.getElementById('categories-dropdown');
-const API_BASE_URL = "http://localhost:8080";
 
-// Load categories from API
+// --- Cargar categorías ---
 async function loadCategories() {
+  try {
     const categories = await API.getCategories();
     renderCategories(categories);
+  } catch (err) {
+    console.error("Error al cargar categorías:", err);
+  }
 }
 
-// Render categories in dropdown
 function renderCategories(categories) {
-    if (!Array.isArray(categories)) {
-        console.error('Categorías inválidas:', categories);
-        return;
-    }
+  if (!Array.isArray(categories)) {
+    console.error('Categorías inválidas:', categories);
+    return;
+  }
 
-    categoriesDropdown.innerHTML = '';
-    
-    categories.forEach(category => {
-        if (category.id === 1) return; // 👈 Saltar la categoría con id 1
-        const categoryLink = document.createElement('a');
-        categoryLink.href = '#';
-        categoryLink.className = 'dropdown-category';
-        categoryLink.textContent = category.nombre; // "nombre" según tu DTO
-        categoryLink.dataset.categoryId = category.id;
-        
-        categoriesDropdown.appendChild(categoryLink);
-    });
+  categoriesDropdown.innerHTML = '';
+  categories.forEach(category => {
+    if (category.id === 1) return; // Saltar la categoría con id 1
+    const categoryLink = document.createElement('a');
+    categoryLink.href = '#';
+    categoryLink.className = 'dropdown-category';
+    categoryLink.textContent = category.nombre;
+    categoryLink.dataset.categoryId = category.id;
+    categoriesDropdown.appendChild(categoryLink);
+  });
 }
-// Handle all click events
+
 function handleClicks(e) {
-    // Handle category clicks in dropdown
-    if (e.target.classList.contains('dropdown-category')) {
-        e.preventDefault();
-        const categoryId = e.target.dataset.categoryId;
-        const categoryName = e.target.textContent.toLowerCase().replace(/ /g, '-');
-        if (categoryId) {
-            window.location.href = `/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
-        }
+  if (e.target.classList.contains('dropdown-category')) {
+    e.preventDefault();
+    const categoryId = e.target.dataset.categoryId;
+    const categoryName = e.target.textContent.toLowerCase().replace(/ /g, '-');
+    if (categoryId) {
+      window.location.href = `/categoria.html?categoria=${encodeURIComponent(categoryName)}`;
     }
-
+  }
 }
 
-
-// Initialize shop dropdown functionality
 function initializeDropdown() {
-    const shopTrigger = document.getElementById('shop-trigger');
-    const categoriesDropdownMenu = document.getElementById('categories-dropdown');
+  const shopTrigger = document.getElementById('shop-trigger');
+  const categoriesDropdownMenu = document.getElementById('categories-dropdown');
 
-    if (shopTrigger && categoriesDropdownMenu) {
-        // Show dropdown on hover
-        shopTrigger.addEventListener('mouseenter', () => {
-            categoriesDropdownMenu.classList.add('show');
-        });
-        
-        // Hide dropdown when leaving the entire dropdown area
-        const navDropdown = shopTrigger.parentElement;
-        navDropdown.addEventListener('mouseleave', () => {
-            categoriesDropdownMenu.classList.remove('show');
-        });
-    }
-}
-
-// --- Manejo de tokens ---
-function obtenerAccessToken() {
-  return localStorage.getItem('accessToken');
-}
-
-function obtenerRefreshToken() {
-  return localStorage.getItem('refreshToken');
-}
-
-function guardarTokens(accessToken, refreshToken) {
-  localStorage.setItem('accessToken', accessToken);
-  localStorage.setItem('refreshToken', refreshToken);
-}
-
-function eliminarTokens() {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-}
-
-async function refreshAccessToken() {
-  const refreshToken = obtenerRefreshToken();
-  if (!refreshToken) return null;
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/auth/refresh-token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken })
+  if (shopTrigger && categoriesDropdownMenu) {
+    shopTrigger.addEventListener('mouseenter', () => {
+      categoriesDropdownMenu.classList.add('show');
     });
 
-    if (!res.ok) {
-      eliminarTokens();
-      return null;
-    }
-
-    const data = await res.json();
-    // Suponemos backend responde con { accessToken, refreshToken }
-    guardarTokens(data.accessToken, data.refreshToken);
-    return data.accessToken;
-
-  } catch (e) {
-    eliminarTokens();
-    return null;
+    const navDropdown = shopTrigger.parentElement;
+    navDropdown.addEventListener('mouseleave', () => {
+      categoriesDropdownMenu.classList.remove('show');
+    });
   }
 }
+// --- Función helper mínima para 403 ---
+async function fetchCon403(url, opciones = {}) {
+  const res = await authManager.fetchWithAuth(url, opciones);
 
-function redirigirALogin() {
-  eliminarTokens();
-  window.location.href = '/usuario/login/login.html'; // Cambiar según ruta real
+  if (res.status === 403) {
+    alert("No autorizado. Redirigiendo al login...");
+    window.location.href = '/usuario/login/login.html';
+    throw new Error("No autorizado");
+  }
+
+  return res;
 }
-
-// --- Función fetch con refresh automático ---
-async function fetchConRefresh(url, options = {}) {
-  options.headers = options.headers || {};
-  let token = obtenerAccessToken();
-
-  if (token) {
-    options.headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  let response = await fetch(url, options);
-
-  if (response.status === 401) {
-    // Intentar refrescar token
-    const nuevoToken = await refreshAccessToken();
-
-    if (nuevoToken) {
-      options.headers["Authorization"] = `Bearer ${nuevoToken}`;
-      response = await fetch(url, options);
-    } else {
-      redirigirALogin();
-      throw new Error("No autorizado");
-    }
-  }
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || "Error en la petición");
-  }
-
-  return response;
-}
-
-// --- Función para parsear JWT ---
-function parseJwt(token) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
-  }
-}
-
 // --- Modal cambio de contraseña ---
 const btnEditarPassword = document.getElementById('btnEditarPassword');
 const modalPassword = document.getElementById('modalCambiarPassword');
 const cerrarModalPassword = document.getElementById('cerrarModalPassword');
 const formCambiarPassword = document.getElementById('formCambiarPassword');
+
+// --- Modal cambio de email ---
+const btnCambiarEmail = document.getElementById('btnCambiarEmail');
+const modalEmail = document.getElementById('modalCambiarEmail');
+const cerrarModalEmail = document.getElementById('cerrarModalEmail');
+const btnEnviarCambioEmail = document.getElementById('btnEnviarCambioEmail');
+const inputNuevoEmail = document.getElementById('nuevoEmail');
 
 btnEditarPassword.addEventListener('click', () => {
   modalPassword.classList.add('active');
@@ -176,57 +88,46 @@ cerrarModalPassword.addEventListener('click', () => {
   formCambiarPassword.reset();
 });
 
-formCambiarPassword.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const passwordActual = formCambiarPassword.passwordActual.value.trim();
-  const nuevaPassword = formCambiarPassword.nuevaPassword.value.trim();
-  const repetirNuevaPassword = formCambiarPassword.repetirNuevaPassword.value.trim();
-
-  if (nuevaPassword !== repetirNuevaPassword) {
-    alert("Las nuevas contraseñas no coinciden.");
-    return;
-  }
-
-  if (nuevaPassword.length < 6) {
-    alert("La nueva contraseña debe tener al menos 6 caracteres.");
+btnEnviarCambioEmail.addEventListener('click', async () => {
+  const nuevoEmail = inputNuevoEmail.value.trim();
+  if (!nuevoEmail) {
+    mostrarError("Por favor, ingresa un nuevo email.");
     return;
   }
 
   try {
-    const token = obtenerAccessToken();
-    if (!token) throw new Error("No hay token de autenticación");
+    const user = authManager.getUserInfo();
+    if (!user?.gmail) throw new Error("No se pudo obtener el usuario autenticado");
 
-    const payload = parseJwt(token);
-    const gmail = payload?.sub;
-    if (!gmail) throw new Error("Token inválido o sin gmail");
+    mostrarCarga("Enviando confirmación de email...");
 
-    const body = {
-      passwordActual,
-      nuevaPassword,
-    };
+    const res = await authManager.fetchWithAuth(
+      `${API_BASE_URL}/api/usuario/${encodeURIComponent(user.gmail)}/email`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nuevoEmail }),
+      }
+    );
 
-    const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${encodeURIComponent(gmail)}/password-directo`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    ocultarCarga();
 
-    alert("Contraseña actualizada correctamente.");
-    modalPassword.classList.remove("active");
-    formCambiarPassword.reset();
-
+    if (res.ok) {
+      mostrarExito("Se envió un email para confirmar el cambio de email.");
+      modalEmail.classList.remove('active');
+      inputNuevoEmail.value = '';
+    } else {
+      const msg = await res.text();
+      mostrarError(`Error al cambiar email: ${msg}`);
+    }
   } catch (error) {
-    alert("Error: " + error.message);
+    ocultarCarga();
+    console.error("Error al cambiar email:", error);
+    mostrarError("Error: " + error.message);
   }
 });
 
-// --- Modal cambio de email ---
-const btnCambiarEmail = document.getElementById('btnCambiarEmail');
-const modalEmail = document.getElementById('modalCambiarEmail');
-const cerrarModalEmail = document.getElementById('cerrarModalEmail');
-const btnEnviarCambioEmail = document.getElementById('btnEnviarCambioEmail');
-const inputNuevoEmail = document.getElementById('nuevoEmail');
+
 
 btnCambiarEmail.addEventListener('click', () => {
   modalEmail.classList.add('active');
@@ -236,79 +137,139 @@ cerrarModalEmail.addEventListener('click', () => {
   modalEmail.classList.remove('active');
   inputNuevoEmail.value = '';
 });
+// --- Cambiar contraseña ---
+formCambiarPassword.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-btnEnviarCambioEmail.addEventListener('click', async () => {
-  const nuevoEmail = inputNuevoEmail.value.trim();
-  if (!nuevoEmail) {
-    alert("Por favor, ingresa un nuevo email.");
+  const passwordActual = document.getElementById('passwordActual').value.trim();
+  const nuevaPassword = document.getElementById('nuevaPassword').value.trim();
+  const repetirNuevaPassword = document.getElementById('repetirNuevaPassword').value.trim();
+
+  if (!passwordActual || !nuevaPassword || !repetirNuevaPassword) {
+    mostrarError("Todos los campos son obligatorios.");
     return;
   }
 
-  const token = obtenerAccessToken();
-  if (!token) {
-    alert("No estás autenticado");
-    redirigirALogin();
+  if (nuevaPassword.length < 6) {
+    mostrarError("La nueva contraseña debe tener al menos 6 caracteres.");
     return;
   }
 
-  const payload = parseJwt(token);
-  const gmail = payload?.sub;
-  if (!gmail) {
-    alert("Token inválido");
-    redirigirALogin();
+  if (nuevaPassword !== repetirNuevaPassword) {
+    mostrarError("Las nuevas contraseñas no coinciden.");
     return;
   }
 
   try {
-    const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${encodeURIComponent(gmail)}/email`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ nuevoEmail }),
-    });
+    const user = authManager.getUserInfo();
+    if (!user?.gmail) throw new Error("No se pudo obtener el usuario autenticado");
 
-    alert("Se envió un email para confirmar el cambio de email.");
-    modalEmail.classList.remove('active');
-    inputNuevoEmail.value = '';
+    mostrarCarga("Actualizando contraseña...");
+
+    const res = await authManager.fetchWithAuth(
+      `${API_BASE_URL}/api/usuario/${encodeURIComponent(user.gmail)}/password-directo`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          passwordActual,
+          nuevaPassword
+        }),
+      }
+    );
+
+    ocultarCarga();
+
+    if (res.ok) {
+      mostrarExito("Contraseña actualizada correctamente.");
+      modalPassword.classList.remove('active');
+      formCambiarPassword.reset();
+    } else {
+      const msg = await res.text();
+      mostrarError(`Error al cambiar contraseña: ${msg}`);
+    }
 
   } catch (error) {
-    console.error("Error al cambiar email:", error);
-    alert("Error: " + error.message);
+    ocultarCarga();
+    console.error("Error al cambiar contraseña:", error);
+    mostrarError("Error: " + error.message);
   }
 });
 
-// --- Carga y actualización del perfil ---
+btnEnviarCambioEmail.addEventListener('click', async () => {
+  const nuevoEmail = inputNuevoEmail.value.trim();
+  if (!nuevoEmail) {
+    mostrarError("Por favor, ingresa un nuevo email.");
+    return;
+  }
+
+  try {
+    const user = authManager.getUserInfo();
+    if (!user?.gmail) throw new Error("No se pudo obtener el usuario autenticado");
+
+    mostrarCarga("Enviando confirmación de email...");
+
+    const res = await authManager.fetchWithAuth(
+      `${API_BASE_URL}/api/usuario/${encodeURIComponent(user.gmail)}/email`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nuevoEmail }),
+      }
+    );
+
+    ocultarCarga();
+
+    if (res.ok) {
+      mostrarExito("Se envió un email para confirmar el cambio de email.");
+      modalEmail.classList.remove('active');
+      inputNuevoEmail.value = '';
+    } else {
+      const msg = await res.text();
+      mostrarError(`Error al cambiar email: ${msg}`);
+    }
+  } catch (error) {
+    ocultarCarga();
+    console.error("Error al cambiar email:", error);
+    mostrarError("Error: " + error.message);
+  }
+});
+
+
+// --- Perfil ---
 document.addEventListener("DOMContentLoaded", async () => {
   initializeDropdown();
   loadCategories();
   document.addEventListener('click', handleClicks);
 
-  
-  const token = obtenerAccessToken();
-
-  if (!token) {
+  if (!authManager.isAuthenticated()) {
     alert("No estás autenticado");
-    redirigirALogin();
+    authManager.redirigirALogin();
     return;
   }
 
-  const payload = parseJwt(token);
-  const gmail = payload?.sub;
-
-  if (!gmail) {
+  const user = authManager.getUserInfo();
+  if (!user?.gmail) {
     alert("Token inválido");
-    redirigirALogin();
+    authManager.redirigirALogin();
     return;
   }
+
+  const telInput = document.getElementById("telefono");
+  telInput.addEventListener("input", () => {
+    telInput.value = telInput.value.replace(/[^0-9]/g, "");
+  });
 
   const form = document.getElementById("perfil-form");
 
-  // Cargar datos del usuario
   try {
-    const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${gmail}`);
-    const usuario = await res.json();
+    const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/usuario/${user.gmail}`);
 
+      if (!res.ok) {
+          throw new Error(`Error ${res.status}: ${res.statusText}`);
+      }
+
+      const usuario = await res.json();
     form.nombre.value = usuario.nombre ?? "";
     form.apellido.value = usuario.apellido ?? "";
     form.direccion.value = usuario.direccion ?? "";
@@ -323,7 +284,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("Error al cargar el perfil: " + err.message);
   }
 
-  // Manejar actualización del perfil
   form.addEventListener("submit", async e => {
     e.preventDefault();
 
@@ -337,17 +297,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     try {
-      const res = await fetchConRefresh(`${API_BASE_URL}/api/usuario/${gmail}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datos)
-      });
+    mostrarCarga("Actualizando perfil...");
 
-      await res.json();
-      alert("Perfil actualizado correctamente");
-    } catch (err) {
-      console.error(err);
-      alert("Error al actualizar perfil: " + err.message);
+    const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/usuario/${user.gmail}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos),
+    });
+
+    ocultarCarga();
+
+    if (res.ok) {
+      mostrarExito("Perfil actualizado correctamente");
+    } else {
+      const msg = await res.text();
+      mostrarError(`Error al actualizar perfil: ${msg}`);
     }
-  });
+  } catch (err) {
+    ocultarCarga();
+    console.error(err);
+    mostrarError("Error al actualizar perfil: " + err.message);
+  }
+});
 });

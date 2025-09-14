@@ -170,121 +170,125 @@ window.actualizarPreview = () => {
 
     // --- Submit del form ---
 if (form) {
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault(); // evita recargar la página
+    form.addEventListener("submit", async (e) => {
+    mostrarCarga("Guardando producto..."); // Mostrar overlay
+      e.preventDefault(); // evita recargar la página
 
-    // --- Recolectar campos ---
-    const nombre = document.getElementById("nombre").value.trim();
-    const descripcion = document.getElementById("descripcion").value.trim();
-    const categoriaId = parseInt(document.getElementById("categoria").value);
-    const precio = parseFloat(document.getElementById("precio").value);
-    const precioDigital = parseFloat(document.getElementById("precioDigital").value);
-    const codigoInicial = document.getElementById("codigo-inicial").value.trim();
-    const version = document.getElementById("version").value.trim();
-    const seguimiento = document.getElementById("seguimiento").value.trim();
-    const dimensionAlto = parseFloat(document.getElementById("dimension-alto").value);
-    const dimensionAncho = parseFloat(document.getElementById("dimension-ancho").value);
-    const dimensionProfundidad = parseFloat(document.getElementById("dimension-profundidad").value);
-    const material = document.getElementById("material").value.trim();
-    const peso = parseFloat(document.getElementById("peso").value);
-    const tecnica = document.getElementById("tecnica").value.trim();
+      // --- Recolectar campos ---
+      const nombre = document.getElementById("nombre").value.trim();
+      const descripcion = document.getElementById("descripcion").value.trim();
+      const categoriaId = parseInt(document.getElementById("categoria").value);
+      const precio = parseFloat(document.getElementById("precio").value);
+      const precioDigital = parseFloat(document.getElementById("precioDigital").value);
+      const codigoInicial = document.getElementById("codigo-inicial").value.trim();
+      const version = document.getElementById("version").value.trim();
+      const seguimiento = document.getElementById("seguimiento").value.trim();
+      const dimensionAlto = parseFloat(document.getElementById("dimension-alto").value);
+      const dimensionAncho = parseFloat(document.getElementById("dimension-ancho").value);
+      const dimensionProfundidad = parseFloat(document.getElementById("dimension-profundidad").value);
+      const material = document.getElementById("material").value.trim();
+      const peso = parseFloat(document.getElementById("peso").value);
+      const tecnica = document.getElementById("tecnica").value.trim();
 
-    if (!nombre || !categoriaId || isNaN(precio)) {
-      mostrarError("Por favor completa todos los campos obligatorios.");
-      return;
-    }
-    // 🔹 Validar que no haya imágenes de otros productos
-    const archivosInvalidos = window.productoState.archivosSeleccionados.filter(f => !(f instanceof File));
-    if (archivosInvalidos.length > 0) {
-      mostrarError("No se puede guardar el producto con imágenes de otro producto. Elimina las imágenes antiguas.");
-      return;
-    }
-    try {
-      const productoPayload = {
-        nombre, descripcion, categoriaId, precio, precioDigital,
-        colores: window.productoState.coloresSeleccionados,
-        codigoInicial, version, seguimiento,
-        dimensionAlto, dimensionAncho, dimensionProfundidad,
-        material, peso, tecnica
-      };
-
-      // 🔹 MOSTRAR DTO ANTES DE ENVIAR
-      console.log("DTO que se enviará:", productoPayload);
-
-      // --- Crear producto (POST) ---
-      const formData = new FormData();
-      formData.append("producto", new Blob([JSON.stringify(productoPayload)], { type: "application/json" }));
-
-      // Agregar archivo comprimido
-      if (window.productoState.archivoComprimido) formData.append("archivo", window.productoState.archivoComprimido);
-
-      const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productos`, {
-        method: "POST",
-        body: formData
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText);
+      if (!nombre || !categoriaId || isNaN(precio)) {
+        mostrarError("Por favor completa todos los campos obligatorios.");
+        return;
       }
+      // 🔹 Validar que no haya imágenes de otros productos
+      const archivosInvalidos = window.productoState.archivosSeleccionados.filter(f => !(f instanceof File));
+      if (archivosInvalidos.length > 0) {
+        mostrarError("No se puede guardar el producto con imágenes de otro producto. Elimina las imágenes antiguas.");
+        return;
+      }
+      try {
+        const productoPayload = {
+          nombre, descripcion, categoriaId, precio, precioDigital,
+          colores: window.productoState.coloresSeleccionados,
+          codigoInicial, version, seguimiento,
+          dimensionAlto, dimensionAncho, dimensionProfundidad,
+          material, peso, tecnica
+        };
 
-      const productoCreado = await res.json();
-      const productoId = productoCreado.id;
+        // 🔹 MOSTRAR DTO ANTES DE ENVIAR
+        console.log("DTO que se enviará:", productoPayload);
 
-      // --- Subir imágenes al endpoint de archivos ---
-      for (let i = 0; i < window.productoState.archivosSeleccionados.length; i++) {
-        const file = window.productoState.archivosSeleccionados[i];
-        const imgFormData = new FormData();
-        imgFormData.append("file", file);
-        imgFormData.append("orden", i + 1);
+        // --- Crear producto (POST) ---
+        const formData = new FormData();
+        formData.append("producto", new Blob([JSON.stringify(productoPayload)], { type: "application/json" }));
 
-        try {
-          const resImg = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productos/${productoId}/archivos`, {
-            method: "POST",
-            body: imgFormData
-          });
+        // Agregar archivo comprimido
+        if (window.productoState.archivoComprimido) formData.append("archivo", window.productoState.archivoComprimido);
 
-          if (!resImg.ok) {
-            const errorText = await resImg.text();
-            console.error("Error subiendo imagen:", file.name, errorText);
+        const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productos`, {
+          method: "POST",
+          body: formData
+        });
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(errorText);
+        }
+
+        const productoCreado = await res.json();
+        const productoId = productoCreado.id;
+
+        // --- Subir imágenes al endpoint de archivos ---
+        for (let i = 0; i < window.productoState.archivosSeleccionados.length; i++) {
+          const file = window.productoState.archivosSeleccionados[i];
+          const imgFormData = new FormData();
+          imgFormData.append("file", file);
+          imgFormData.append("orden", i + 1);
+
+          try {
+            const resImg = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productos/${productoId}/archivos`, {
+              method: "POST",
+              body: imgFormData
+            });
+
+            if (!resImg.ok) {
+              const errorText = await resImg.text();
+              console.error("Error subiendo imagen:", file.name, errorText);
+            }
+          } catch (err) {
+            console.error("Error subiendo imagen:", file.name, err);
           }
-        } catch (err) {
-          console.error("Error subiendo imagen:", file.name, err);
+        }
+
+        mostrarExito("Producto guardado con éxito!");
+
+        // --- Limpiar estado y previews ---
+        form.reset();
+        window.productoState.coloresSeleccionados = [];
+        window.productoState.archivosSeleccionados = [];
+        window.productoState.archivoComprimido = null;
+        window.colorManager.actualizarListaColores();
+        window.cargarProductos();
+        window.actualizarPreview();
+        window.actualizarPreviewComprimido();
+
+      } catch (err) {
+    console.error(err);
+
+    // Intentar extraer solo el mensaje del servidor
+    let mensaje = "Error al guardar el producto";
+      if (err.response) {
+        // Si tu fetch devuelve un objeto con .response
+        if (err.response.message) mensaje = err.response.message;
+      } else {
+        // Intentar extraer texto plano que venga en err.message
+        const match = /Error al crear el producto:\s*(.*)/i.exec(err.message);
+        if (match && match[1]) {
+          mensaje = match[1]; // solo el mensaje útil
+        } else if (err.message) {
+          mensaje = err.message; // fallback
         }
       }
 
-      mostrarExito("Producto guardado con éxito!");
-
-      // --- Limpiar estado y previews ---
-      form.reset();
-      window.productoState.coloresSeleccionados = [];
-      window.productoState.archivosSeleccionados = [];
-      window.productoState.archivoComprimido = null;
-      window.colorManager.actualizarListaColores();
-      window.cargarProductos();
-      window.actualizarPreview();
-      window.actualizarPreviewComprimido();
-
-    } catch (err) {
-  console.error(err);
-
-  // Intentar extraer solo el mensaje del servidor
-  let mensaje = "Error al guardar el producto";
-  if (err.response) {
-    // Si tu fetch devuelve un objeto con .response
-    if (err.response.message) mensaje = err.response.message;
-  } else {
-    // Intentar extraer texto plano que venga en err.message
-    const match = /Error al crear el producto:\s*(.*)/i.exec(err.message);
-    if (match && match[1]) {
-      mensaje = match[1]; // solo el mensaje útil
-    } else if (err.message) {
-      mensaje = err.message; // fallback
+      mostrarError(mensaje); // Mostrarlo limpio al usuario
     }
-  }
-
-  mostrarError(mensaje); // Mostrarlo limpio al usuario
-}
+  finally {
+          ocultarCarga(); // Ocultar overlay siempre
+      }
 
   });
 }

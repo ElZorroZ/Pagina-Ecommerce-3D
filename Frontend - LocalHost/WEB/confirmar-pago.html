@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial de Pedidos</title>
+    <title>Pago Confirmado - Forma programada</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="historial-pedidos.css">
+    <link rel="stylesheet" href="confirmar-pago.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Header -->
-     <header class="header">
+             <!-- Header -->
+    <header class="header">
         
         <!-- Main navigation -->
         <div class="nav-container">
@@ -54,7 +54,7 @@
                         <!-- Dropdown para cuenta (solo visible si hay JWT) -->
                         <div class="dropdown-menu" id="account-menu" style="display: none;">
                             <div class="dropdown-content">
-                            <a href="perfil.html">Acceder Cuenta</a>
+                            <a href="/usuario/perfil/perfil.html">Acceder Cuenta</a>
                             <a href="/historial-pedidos.html">Ver pedidos</a>
                             <a href="#" id="logout-btn">Salir de la cuenta</a>
                             </div>
@@ -96,40 +96,41 @@
     </header>
 
     <!-- Main Content -->
-    <main class="orders-main">
+    <main class="status-main">
         <div class="container">
-            <div class="orders-header">
-                <h1 class="orders-title">Historial de Pedidos</h1>
-                <p class="orders-subtitle">Revisa todos tus pedidos realizados</p>
-            </div>
+            <div class="status-content">
+                <div class="status-icon success-icon">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                </div>
+                
+                <div class="status-header">
+                    <h1 class="status-title">¡Pago Confirmado!</h1>
+                    <p class="status-subtitle">Gracias por tu compra</p>
+                </div>
 
-            <div class="orders-content">
-                <!-- Orders will be loaded here -->
-                <div id="orders-container">
-                    <!-- Loading state -->
-                    <div class="loading-state" id="loading-state">
-                        <div class="loading-spinner"></div>
-                        <p>Cargando pedidos...</p>
-                    </div>
-
-                    <!-- Empty orders state -->
-                    <div class="empty-orders" id="empty-orders" style="display: none;">
-                        <div class="empty-orders-icon">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5H2M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6.28"/>
+                <div class="status-message">
+                    <p>Tu pago ha sido procesado exitosamente. Hemos enviado un correo de confirmación con todos los detalles de tu pedido.</p>
+                    
+                    <div class="email-notice">
+                        <div class="email-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
                             </svg>
                         </div>
-                        <h3>No tienes pedidos aún</h3>
-                        <p>Cuando realices tu primera compra, aparecerá aquí</p>
-                        <button class="start-shopping-btn" onclick="window.location.href='index.html'">
-                            Comenzar a Comprar
-                        </button>
+                        <div>
+                            <h3>Revisa tu correo electrónico</h3>
+                            <p>Por favor, revisa tu bandeja de entrada o la carpeta de spam para ver la confirmación del pedido.</p>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Orders list -->
-                    <div class="orders-list" id="orders-list" style="display: none;">
-                        <!-- Orders will be dynamically inserted here -->
-                    </div>
+                <div class="status-actions">
+                    <a href="index.html" class="btn-primary">Continuar Comprando</a>
+                    <a href="historial-pedidos.html" class="btn-secondary">Ver mis Pedidos</a>
                 </div>
             </div>
         </div>
@@ -139,6 +140,6 @@
     <script src="api.js"></script>
     <script src="admin-access.js"></script>
     <script src="carrito-visual.js"></script>
-    <script src="historial-pedidos.js"></script>
+    <script src="mensajes.js"></script>
 </body>
 </html>

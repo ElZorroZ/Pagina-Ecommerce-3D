@@ -1553,6 +1553,59 @@ img {
 .write-review-btn:hover {
     background: #ea580c;
 }
+.review-response {
+  position: relative;
+  margin-left: 20px;
+  margin-top: 15px;
+  padding-left: 20px;
+  padding: 12px 16px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+.review-connector {
+  position: absolute;
+  left: -10px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background-color: #cbd5e1;
+  border-radius: 1px;
+}
+
+.review-horizontal-line {
+  position: absolute;
+  left: -10px;
+  top: 20px;
+  width: 15px;
+  height: 2px;
+  background-color: #cbd5e1;
+  border-radius: 1px;
+}
+
+.reply-btn {
+  display: inline-block;
+  margin-top: 10px;
+  position: relative;
+  z-index: 9999;
+  background-color: #22c55e;
+  color: #fff;
+  padding: 0.75rem 1.5rem; /* importante para que sea visible */
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.reply-btn:hover {
+  background-color: #16a34a;
+}
+
+
+.delete-btn {
+  background-color: #ef4444;
+  color: #fff;
+  margin-left: 8px;
+}
 
 .reviews-summary {
     display: grid;

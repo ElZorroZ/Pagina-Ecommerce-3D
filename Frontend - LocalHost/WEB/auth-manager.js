@@ -23,6 +23,23 @@ class AuthManager {
   isAuthenticated() {
     return !!(this.getAccessToken() && this.getRefreshToken() && this.getUserId());
   }
+  
+  getUserInfo() {
+    const token = this.getAccessToken(); // ✅ obtener token
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return {
+        gmail: payload.sub, // depende de cómo armes el JWT
+        roles: payload.roles || []
+      };
+    } catch (e) {
+      console.error("Error al decodificar token:", e);
+      return null;
+    }
+  }
+
 
   saveAuthData(accessToken, refreshToken, usuarioId) {
     localStorage.setItem("accessToken", accessToken);
@@ -173,7 +190,7 @@ class AuthManager {
   redirectToLogin() {
     if (window.location.pathname !== '/login.html') {
       console.log("🔄 Redirigiendo...");
-      window.location.href = '/login.html';
+      window.location.href = '/usuario/login/login.html';
     }
   }
 

@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const categoriaPayload = { nombre };
 
       try {
+        mostrarCarga("Guardando categoria..."); // Mostrar overlay
         const res = await authManager.fetchWithAuth(backendBaseSinImagen, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -35,7 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (error) {
         mostrarError("Error: " + error.message);
         console.error(error);
-      }
+      }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
     });
 
   })();

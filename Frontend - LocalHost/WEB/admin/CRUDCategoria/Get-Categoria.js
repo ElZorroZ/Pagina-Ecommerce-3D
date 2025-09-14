@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
  let categoriaSeleccionadaId = null; // ID actualmente seleccionado
 async function cargarCategorias() {
   try {
+    mostrarCarga("Cargando categorias..."); // Mostrar overlay
     const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/categoria`);
     if (!res.ok) throw new Error("Error al obtener las categorías");
     const categorias = await res.json();
@@ -46,11 +47,14 @@ async function cargarCategorias() {
   } catch (error) {
     console.error("Error al cargar categorías:", error);
     mostrarError("No se pudieron cargar las categorías");
-  }
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
 
 async function selectCategoria(categoriaId) {
   try {
+    mostrarCarga("Seleccionando categoria..."); // Mostrar overlay
     const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/categoria/${categoriaId}`);
     if (!res.ok) throw new Error("No se pudo cargar la categoría");
     const data = await res.json();
@@ -67,6 +71,8 @@ async function selectCategoria(categoriaId) {
   } catch (error) {
     console.error("Error al cargar categoría:", error);
     mostrarError("Error al cargar la categoría");
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
   }
 }
 
@@ -111,6 +117,7 @@ async function actualizarCategoria() {
   formData.append("categoria", new Blob([JSON.stringify(payload)], { type: "application/json" }));
 
   try {
+    mostrarCarga("Actualizando categoria..."); // Mostrar overlay
     const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/categoria/${id}`, {
       method: "PUT",
       body: formData
@@ -126,7 +133,9 @@ async function actualizarCategoria() {
     cargarCategorias();
   } catch (error) {
     mostrarError("Error al actualizar categoría: " + error.message);
-  }
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
 
   if (btnEditar) {

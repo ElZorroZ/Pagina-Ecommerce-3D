@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const shopTrigger = document.getElementById("shop-trigger");
   async function cargarColaboradores() {
     try {
+      mostrarCarga("Cargando colaboradores..."); // Mostrar overlay
       const response = await authManager.fetchWithAuth(
         `${API_BASE_URL}/api/usuario/colaboradores`
       );
@@ -41,6 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error("Error al cargar colaboradores:", error.message);
       mostrarError("❌ No se pudieron cargar los colaboradores");
+    }finally {
+        ocultarCarga(); // Ocultar overlay siempre
     }
   }
 
@@ -54,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!confirmado) return;
 
         try {
+            mostrarCarga("Eliminando colaborador..."); // Mostrar overlay
             const res = await authManager.fetchWithAuth(
                 `${API_BASE_URL}/api/usuario/colaboradores`,
                 {
@@ -79,7 +83,9 @@ document.addEventListener("DOMContentLoaded", () => {
             cargarColaboradores(); // refresca la tabla
         } catch (error) {
             mostrarError("Error: " + error.message);
-        }
+        }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
     });
 }
 

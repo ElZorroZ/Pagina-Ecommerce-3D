@@ -1,13 +1,10 @@
+const cartBtn = document.querySelector('.cart-btn'); 
 const cartCount = document.querySelector('.cart-count');
-async function actualizarCantidadCarrito() {
-  const cartCount = document.querySelector('#cart-count'); // Ajusta el selector a tu HTML
 
-  // Verificar autenticación usando el authManager
+async function actualizarCantidadCarrito() {
   if (!authManager.isAuthenticated()) {
     console.warn('Usuario no autenticado');
-    if (cartCount) {
-      cartCount.textContent = '0';
-    }
+    if (cartCount) cartCount.textContent = '0';
     return;
   }
 
@@ -21,29 +18,35 @@ async function actualizarCantidadCarrito() {
     }
 
     const data = await response.json();
-    
-    // data ahora es un array de IDs, así que la cantidad es su longitud
-    const cantidad = data.length;
-    if (cartCount) {
-      cartCount.textContent = cantidad;
-    }
-    
-    console.log(`Carrito actualizado: ${cantidad} items`);
-    
+    console.log("Datos recibidos del carrito:", data);
+
+    // Sumar cantidades totales sin filtrar duplicados
+    let cantidadTotal = 0;
+    data.forEach(item => {
+      cantidadTotal += Number(item.cantidad) || 0;
+    });
+
+    if (cartCount) cartCount.textContent = cantidadTotal;
+
+    console.log(`Carrito actualizado: ${cantidadTotal} items (sumando todas las cantidades)`);
+
   } catch (error) {
     console.error('Error al cargar carrito:', error);
-    
-    // En caso de error, mostrar 0 en el contador
-    if (cartCount) {
-      cartCount.textContent = '0';
-    }
-    
-    // Si el error es de autenticación, el authManager ya manejará la redirección
-    if (error.message.includes('Usuario no autenticado') || error.message.includes('Sesión expirada')) {
-      console.warn('Sesión expirada, redirigiendo al login...');
-    }
+    if (cartCount) cartCount.textContent = '0';
   }
 }
+
+if (cartBtn) {
+  cartBtn.addEventListener('click', () => {
+    if (authManager.isAuthenticated()) {
+      window.location.href = '/carrito.html';
+    } else {
+      console.warn('Usuario no autenticado, redirigiendo al login...');
+      authManager.redirectToLogin();
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   actualizarCantidadCarrito();
 });

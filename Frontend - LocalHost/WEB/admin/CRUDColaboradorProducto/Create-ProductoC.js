@@ -148,6 +148,8 @@ if (form) {
     e.preventDefault();
 
     try {
+                mostrarCarga("Guardando producto..."); // Mostrar overlay
+
       // --- Recolectar campos ---
       const nombre = document.getElementById("nombre").value.trim();
       const descripcion = document.getElementById("descripcion").value.trim();
@@ -231,6 +233,8 @@ console.log("Producto creado:", productoCreado); // Debe mostrar id
     } catch (err) {
       mostrarError("Error al guardar el producto: " + (err.message || "Error desconocido"));
       console.error("Submit error:", err);
+    }finally {
+        ocultarCarga(); // Ocultar overlay siempre
     }
   });
 }

@@ -85,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Cargar productos ---
   async function cargarProductos() {
   try {
+    mostrarCarga("Cargando productos..."); // Mostrar overlay
     const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productosAprobacion/VerProductos`);
     if (!res.ok) throw new Error("Error al obtener los productos");
     const productos = await res.json();
@@ -132,7 +133,9 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch (error) {
     console.error("Error al cargar productos:", error.message);
     mostrarError("No se pudieron cargar los productos");
-  }
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
 
   window.cargarProductos = cargarProductos;
@@ -141,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Seleccionar producto ---
   async function selectProducto(productoId) {
     try {
+      mostrarCarga("Seleccionando producto..."); // Mostrar overlay
       const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productosAprobacion/VerProductoCompleto/${productoId}`);
       if (!res.ok) throw new Error("No se pudo cargar el producto");
       const data = await res.json();
@@ -166,6 +170,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error(error);
       mostrarError("Error al cargar producto");
+    }finally {
+        ocultarCarga(); // Ocultar overlay siempre
     }
   }
 
@@ -422,6 +428,7 @@ async function eliminarProducto(id) {
     if (!confirmado) return;
 
     try {
+      mostrarCarga("Eliminando producto..."); // Mostrar overlay
       const res = await authManager.fetchWithAuth(
         `${API_BASE_URL}/api/productosAprobacion/BorrarProducto?id=${id}`,
         { method: "DELETE" }
@@ -442,6 +449,8 @@ async function eliminarProducto(id) {
     } catch (error) {
       mostrarError("Error: " + error.message);
       console.error(error);
+    }finally {
+        ocultarCarga(); // Ocultar overlay siempre
     }
   });
 }

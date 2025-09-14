@@ -150,38 +150,44 @@ async renderOrderSummary() {
 
     try {
         this.cart = await window.API.obtenerCarrito();
-        // Mostrar cada item en consola
         console.log("Carrito completo:", this.cart);
-        this.cart.forEach((item, index) => {
-            console.log(`Item ${index}:`, item);
-        });
+
         if (this.cart.length === 0) {
             orderItemsContainer.innerHTML = '<p class="empty-cart">No hay productos en el carrito</p>';
             document.getElementById('subtotal').textContent = '$0';
             document.getElementById('shipping-cost').textContent = 'Gratis';
             document.getElementById('total').textContent = '$0';
+
+            // Guardar en sessionStorage
+            sessionStorage.setItem('checkoutSubtotal', 0);
+            sessionStorage.setItem('checkoutShipping', 0);
+            sessionStorage.setItem('checkoutTotal', 0);
             return;
         }
 
         // Agrupar productos por nombre
         const grouped = {};
         this.cart.forEach(item => {
-            const key = item.nombre; // agrupamos por nombre
+            const key = item.nombre;
+            const cantidad = Number(item.cantidad);
+            const precioUnitario = Number(item.precioUnitario ?? item.precio ?? 0);
+
             if (!grouped[key]) {
                 grouped[key] = {
                     ...item,
-                    cantidadTotal: item.cantidad,
-                    linkArchivo: item.linkArchivo // podemos tomar el primer linkArchivo
+                    cantidadTotal: cantidad,
+                    precioUnitario: precioUnitario,
+                    linkArchivo: item.linkArchivo
                 };
             } else {
-                grouped[key].cantidadTotal += item.cantidad;
+                grouped[key].cantidadTotal += cantidad;
             }
         });
 
         let subtotal = 0;
 
         Object.values(grouped).forEach(item => {
-            const itemTotal = item.precioTotal ?? item.precioUnitario * item.cantidadTotal;
+            const itemTotal = item.precioUnitario * item.cantidadTotal;
             subtotal += itemTotal;
 
             const orderItem = document.createElement('div');
@@ -206,12 +212,21 @@ async renderOrderSummary() {
         document.getElementById('shipping-cost').textContent = shippingCost > 0 ? `$${shippingCost.toLocaleString()}` : 'Gratis';
         document.getElementById('total').textContent = `$${total.toLocaleString()}`;
 
+        // Guardar en sessionStorage para que coincida con confirmar-pedido
+        sessionStorage.setItem('checkoutSubtotal', subtotal);
+        sessionStorage.setItem('checkoutShipping', shippingCost);
+        sessionStorage.setItem('checkoutTotal', total);
+
     } catch (error) {
         console.error('Error cargando el carrito:', error);
         orderItemsContainer.innerHTML = '<p class="empty-cart">No se pudo cargar el carrito</p>';
         document.getElementById('subtotal').textContent = '$0';
         document.getElementById('shipping-cost').textContent = 'Gratis';
         document.getElementById('total').textContent = '$0';
+
+        sessionStorage.setItem('checkoutSubtotal', 0);
+        sessionStorage.setItem('checkoutShipping', 0);
+        sessionStorage.setItem('checkoutTotal', 0);
     }
 }
 
@@ -481,54 +496,51 @@ async renderOrderSummary() {
         }
     }
 }
+  const categoriesDropdown = document.querySelector("#categories-dropdown .dropdown-content");
+  const shopTrigger = document.getElementById("shop-trigger");
+  // --- Carga de categorías ---
+  async function loadCategories() {
+    const categories = await API.getCategories();
+    renderCategories(categories);
+  }
 
-// Utility functions for categories and navigation (from existing pattern)
-async function loadCategories() {
-    try {
-        if (window.API && window.API.getCategories) {
-            const categories = await window.API.getCategories();
-            if (categories) {
-                renderCategories(categories);
-            }
-        }
-    } catch (error) {
-        console.error('Error loading categories:', error);
-    }
-}
+  function renderCategories(categorias) {
+    if (!Array.isArray(categorias)) return;
+    categoriesDropdown.innerHTML = "";
 
-function renderCategories(categories) {
-    const dropdown = document.querySelector('#categories-dropdown .dropdown-content');
-    if (!dropdown) return;
+    categorias.forEach(cat => {
+      const link = document.createElement("a");
+      link.href = "#";
+      link.className = "dropdown-category";
+      link.textContent = cat.nombre;
+      link.dataset.categoryId = cat.id;
 
-    dropdown.innerHTML = categories.map(category => 
-        `<a href="/category.html?id=${category.id}" class="dropdown-item">${category.nombre}</a>`
-    ).join('');
-}
-
-function handleClicks(e) {
-    if (e.target.matches('.dropdown-item')) {
+      // 🔑 Redirección al hacer click
+      link.addEventListener("click", (e) => {
         e.preventDefault();
-        const url = e.target.getAttribute('href');
-        if (url) {
-            window.location.href = url;
-        }
-    }
-}
+        window.location.href = `/categoria.html?id=${cat.id}`;
+      });
 
-function initializeDropdown() {
-    const shopTrigger = document.getElementById('shop-trigger');
-    const dropdown = document.getElementById('categories-dropdown');
-    
-    if (shopTrigger && dropdown) {
-        shopTrigger.addEventListener('mouseenter', () => {
-            dropdown.style.display = 'block';
-        });
-        
-        shopTrigger.parentElement.addEventListener('mouseleave', () => {
-            dropdown.style.display = 'none';
-        });
-    }
-}
+      categoriesDropdown.appendChild(link);
+    });
+  }
+
+  function initializeDropdown() {
+    if (!shopTrigger) return;
+    const categoriesDropdownMenu = document.getElementById("categories-dropdown");
+
+    shopTrigger.addEventListener("mouseenter", () => {
+      categoriesDropdownMenu.classList.add("show");
+    });
+
+    const navDropdown = shopTrigger.parentElement;
+    navDropdown.addEventListener("mouseleave", () => {
+      categoriesDropdownMenu.classList.remove("show");
+    });
+  }
+
+  loadCategories();
+  initializeDropdown();
 
 function initializeMobileMenu() {
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');

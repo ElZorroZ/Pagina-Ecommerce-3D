@@ -104,6 +104,68 @@ function mostrarConfirmacion(text, callback) {
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 }
+// Muestra un overlay de carga
+function mostrarCarga(texto = "Cargando...") {
+    let overlay = document.getElementById("loading-overlay");
+    if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = "loading-overlay";
+        Object.assign(overlay.style, {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 10000
+        });
+
+        const spinner = document.createElement("div");
+        spinner.className = "spinner";
+        Object.assign(spinner.style, {
+            border: "6px solid #f3f3f3",
+            borderTop: "6px solid #059669",
+            borderRadius: "50%",
+            width: "50px",
+            height: "50px",
+            animation: "spin 1s linear infinite"
+        });
+
+        const label = document.createElement("span");
+        label.textContent = texto;
+        Object.assign(label.style, {
+            color: "#fff",
+            marginLeft: "15px",
+            fontSize: "16px",
+            fontFamily: "Arial, sans-serif"
+        });
+
+        overlay.appendChild(spinner);
+        overlay.appendChild(label);
+        document.body.appendChild(overlay);
+
+        // Agregar animación CSS
+        const style = document.createElement("style");
+        style.innerHTML = `
+            @keyframes spin { 
+                0% { transform: rotate(0deg); } 
+                100% { transform: rotate(360deg); } 
+            }
+        `;
+        document.head.appendChild(style);
+    } else {
+        overlay.style.display = "flex";
+    }
+}
+
+// Oculta el overlay de carga
+function ocultarCarga() {
+    const overlay = document.getElementById("loading-overlay");
+    if (overlay) overlay.style.display = "none";
+}
 
 // Funciones específicas para éxito y error
 function mostrarExito(text) {

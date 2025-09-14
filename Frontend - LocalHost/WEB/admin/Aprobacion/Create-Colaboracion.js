@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
+        mostrarCarga("Agregando colaborador..."); // Mostrar overlay
         const colaboradorPayload = { gmail };
 
         const res = await authManager.fetchWithAuth(
@@ -47,6 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
         await cargarColaboradores(); // actualiza la lista
       } catch (error) {
         mostrarError("Error: " + error.message);
+      }finally {
+        ocultarCarga(); // Ocultar overlay siempre
       }
     });
   })();

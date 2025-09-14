@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="perfil_styles.css" />
 </head>
 <body>
-    <!-- Header -->
+             <!-- Header -->
     <header class="header">
         
         <!-- Main navigation -->
@@ -30,17 +30,12 @@
                     </div>
                     <!-- Panel de administración (dropdown) -->
                     <div class="nav-dropdown hidden" id="admin-dropdown">
-                        <a href="#" class="nav-link">Panel de administración</a>
+                        <span class="nav-link" style="cursor: default;">Panel de administración</span>
                         <div class="dropdown-menu">
-                            <div class="dropdown-content" id="admin-options">
-                                <a href="/admin/CRUDCategoria/CRUDcategoria.html">Administrar Categorias</a>
-                                <a href="/admin/CRUDProducto/CRUDproducto.html">Administrar Productos</a>
-                                <a href="/admin/Aprobacion/CRUDAprobacion.html">Administrar Colaboradores</a>
-                                <a href="/admin/PagoySeguimiento/pagoYseguimiento.html">Administrar Pedidos </a>
-
-                            </div>
+                            <div class="dropdown-content" id="admin-options"></div>
                         </div>
-                    </div>
+                        </div>
+
                 </nav>
 
                 <!-- Right side icons -->
@@ -57,7 +52,8 @@
                         <!-- Dropdown para cuenta (solo visible si hay JWT) -->
                         <div class="dropdown-menu" id="account-menu" style="display: none;">
                             <div class="dropdown-content">
-                            <a href="/usuario/perfil/perfil.html">Acceder Cuenta</a>
+                            <a href="perfil.html">Acceder Cuenta</a>
+                            <a href="/historial-pedidos.html">Ver pedidos</a>
                             <a href="#" id="logout-btn">Salir de la cuenta</a>
                             </div>
                         </div>
@@ -190,15 +186,26 @@
 
         <div class="form-group">
           <label for="telefono">Teléfono</label>
-          <input type="tel" id="telefono" name="telefono" placeholder="Número de teléfono" />
+          <input 
+            type="tel" 
+            id="telefono" 
+            name="telefono" 
+            placeholder="Número de teléfono"
+            inputmode="numeric"
+            required
+          />
         </div>
+
 
         <button type="submit" class="btn-submit">Guardar Cambios</button>
       </form>
     </section>
   </main>
-
-  <script src="../../api.js"></script>
+  <script src="/auth-manager.js"></script>
+  <script src="/admin-access.js"></script>
+  <script src="/mensajes.js"></script>
+  <script src="/api.js"></script>
+  <script src="/carrito-visual.js"></script>
   <script src="perfil.js"></script>
 </body>
 </html>

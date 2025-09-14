@@ -52,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const shopTrigger = document.getElementById("shop-trigger");
   async function cargarPedidos() {
   try {
+    mostrarCarga("Cargando pedidos..."); // Mostrar overlay
     const response = await authManager.fetchWithAuth(`${API_BASE_URL}/api/pedido/verPedidos`);
     if (!response.ok) throw new Error("Error al obtener los pedidos");
 
@@ -60,6 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch (error) {
     console.error("Error al cargar pedidos:", error.message);
     mostrarError("No se pudieron cargar los pedidos"); // usando mensajes.js
+  } finally {
+        ocultarCarga(); // Ocultar overlay siempre
   }
 }
 
@@ -106,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fila.querySelector(".guardar-estado")?.addEventListener("click", async () => {
           const nuevoEstado = fila.querySelector(".estado-select").value;
           try {
+            mostrarCarga("Cambiando estado..."); // Mostrar overlay
             const res = await authManager.fetchWithAuth(
               `${API_BASE_URL}/api/pedido/CambiarEstado?estado=${encodeURIComponent(nuevoEstado)}&id=${pedido.id}`,
               { method: "PUT" }
@@ -116,6 +120,8 @@ document.addEventListener("DOMContentLoaded", () => {
           } catch (err) {
             console.error(err);
             mostrarError("Error al actualizar el estado");
+          } finally {
+              ocultarCarga(); // Ocultar overlay siempre
           }
         });
 
@@ -142,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
  // Seleccionar pedido y cargar en formulario + preview
 async function selectPedido(pedidoId) {
   try {
+    mostrarCarga("Cargando pedido..."); // Mostrar overlay
     // --- Obtener pedido usando authManager ---
     const res = await authManager.fetchWithAuth(
       `${API_BASE_URL}/api/pedido/verPedido?id=${pedidoId}`
@@ -170,7 +177,9 @@ async function selectPedido(pedidoId) {
   } catch (error) {
     console.error("Error al cargar pedido:", error);
     mostrarError("Error al cargar el pedido");
-  }
+  }finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
 
 // Cargar solo los datos del cliente
@@ -183,11 +192,12 @@ function cargarPedidoClienteEnFormulario(pedido) {
   document.getElementById("telefono").value = pedido.telefono || "";
   document.getElementById("email").value = pedido.gmail || "";
 }
-
 // Renderiza todos los productos en el contenedor
 function cargarProductosDelPedido(productos) {
   const contenedor = document.getElementById("productos-container");
-  contenedor.innerHTML = ""; // limpiar antes de renderizar
+  const contenedorComprimidos = document.getElementById("comprimido-preview");
+  contenedor.innerHTML = "";
+  contenedorComprimidos.innerHTML = ""; // limpiar antes de renderizar
 
   productos.forEach((prod, index) => {
     const productoDiv = document.createElement("div");
@@ -197,21 +207,29 @@ function cargarProductosDelPedido(productos) {
     productoDiv.style.marginBottom = "10px";
     productoDiv.style.borderRadius = "5px";
 
+    const colorText = prod.esDigital ? "DIGITAL" : (prod.colorNombre || "-");
+
     productoDiv.innerHTML = `
       <p><strong>Producto ${index + 1}</strong></p>
       <p>Nombre: ${prod.nombre || "-"}</p>
-      <p>Color: ${prod.colorNombre || "-"}</p>
+      <p>Color: ${colorText}</p>
       <p>Cantidad: ${prod.cantidad || "-"}</p>
     `;
 
     contenedor.appendChild(productoDiv);
 
-    // Preview de archivo comprimido si existe
-    if (prod.archivoBase64) {
-      mostrarArchivoComprimido(prod.archivoBase64, `${prod.nombre || 'archivo'}.zip`);
+    // Solo mostrar ZIP si NO es digital
+    if (prod.archivoBase64 && !prod.esDigital) {
+      const enlace = document.createElement("a");
+      enlace.href = `data:application/zip;base64,${prod.archivoBase64}`;
+      enlace.download = `${prod.nombre || 'archivo'}.zip`;
+      enlace.textContent = `${prod.nombre || 'archivo'}.zip`;
+      enlace.style.display = "block";
+      contenedorComprimidos.appendChild(enlace);
     }
   });
 }
+
 
 async function cargarCategoriasYSeleccionar(categoriaIdSeleccionada) {
   try {

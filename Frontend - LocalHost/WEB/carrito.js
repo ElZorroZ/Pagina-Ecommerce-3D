@@ -15,30 +15,28 @@ class CartManager {
   async loadCart() {
     try {
       const carritoData = await window.API.obtenerCarrito();
+      console.log("Estructura", carritoData);
 
       if (!Array.isArray(carritoData)) {
         console.warn('Respuesta no es array, asignando []');
         this.cart = [];
       } else {
         this.cart = carritoData.map(item => ({
-          id: item.id,  // Usar id del carrito (registro en tabla carrito)
+          id: item.id,  // id del carrito
           nombre: item.nombre || 'Producto sin nombre',
           cantidad: item.cantidad || 1,
           precio: item.precioUnitario || 0,
           precioTotal: item.precioTotal || 0,
           esDigital: item.esDigital ?? false,
-          linkArchivo: item.linkArchivo || null
+          linkArchivo: item.linkArchivo || null,
+          colorNombre: item.colorNombre || 'Sin color' // <--- agregado
         }));
       }
     } catch (error) {
       console.error('Error cargando carrito:', error);
       this.cart = [];
     }
-  }
-
-
-
-
+}
     saveCart() {
         localStorage.setItem('cart', JSON.stringify(this.cart));
     }
@@ -83,6 +81,7 @@ renderCart() {
 
 cartItemsContainer.innerHTML = this.cart.map(item => {
   const imagen = item.linkArchivo ? item.linkArchivo : '/api/placeholder/80/80';
+  const colorTexto = item.esDigital ? '' : (item.colorNombre || 'Sin color');
 
   return `
     <tr data-cart-id="${item.id}">
@@ -94,6 +93,9 @@ cartItemsContainer.innerHTML = this.cart.map(item => {
           </div>
         </div>
       </td>
+
+      <td>${colorTexto}</td> <!-- Nueva columna color -->
+
       <td><span class="price">$${item.precio.toFixed(2)}</span></td>
       
       <td>
@@ -133,10 +135,6 @@ cartItemsContainer.innerHTML = this.cart.map(item => {
     </tr>
   `;
 }).join('');
-
-
-
-
   console.log("Carrito sin duplicados:", this.cart);
 
   this.updateSummary();
@@ -154,6 +152,7 @@ async updateQuantity(carritoId, cantidadCambio) {
   // Validar que nueva cantidad sea >= 1
   if (nuevaCantidad < 1) {
     this.removeItem(carritoId);
+    await actualizarCantidadCarrito(); // actualizar contador
     return;
   }
 
@@ -162,57 +161,88 @@ async updateQuantity(carritoId, cantidadCambio) {
     cantidadCambio = 99 - item.cantidad;
   }
 
-  try {
-    console.log("Sumando cantidad:", { carritoId, cantidadCambio });
-    // Enviar solo el delta al backend
-    await window.API.sumarCantidad(carritoId, cantidadCambio);
+    try {
+      mostrarCarga("Actualizando cantidad...");
+      console.log("Sumando cantidad:", { carritoId, cantidadCambio });
 
-    // Actualizar localmente
-    item.cantidad += cantidadCambio;
-    this.saveCart();
-    this.renderCart();
-    this.updateCartCount();
+      // Enviar solo el delta al backend
+      await window.API.sumarCantidad(carritoId, cantidadCambio);
+
+      // Actualizar localmente
+      item.cantidad += cantidadCambio;
+      this.saveCart();
+      this.renderCart();
+
+      // 🔹 Actualizar contador local
+      await actualizarCantidadCarrito();
+
+      mostrarExito("Cantidad actualizada correctamente"); // Mensaje de éxito
 
   } catch (error) {
-    console.error('Error actualizando cantidad en el servidor:', error);
-    alert('No se pudo actualizar la cantidad, intente nuevamente.');
+      console.error('Error actualizando cantidad en el servidor:', error);
+      mostrarError("No se pudo actualizar la cantidad, intente nuevamente."); // Mensaje de error
+  } finally {
+      // Ocultar overlay siempre
+      ocultarCarga();
   }
+
 }
 
 
  async removeItem(carritoId) {
-  if (!confirm('¿Estás seguro de que quieres eliminar este producto del carrito?')) return;
+  // Usamos la función de confirmación atractiva
+  mostrarConfirmacion('¿Estás seguro de que quieres eliminar este producto del carrito?', async (confirmado) => {
+    if (!confirmado) return;
 
-  try {
-    await window.API.borrarProductoCarrito(carritoId);
-    this.cart = this.cart.filter(item => item.id !== carritoId);
-    this.saveCart();
-    this.renderCart();
-    this.updateCartCount();
-  } catch (error) {
-    // Mostrar error detallado
-    alert(`No se pudo eliminar el producto, intente nuevamente.\nDetalle: ${error.message || error}`);
-    console.log('Error en removeItem:', error);
-  }
+    try {
+      mostrarCarga("Eliminando producto..."); // Mostrar overlay
+
+      await window.API.borrarProductoCarrito(carritoId);
+      
+      // Filtramos el item eliminado
+      this.cart = this.cart.filter(item => item.id !== carritoId);
+      
+      this.saveCart();
+      this.renderCart();
+      this.updateCartCount();
+
+      // Mostrar mensaje de éxito
+      mostrarExito('Producto eliminado del carrito correctamente.');
+    } catch (error) {
+      // Mostrar mensaje de error
+      mostrarError(`No se pudo eliminar el producto. Detalle: ${error.message || error}`);
+      console.log('Error en removeItem:', error);
+    } finally {
+      ocultarCarga(); // Ocultar overlay siempre
+    }
+  });
 }
+
 
 async clearCart() {
-  if (!confirm('¿Estás seguro de que quieres vaciar todo el carrito?')) return;
+    const confirmado = await new Promise(resolve => {
+        mostrarConfirmacion('¿Estás seguro de que quieres vaciar todo el carrito?', resolve);
+    });
 
-  try {
-    await window.API.vaciarCarrito();
-    this.cart = [];
-    this.saveCart();
-    this.renderCart();
-    this.updateCartCount();
-    alert('Carrito vaciado exitosamente');
-  } catch (error) {
-    alert(`No se pudo vaciar el carrito, intente nuevamente.\nDetalle: ${error.message || error}`);
-    console.log('Error en clearCart:', error);
-  }
+    if (!confirmado) return;
+
+    try {
+        mostrarCarga("Vaciando carrito..."); // Mostrar overlay
+        await window.API.vaciarCarrito();
+
+        this.cart = [];
+        this.saveCart();
+        this.renderCart();
+        this.updateCartCount();
+
+        mostrarExito('Carrito vaciado exitosamente');
+    } catch (error) {
+        mostrarError(`No se pudo vaciar el carrito, intente nuevamente.\nDetalle: ${error.message || error}`);
+        console.log('Error en clearCart:', error);
+    } finally {
+        ocultarCarga(); // Ocultar overlay siempre
+    }
 }
-
-
 
 updateSummary() {
     const subtotal = this.cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
@@ -245,22 +275,50 @@ updateSummary() {
 
 
     proceedToCheckout() {
-        if (this.cart.length === 0) {
-            alert('Tu carrito está vacío');
-            return;
-        }
-
-        // Here you would typically redirect to a payment page
-        // For now, we'll show an alert
-        const total = this.cart.reduce((sum, item) => sum + (item.precio * item.quantity), 0);
-        const shipping = total > 50 ? 0 : 5.99;
-        const taxes = total * 0.08;
-        const finalTotal = total + shipping + taxes;
-
-        
-        // Redirect to payment page (to be implemented)
-        window.location.href = '/confirmar-pedido.html';
+    if (this.cart.length === 0) {
+        alert('Tu carrito está vacío');
+        return;
     }
+
+    // Agrupar productos por nombre, igual que en renderOrderSummary
+    const grouped = {};
+    this.cart.forEach(item => {
+        const key = item.nombre;
+        if (!grouped[key]) {
+            grouped[key] = {
+                ...item,
+                cantidadTotal: Number(item.cantidad),
+                precioUnitario: Number(item.precioUnitario ?? item.precio),
+            };
+        } else {
+            grouped[key].cantidadTotal += Number(item.cantidad);
+        }
+    });
+
+    // Calcular subtotal
+    let subtotal = 0;
+    Object.values(grouped).forEach(item => {
+        subtotal += item.precioUnitario * item.cantidadTotal;
+    });
+
+    // Detectar productos físicos
+    const hasPhysicalProducts = Object.values(grouped).some(item => !item.linkArchivo);
+    const shipping = hasPhysicalProducts ? 500 : 0;
+
+    const total = subtotal + shipping;
+
+    console.log('Subtotal:', subtotal);
+    console.log('Shipping:', shipping);
+    console.log('Total:', total);
+
+    // Guardar en sessionStorage o localStorage para la página de confirmar-pedido
+    sessionStorage.setItem('checkoutSubtotal', subtotal);
+    sessionStorage.setItem('checkoutShipping', shipping);
+    sessionStorage.setItem('checkoutTotal', total);
+
+    window.location.href = '/confirmar-pedido.html';
+}
+
 }
 
 // Load categories from API
@@ -279,7 +337,6 @@ function renderCategories(categories) {
     categoriesDropdown.innerHTML = '';
     
     categories.forEach(category => {
-        if (category.id === 1) return; // 👈 Saltar la categoría con id 1
         const categoryLink = document.createElement('a');
         categoryLink.href = '#';
         categoryLink.className = 'dropdown-category';
