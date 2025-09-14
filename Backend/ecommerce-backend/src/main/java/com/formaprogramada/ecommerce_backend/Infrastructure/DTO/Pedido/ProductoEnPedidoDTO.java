@@ -9,8 +9,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductoEnPedidoDTO {
     private Integer id;
+    private Integer productoId;
     private String nombre;
-    private double precioTotal;
+    private double precio;
     private int cantidad;
     private Boolean esDigital;
+    private Integer colorId;
+    private String colorNombre;
+    private String hex;
+    private double precioTotal;
+    // NUEVO: archivo en Base64
+    private String archivoBase64;
+    private String imagen;
 }

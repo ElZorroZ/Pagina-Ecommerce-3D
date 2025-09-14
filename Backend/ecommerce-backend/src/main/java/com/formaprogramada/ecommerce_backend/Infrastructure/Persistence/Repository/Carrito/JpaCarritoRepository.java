@@ -2,6 +2,7 @@ package com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Reposit
 
 import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoCompletoDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoProductoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.ProductoColorEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,6 +44,19 @@ public interface JpaCarritoRepository extends JpaRepository<CarritoEntity, Integ
             Integer productoId,
             ProductoColorEntity color
     );
+    @Query("""
+    SELECT new com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoProductoDTO(
+        c.productoId,
+        p.nombre,
+        c.cantidad,
+        c.color.id
+    )
+    FROM CarritoEntity c
+    JOIN ProductoEntity p ON c.productoId = p.id
+    WHERE c.usuarioId = :usuarioId
+""")
+    List<CarritoProductoDTO> seleccionarCarritoDTO(@Param("usuarioId") int usuarioId);
+
 
     @Query("SELECT DISTINCT c.usuarioId FROM CarritoEntity c")
     List<Integer> obtenerIdsUsuariosConCarrito();

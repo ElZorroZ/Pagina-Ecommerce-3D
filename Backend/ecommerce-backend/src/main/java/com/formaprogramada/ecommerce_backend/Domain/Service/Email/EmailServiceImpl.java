@@ -15,12 +15,10 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -66,7 +64,7 @@ public class EmailServiceImpl implements EmailService {
 
         // URL del frontend
         String frontendUrl = "http://localhost:5501";
-        String link = frontendUrl + "/WEB/usuario/validacion/validar-email.html?token=" + token;
+        String link = frontendUrl + "/usuario/validacion/validar-email.html?token=" + token;
 
         // Variables para la plantilla
         Map<String, Object> variables = Map.of(
@@ -91,8 +89,8 @@ public class EmailServiceImpl implements EmailService {
 
         String token = jwtSpecialTokenService.generateResetPasswordToken(gmail);
 
-        String frontendUrl = "http://localhost:5500";
-        String link = frontendUrl + "/WEB/usuario/confirmacion-password/confirmar-password.html?token=" + token;
+        String frontendUrl = "http://localhost:5501";
+        String link = frontendUrl + "/usuario/confirmacion-password/confirmar-password.html?token=" + token;
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("link", link);
@@ -115,8 +113,8 @@ public class EmailServiceImpl implements EmailService {
 
         String token = jwtSpecialTokenService.generateConfirmEmailToken(nuevoEmail, gmailActual);
 
-        String frontendUrl = "http://localhost:5500"; // o el puerto donde tengas tu frontend
-        String link = frontendUrl + "/WEB/usuario/confirmacion/confirmar-email.html?token=" + token;
+        String frontendUrl = "http://localhost:5501"; // o el puerto donde tengas tu frontend
+        String link = frontendUrl + "/usuario/confirmacion/confirmar-email.html?token=" + token;
 
         String asunto = "Confirmación de cambio de email";
 
@@ -154,23 +152,6 @@ public class EmailServiceImpl implements EmailService {
         jpaUsuarioRepository.save(usuario);
     }
 
-    @Override
-    public void enviarEmailConfirmacionCompra(String gmail, String nombre) {
-        String frontendUrl = "http://localhost:5501";
-        String link = frontendUrl + "/WEB/usuario/confirmacion-compra/confirmar-compra.html";
-
-        Map<String, Object> variables = Map.of(
-                "nombre",nombre,
-                "urlValidacion", link
-        );
-
-        // Asunto y plantilla
-        String asunto = "Pedido de compra en Forma Programada";
-        String plantilla = "confirmar-compra";
-
-        //Enviar el email
-        enviarEmailHtml(gmail, asunto, variables, plantilla);
-    }
 
 
 }

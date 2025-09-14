@@ -10,8 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ProductoService {
-    ProductoResponse crearProducto(ProductoRequestConColores dto, MultipartFile archivoStl) throws IOException;
-    ProductoEntity obtenerProductoPorId(Integer id);
+    ProductoResponse crearProducto(ProductoRequestConColores dto, MultipartFile archivoStl) throws IOException;    ProductoEntity obtenerProductoPorId(Integer id);
 
     List<ProductoResponseConDestacado> listarProductos();
     ProductoEntity actualizarProductoCompleto(

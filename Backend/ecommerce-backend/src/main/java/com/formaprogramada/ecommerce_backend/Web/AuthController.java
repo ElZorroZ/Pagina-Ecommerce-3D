@@ -103,11 +103,28 @@ public class AuthController {
         try {
             log.info("Intento de login para: {}", request.getGmail());
 
+            // Buscar usuario en la base de datos
+            Optional<Usuario> optUser = usuarioRepository.buscarPorGmail(request.getGmail());
+            if (optUser.isEmpty()) {
+                log.warn("Usuario no encontrado: {}", request.getGmail());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Credenciales inválidas");
+            }
+
+            Usuario usuario = optUser.get();
+
+            // Verificar si está marcado como verificado
+            if (!usuario.isVerificado()) {
+                log.warn("Usuario no verificado: {}", request.getGmail());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Usuario no verificado");
+            }
+
+            // Autenticación
             var authToken = new UsernamePasswordAuthenticationToken(
                     request.getGmail(),
                     request.getPassword()
             );
-
             var auth = authManager.authenticate(authToken);
             var userDetails = (UserDetails) auth.getPrincipal();
 
@@ -131,6 +148,8 @@ public class AuthController {
                     .body("Error interno del servidor");
         }
     }
+
+
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
@@ -202,6 +221,7 @@ public class AuthController {
         String passwordHasheada = passwordEncoder.encode(nuevaPassword);
         usuario.setPassword(passwordHasheada);
         jpaUsuarioRepository.save(usuario);
+        log.info("Password actualizada para {}: {}", usuario.getGmail(), usuario.getPassword());
 
         return ResponseEntity.ok("Contraseña actualizada correctamente");
     }

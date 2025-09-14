@@ -18,5 +18,6 @@ public class PedidoProducto {
     private Integer cantidad;
     private Double precio;
     private int colorId;
+    private String colorNombre;
     private Boolean esDigital;
 }

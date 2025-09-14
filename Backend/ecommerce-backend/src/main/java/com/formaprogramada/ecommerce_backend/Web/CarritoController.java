@@ -3,12 +3,14 @@ import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Carrito.CarritoService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoAgregarRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoCompletoDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoProductoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
 import com.formaprogramada.ecommerce_backend.Mapper.Carrito.CarritoMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -91,18 +93,18 @@ public class CarritoController {
         }
     }
 
+    @Transactional
     @GetMapping("/verCarrito/{id}")
-    public ResponseEntity<List<Integer>> VerCarrito(@PathVariable int id) {
+    public ResponseEntity<List<CarritoProductoDTO>> VerCarrito(@PathVariable int id) {
         try {
-            // Leer solo los IDs del carrito
-            List<Integer> listaIds = carritoService.LeerUnCarrito(id);
-            System.out.println("IDs del carrito: " + listaIds);
-            return ResponseEntity.ok(listaIds);
+            List<CarritoProductoDTO> carritoDTO = carritoService.LeerUnCarrito(id);
+            return ResponseEntity.ok(carritoDTO);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
 
     @GetMapping("/verCarritoConImagen/{id}")

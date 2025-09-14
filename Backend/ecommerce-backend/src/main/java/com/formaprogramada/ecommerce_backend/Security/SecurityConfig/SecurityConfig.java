@@ -19,6 +19,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -53,13 +54,26 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/completo").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/pedido/EnviarPedidoOnline").permitAll()
-
+                        .requestMatchers(
+                                "/api/mp/auto-detect-environment",
+                                "/api/mp/simulate-webhook",
+                                "/api/mp/webhook",
+                                "/api/mp/payment-info/**",
+                                "/api/mp/check-payment/{pedidoId}",
+                                "/api/mp/config-status",
+                                "/api/mp/webhook-test","/api/mp/verificar-pago/**",
+                                "/api/mp/webhook-debug"
+                        ).permitAll()
                         // ENDPOINTS PROTEGIDOS
+                        .requestMatchers(HttpMethod.POST, "/api/carrito/**").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/api/carrito/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
                         .requestMatchers(HttpMethod.PUT, "/api/usuario/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
                         .requestMatchers(HttpMethod.PUT, "/api/carrito/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
                         .requestMatchers(HttpMethod.POST, "/api/reviews").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/api/pedido/**").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/carrito/**").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.PUT, "/api/pedido/**").hasAnyRole("CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/reviews/*/responder").hasAnyRole("COLABORADOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/productosAprobacion/AprobarProducto").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/productosAprobacion/crearAprobacionProducto").hasRole("COLABORADOR")

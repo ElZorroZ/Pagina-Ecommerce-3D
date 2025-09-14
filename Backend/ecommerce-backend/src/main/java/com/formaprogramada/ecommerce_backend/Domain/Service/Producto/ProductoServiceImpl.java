@@ -290,25 +290,35 @@ public class ProductoServiceImpl implements ProductoService {
 
             productoDetalleRepository.save(detalle);
 
-            // 3. Borrar colores anteriores
-            productoColorRepository.deleteByProducto_Id(productoActualizado.getId());
-            productoColorRepository.flush(); // asegura que se ejecute el delete en DB
-            productoActualizado.getColores().clear(); // opcional si tenés JPA bidireccional
-            productoColorRepository.deleteByProducto_Id(productoActualizado.getId());
+            // 3. Manejar colores sin borrar
+            List<ProductoColorEntity> coloresExistentes = productoColorRepository.findByProductoId(productoActualizado.getId());
+            Set<String> coloresNuevosHex = dto.getColores() != null
+                    ? dto.getColores().stream().map(ColorRequest::getHex).collect(Collectors.toSet())
+                    : Collections.emptySet();
 
-            // 4. Guardar colores nuevos
-            List<ColorRequest> colores = dto.getColores(); // O el nombre del getter que tenga hex
-            if (colores != null && !colores.isEmpty()) {
-                List<ProductoColorEntity> coloresEntities = colores.stream()
-                        .map(color -> new ProductoColorEntity(
-                                0,
-                                productoActualizado,
-                                color.getNombre(), // nombre o color
-                                color.getHex()     // hex
-                        ))
-                        .toList();
-                productoColorRepository.saveAll(coloresEntities);
+// Actualizar colores existentes si cambió el nombre
+            for (ProductoColorEntity colorExistente : coloresExistentes) {
+                dto.getColores().stream()
+                        .filter(c -> c.getHex().equals(colorExistente.getHex()))
+                        .findFirst()
+                        .ifPresent(c -> colorExistente.setColor(c.getNombre()));
             }
+            productoColorRepository.saveAll(coloresExistentes);
+
+// Agregar colores nuevos que no existían
+            for (ColorRequest colorDto : dto.getColores()) {
+                boolean yaExiste = coloresExistentes.stream()
+                        .anyMatch(c -> c.getHex().equals(colorDto.getHex()));
+                if (!yaExiste) {
+                    ProductoColorEntity nuevoColor = new ProductoColorEntity();
+                    nuevoColor.setProducto(productoActualizado);
+                    nuevoColor.setColor(colorDto.getNombre());
+                    nuevoColor.setHex(colorDto.getHex());
+                    productoColorRepository.save(nuevoColor);
+                }
+            }
+
+
 
 
             // 5. Borrar imágenes antiguas (en BDD y en ImgBB)

@@ -1,17 +1,26 @@
 package com.formaprogramada.ecommerce_backend.Web;
 
+import com.formaprogramada.ecommerce_backend.Domain.Model.Carrito.Carrito;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.Pedido;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Carrito.CarritoService;
 import com.formaprogramada.ecommerce_backend.Domain.Service.Pedido.PedidoService;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoAgregarRequest;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Carrito.CarritoCompletoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoDTO;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoUsuarioDTO;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdate;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Usuario.UsuarioUpdatePedido;
+import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Carrito.CarritoEntity;
+import com.formaprogramada.ecommerce_backend.Mapper.Carrito.CarritoMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Pedido.PedidoMapper;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -100,22 +109,6 @@ public class PedidoController {
             throw new RuntimeException(e);
         }
     }
-
-    @PutMapping("/EnviarPedidoOnline")
-    public ResponseEntity<List<String>> EnviarPedidoOnline(@RequestParam int idPedido) {
-        try {
-            List<String> archivos = pedidoService.EnviarPedidoOnline(idPedido);
-            return ResponseEntity.ok(archivos);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-
-
-
 
 
 

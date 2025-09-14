@@ -17,4 +17,6 @@ public class Pedido {
     private double total;
     private int usuarioId;
     private String estado;
+    private String externalPaymentId;
+    private String paymentProvider;
 }
