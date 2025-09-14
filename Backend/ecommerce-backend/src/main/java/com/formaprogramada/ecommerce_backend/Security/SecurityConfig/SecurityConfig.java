@@ -39,17 +39,17 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,
-                                           DaoAuthenticationProvider daoAuthenticationProvider) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, DaoAuthenticationProvider daoAuthenticationProvider) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> corsConfigurationSource())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/oauth2/success").permitAll()
-                        .requestMatchers("/login/**", "/oauth2/**", "/login/oauth2/**").permitAll()
+                        // ENDPOINTS PÚBLICOS
                         .requestMatchers("/api/auth/register", "/api/auth/validate", "/api/auth/login",
                                 "/api/auth/refresh", "/api/usuario/confirmar-email",
                                 "/api/auth/reset-password-request",
-                                "/api/auth/reset-password/confirm").permitAll()
+                                "/api/auth/reset-password/confirm",
+                                "/api/auth/oauth2/success").permitAll()
                         .requestMatchers("/api/productos/busqueda/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categoria").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
@@ -62,7 +62,8 @@ public class SecurityConfig {
                                 "/api/mp/payment-info/**",
                                 "/api/mp/check-payment/{pedidoId}",
                                 "/api/mp/config-status",
-                                "/api/mp/webhook-test","/api/mp/verificar-pago/**",
+                                "/api/mp/webhook-test",
+                                "/api/mp/verificar-pago/**",
                                 "/api/mp/webhook-debug"
                         ).permitAll()
                         // ENDPOINTS PROTEGIDOS
@@ -87,15 +88,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-
-                .authenticationProvider(daoAuthenticationProvider) // Login con BD
-                .authenticationProvider(jwtProvider)               // Login con JWT
-                .cors(Customizer.withDefaults())
+                // Autenticación
+                .authenticationProvider(daoAuthenticationProvider)
+                .authenticationProvider(jwtProvider)
+                // JWT filter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                // OAuth2 login
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login") // Podés customizar tu página de login
-                        .defaultSuccessUrl("/api/auth/oauth2/success", true) // redirigir después de login
+                        .defaultSuccessUrl("/api/auth/oauth2/success", true) // endpoint donde se maneja token JWT
                 )
+                // Deshabilitar login clásico
+                .formLogin(AbstractHttpConfigurer::disable)
                 .build();
     }
 

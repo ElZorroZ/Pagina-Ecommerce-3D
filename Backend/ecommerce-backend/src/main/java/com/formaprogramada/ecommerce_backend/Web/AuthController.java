@@ -21,6 +21,7 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Reposito
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioActualizarMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioRegistroMapper;
+import com.formaprogramada.ecommerce_backend.Security.Hasher.PasswordHasher;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
 import jakarta.persistence.OptimisticLockException;
@@ -60,6 +61,7 @@ public class AuthController {
     private final JwtSpecialTokenService jwtSpecialTokenService;
     private final JpaUsuarioRepository jpaUsuarioRepository;
     private final JwtTokenService jwtTokenService;
+    private final PasswordHasher passwordHasher;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -276,12 +278,47 @@ public class AuthController {
     }
 
     @GetMapping("/oauth2/success")
-    public ResponseEntity<String> getUserInfo(OAuth2AuthenticationToken authentication) {
+    public ResponseEntity<?> getUserInfo(OAuth2AuthenticationToken authentication) {
         Map<String, Object> attributes = authentication.getPrincipal().getAttributes();
         String email = (String) attributes.get("email");
-        String nombre = (String) attributes.get("name");
+        String nombre = (String) attributes.get("given_name");
+        String apellido= (String) attributes.get("family_name");
+        String password="google.com";
+        Boolean verificado= (Boolean) attributes.get("email_verified");
+        //int id=(Integer) attributes.get("sub");
+        String hash = passwordHasher.hash(password);
+        Optional<Usuario> usuario = usuarioRepository.buscarPorGmail(email);
+        if (usuario.isEmpty()) {
+            Usuario usuarioReal= new Usuario();
+            usuarioReal.setGmail(email);
+            usuarioReal.setNombre(nombre);
+            usuarioReal.setApellido(apellido);
+            usuarioReal.setPassword(hash);
+            usuarioReal.setVerificado(verificado);
+            //usuarioReal.setId(id);
 
-        return ResponseEntity.ok("Hola " + nombre + " (" + email + ")");
+            usuarioRepository.guardar(usuarioReal);
+            System.out.println(usuarioReal);
+        }
+        var authToken = new UsernamePasswordAuthenticationToken(
+                email,
+                password
+        );
+        var auth = authManager.authenticate(authToken);
+        var userDetails = (UserDetails) auth.getPrincipal();
+
+        AuthResponse response = jwtTokenService.generarTokens(userDetails);
+
+
+        return ResponseEntity.ok(Map.of(
+                "accessToken", response.getAccessToken(),
+                "refreshToken", response.getRefreshToken(),
+                "usuarioId", response.getUsuarioId()
+        ));
+
+
+
+
     }
 
 
