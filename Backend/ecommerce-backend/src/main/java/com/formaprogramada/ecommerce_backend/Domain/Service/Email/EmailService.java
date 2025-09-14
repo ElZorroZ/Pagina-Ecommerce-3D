@@ -10,4 +10,5 @@ public interface EmailService {
     void enviarEmailVerificacion(Usuario usuario);
     void enviarEmailHtml(String destinatario, String asunto, Map<String, Object> variables, String plantilla);
     void confirmarCambioEmail(String token);
+    void enviarConfirmacionCompra(String gmail);
 }

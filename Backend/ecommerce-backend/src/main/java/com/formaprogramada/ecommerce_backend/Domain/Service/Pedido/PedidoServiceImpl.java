@@ -40,6 +40,7 @@ public class PedidoServiceImpl implements PedidoService {
     public CacheManager getCacheManager() {
         return cacheManager;
     }
+
     private Cache getCache() {
         return cacheManager.getCache("pedido");
     }
@@ -85,7 +86,6 @@ public class PedidoServiceImpl implements PedidoService {
                 pedidosUsuarioCache.put(idUsuario, pedidosUsuario);
             }
         }
-
         return pedido;
     }
 

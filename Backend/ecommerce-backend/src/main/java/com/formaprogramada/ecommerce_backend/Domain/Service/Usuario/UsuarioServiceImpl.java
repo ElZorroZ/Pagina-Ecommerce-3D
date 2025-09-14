@@ -130,4 +130,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.modificarPermisoUsuario(id, permiso);
     }
 
+    @Override
+    public String existePorId(int id) {
+        Usuario usuario = usuarioRepository.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException("El usuario a modificar no existe"));
+        return usuario.getGmail();
+    }
+
 }
