@@ -208,20 +208,28 @@ public class MercadoPagoController {
     }
 
 
-    // 🔥 ENDPOINTS DE REDIRECCIÓN MEJORADOS
     @GetMapping("/pago-exitoso")
     public ResponseEntity<Void> pagoExitoso(@RequestParam int pedidoId,
                                             @RequestParam(required = false) String collection_status,
-                                            @RequestParam(required = false) Long payment_id) {
+                                            @RequestParam(required = false) String payment_id) {
         System.out.println("✅ Pago exitoso para pedido: " + pedidoId);
         System.out.println("📋 Status: " + collection_status);
         System.out.println("💳 Payment ID: " + payment_id);
 
         try {
-            if (payment_id != null) {
+            Long paymentIdLong = null;
+            if (payment_id != null && !"null".equalsIgnoreCase(payment_id)) {
+                try {
+                    paymentIdLong = Long.valueOf(payment_id);
+                } catch (NumberFormatException e) {
+                    System.err.println("⚠️ Payment ID inválido: " + payment_id);
+                }
+            }
+
+            if (paymentIdLong != null) {
                 MercadoPagoConfig.setAccessToken(mercadolibreToken);
                 PaymentClient paymentClient = new PaymentClient();
-                Payment payment = paymentClient.get(payment_id);
+                Payment payment = paymentClient.get(paymentIdLong);
 
                 String estadoReal = mapearEstadoPago(payment.getStatus());
                 pedidoService.CambiarEstado(estadoReal, pedidoId);
@@ -239,17 +247,25 @@ public class MercadoPagoController {
                 .build();
     }
 
-
     @GetMapping("/pago-pendiente")
     public ResponseEntity<Void> pagoPendiente(@RequestParam int pedidoId,
-                                              @RequestParam(required = false) Long payment_id) {
+                                              @RequestParam(required = false) String payment_id) {
         System.out.println("⏳ Pago pendiente para pedido: " + pedidoId);
 
         try {
-            if (payment_id != null) {
+            Long paymentIdLong = null;
+            if (payment_id != null && !"null".equalsIgnoreCase(payment_id)) {
+                try {
+                    paymentIdLong = Long.valueOf(payment_id);
+                } catch (NumberFormatException e) {
+                    System.err.println("⚠️ Payment ID inválido: " + payment_id);
+                }
+            }
+
+            if (paymentIdLong != null) {
                 MercadoPagoConfig.setAccessToken(mercadolibreToken);
                 PaymentClient paymentClient = new PaymentClient();
-                Payment payment = paymentClient.get(payment_id);
+                Payment payment = paymentClient.get(paymentIdLong);
 
                 String estadoReal = mapearEstadoPago(payment.getStatus());
                 pedidoService.CambiarEstado(estadoReal, pedidoId);
@@ -268,14 +284,23 @@ public class MercadoPagoController {
 
     @GetMapping("/pago-fallido")
     public ResponseEntity<Void> pagoFallido(@RequestParam int pedidoId,
-                                            @RequestParam(required = false) Long payment_id) {
+                                            @RequestParam(required = false) String payment_id) {
         System.out.println("❌ Pago fallido para pedido: " + pedidoId);
 
         try {
-            if (payment_id != null) {
+            Long paymentIdLong = null;
+            if (payment_id != null && !"null".equalsIgnoreCase(payment_id)) {
+                try {
+                    paymentIdLong = Long.valueOf(payment_id);
+                } catch (NumberFormatException e) {
+                    System.err.println("⚠️ Payment ID inválido: " + payment_id);
+                }
+            }
+
+            if (paymentIdLong != null) {
                 MercadoPagoConfig.setAccessToken(mercadolibreToken);
                 PaymentClient paymentClient = new PaymentClient();
-                Payment payment = paymentClient.get(payment_id);
+                Payment payment = paymentClient.get(paymentIdLong);
 
                 String estadoReal = mapearEstadoPago(payment.getStatus());
                 pedidoService.CambiarEstado(estadoReal, pedidoId);
