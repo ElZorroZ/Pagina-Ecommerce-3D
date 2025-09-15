@@ -463,7 +463,7 @@ async testConnectivity() {
     console.log("🔍 DIAGNÓSTICO DE CONECTIVIDAD");
     
     // Test 1: Verificar URL base
-    const API_BASE_URL = "http://localhost:8080";
+    const API_BASE_URL = "https://forma-programada.onrender.com";
     console.log("📍 API_BASE_URL:", API_BASE_URL);
     
     // Test 2: Ping básico al servidor
