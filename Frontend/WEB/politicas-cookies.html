@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Políticas de Cookies - Forma programada</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+           <!-- Header -->
+    <header class="header">
+        
+        <!-- Main navigation -->
+        <div class="nav-container">
+            <div class="nav-content">
+                <!-- Logo -->
+                <div class="logo">
+                    <h1><a href="/index.html" style="text-decoration: none; color: inherit;">Forma programada</a></h1>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <div class="nav-dropdown">
+                        <a href="#" class="nav-link" id="shop-trigger">Shop</a>
+                        <div class="dropdown-menu" id="categories-dropdown">
+                            <div class="dropdown-content">
+                                <!-- Categories will be loaded dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Panel de administración (dropdown) -->
+                    <div class="nav-dropdown hidden" id="admin-dropdown">
+                        <span class="nav-link" style="cursor: default;">Panel de administración</span>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-content" id="admin-options"></div>
+                        </div>
+                        </div>
+
+                </nav>
+
+                <!-- Right side icons -->
+                <div class="nav-icons">
+                    <!-- Contenedor de cuenta -->
+                    <div class="nav-dropdown" id="account-dropdown">
+                        <button class="icon-btn account-icon" id="account-btn" title="Cuenta" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown para cuenta (solo visible si hay JWT) -->
+                        <div class="dropdown-menu" id="account-menu" style="display: none;">
+                            <div class="dropdown-content">
+                            <a href="/usuario/perfil/perfil.html">Acceder Cuenta</a>
+                            <a href="/historial-pedidos.html">Ver pedidos</a>
+                            <a href="#" id="logout-btn">Salir de la cuenta</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="search-container">
+                        <input 
+                            type="text" 
+                            id="search-input" 
+                            placeholder="Buscar productos..." 
+                            class="search-input"
+                            autocomplete="off"
+                        />
+                        <button class="icon-btn" id="search-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                        </button>
+                        <div id="suggestions-box" class="suggestions-box"></div>
+
+                    </div>
+
+                    <button class="icon-btn cart-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m2 2 3.6 7.8A1 1 0 0 0 6.5 11H19a1 1 0 0 0 .9-1.4L17 3H6.5"/>
+                            <path d="m9 13 1 6h4l1-6"/>
+                            <circle cx="9" cy="20" r="1"/>
+                            <circle cx="15" cy="20" r="1"/>
+                        </svg>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <!-- Navegación móvil -->
+                    <div id="mobile-nav" class="mobile-nav">
+                        <!-- Agregá links o lo que necesites acá -->
+                    </div>
+                    <!-- Botón para menú móvil -->
+                    <button class="mobile-menu icon-btn" aria-label="Menú móvil">
+                        <!-- Icono hamburguesa simple -->
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container legal-container">
+            <div class="legal-header">
+                <h1>Políticas de Cookies</h1>
+                <p class="last-updated">Última actualización: Septiembre 2024</p>
+            </div>
+
+            <div class="legal-content">
+                <section class="legal-section">
+                    <h2>1. ¿Qué son las Cookies?</h2>
+                    <p>Las cookies son pequeños archivos de texto que se almacenan en su dispositivo cuando visita un sitio web. Estas nos ayudan a mejorar su experiencia de navegación y el funcionamiento de nuestra plataforma.</p>
+                </section>
+
+                <section class="legal-section">
+                    <h2>2. Cookies que Utilizamos</h2>
+                    <p>En Forma programada utilizamos un sistema mínimo de cookies para garantizar la funcionalidad esencial de nuestra plataforma:</p>
+                    
+                    <h3>JWT (JSON Web Token)</h3>
+                    <p>Utilizamos exclusivamente tokens JWT que contienen:</p>
+                    <ul>
+                        <li><strong>Email del usuario:</strong> Para identificar su sesión</li>
+                        <li><strong>Rol del usuario:</strong> Para determinar permisos y accesos</li>
+                        <li><strong>Tiempo de expiración:</strong> Para mantener la seguridad de la sesión</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>3. Propósito de Nuestras Cookies</h2>
+                    <p>Las cookies JWT que utilizamos tienen los siguientes propósitos:</p>
+                    <ul>
+                        <li><strong>Autenticación:</strong> Mantener su sesión activa mientras navega</li>
+                        <li><strong>Autorización:</strong> Verificar sus permisos para acceder a diferentes secciones</li>
+                        <li><strong>Personalización:</strong> Mostrar contenido relevante según su rol</li>
+                        <li><strong>Seguridad:</strong> Proteger su cuenta contra accesos no autorizados</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>4. Tipos de Cookies</h2>
+                    <h3>Cookies Esenciales (No se pueden desactivar)</h3>
+                    <p>Nuestro token JWT es esencial para el funcionamiento básico de la plataforma:</p>
+                    <ul>
+                        <li>Permite mantener su sesión iniciada</li>
+                        <li>Habilita las funciones de compra</li>
+                        <li>Proporciona acceso a su historial de pedidos</li>
+                        <li>Garantiza la seguridad de su cuenta</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>5. Duración de las Cookies</h2>
+                    <p>Nuestro token JWT tiene las siguientes características de duración:</p>
+                    <ul>
+                        <li><strong>Sesión activa:</strong> Se mantiene mientras navega en el sitio</li>
+                        <li><strong>Expiración automática:</strong> Se elimina después de un período de inactividad</li>
+                        <li><strong>Renovación:</strong> Se actualiza automáticamente durante el uso activo</li>
+                        <li><strong>Cierre manual:</strong> Se elimina completamente al cerrar sesión</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>6. Gestión de Cookies</h2>
+                    <p>Puede gestionar las cookies de la siguiente manera:</p>
+                    <ul>
+                        <li><strong>Cerrar sesión:</strong> Elimina automáticamente el token JWT</li>
+                        <li><strong>Configuración del navegador:</strong> Puede bloquear cookies, aunque esto afectará la funcionalidad</li>
+                        <li><strong>Navegación privada:</strong> Las cookies se eliminan al cerrar la ventana</li>
+                        <li><strong>Limpiar datos:</strong> Puede eliminar manualmente las cookies desde su navegador</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>7. Cookies de Terceros</h2>
+                    <p>Trabajamos con servicios externos que pueden establecer sus propias cookies:</p>
+                    <h3>MercadoPago</h3>
+                    <ul>
+                        <li>Procesa los pagos de manera segura</li>
+                        <li>Mantiene información de la transacción durante el proceso</li>
+                        <li>Sus cookies están regidas por las políticas de MercadoPago</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>8. Impacto de Deshabilitar Cookies</h2>
+                    <p>Si deshabilita las cookies esenciales:</p>
+                    <ul>
+                        <li>No podrá mantener su sesión iniciada</li>
+                        <li>Deberá iniciar sesión en cada página</li>
+                        <li>No podrá completar compras</li>
+                        <li>Algunas funciones del sitio no estarán disponibles</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>9. Seguridad</h2>
+                    <p>Implementamos medidas de seguridad para proteger las cookies:</p>
+                    <ul>
+                        <li><strong>Encriptación:</strong> Los tokens JWT están firmados digitalmente</li>
+                        <li><strong>HTTPS:</strong> Transmisión segura de cookies</li>
+                        <li><strong>Expiración:</strong> Tokens con tiempo de vida limitado</li>
+                        <li><strong>Validación:</strong> Verificación constante de integridad</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>10. Actualizaciones de la Política</h2>
+                    <p>Esta política puede actualizarse ocasionalmente. Los cambios importantes serán comunicados a través de:</p>
+                    <ul>
+                        <li>Notificación en la plataforma</li>
+                        <li>Email a usuarios registrados</li>
+                        <li>Actualización de la fecha en esta página</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>11. Contacto</h2>
+                    <p>Para preguntas sobre nuestras políticas de cookies:</p>
+                    <ul>
+                        <li>Email: privacy@formaprogramada.com</li>
+                        <li>Teléfono: +54 11 1234-5678</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <h3>Forma programada</h3>
+                        <p>Diseños 3D hechos realidad.</p>
+                        <p>Argentina, CABA, Palermo.</p>
+                    </div>
+                </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Forma programada. Todos los derechos reservados.</p>
+                    <div class="footer-links">
+                        <a href="#">Politicas de privacidad</a>
+                        <a href="#">Terminos de servicios</a>
+                        <a href="#">Politicas de cookies</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth-manager.js".js"></script>
+    <script src="api.js"></script>
+    <script src="admin-access.js"></script>
+    <script src="carrito-visual.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <script src="busqueda-producto.js"></script>
+</body>
+</html>

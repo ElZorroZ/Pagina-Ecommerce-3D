@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categoría - Forma programada</title>
+    <title>Términos de Servicios - Forma programada</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-          <!-- Header -->
     <header class="header">
         
         <!-- Main navigation -->
@@ -108,102 +107,133 @@
         </div>
     </header>
 
-    <!-- Category Hero Section -->
-    <section class="category-hero">
-        <div class="container">
-            <div class="category-hero-content">
-                <h1 class="category-title" id="category-title"></h1>
-                <p class="category-description" id="category-description"></p>
-            </div>
-        </div>
-    </section>
-
     <!-- Main Content -->
-    <main class="category-main">
-        <div class="container">
-            <div class="category-layout">
-                <!-- Sidebar with filters -->
-                <aside class="category-sidebar">
-                    <div class="filter-section">
-                        <h3 class="filter-title">Filtros</h3>
-                        
-                        <!-- Category Filter -->
-                        <div class="filter-group">
-                            <h4 class="filter-group-title">Categorías</h4>
-                            <div class="filter-options" id="category-filters">
-                                <label class="filter-option">
-                                    <input type="radio" name="category" value="all" checked>
-                                    <span>Todos</span>
-                                </label>
-                                <!-- Categories will be loaded dynamically -->
-                            </div>
-                        </div>
+    <main class="main-content">
+        <div class="container legal-container">
+            <div class="legal-header">
+                <h1>Términos de Servicios</h1>
+                <p class="last-updated">Última actualización: Septiembre 2024</p>
+            </div>
 
-                        <!-- Price Filter (Rango) -->
-                        <div class="filter-group">
-                            <h4 class="filter-group-title">Precio</h4>
-                            <div class="filter-options">
-                                <label class="filter-option">
-                                    <span>Mínimo</span>
-                                    <input type="number" id="price-min" placeholder="0">
-                                </label>
-                                <label class="filter-option">
-                                    <span>Máximo</span>
-                                    <input type="number" id="price-max" placeholder="9999">
-                                </label>
-                                <button id="apply-price-filter">Aplicar</button>
-                            </div>
-                        </div>
-                    
-                    </div>
-                </aside>
+            <div class="legal-content">
+                <section class="legal-section">
+                    <h2>1. Aceptación de los Términos</h2>
+                    <p>Al acceder y utilizar los servicios de Forma programada, usted acepta cumplir con estos términos y condiciones. Si no está de acuerdo con alguno de estos términos, no utilice nuestros servicios.</p>
+                </section>
 
-                <!-- Products Grid -->
-                <div class="category-content">
-                    <div class="category-products-header">
-                        <div class="products-count">
-                            <span id="products-count">Cargando productos...</span>
-                        </div>
-                        <div class="sort-options">
-                            <select id="sort-select" class="sort-select">
-                                <option value="name">Ordenar por nombre</option>
-                                <option value="price-low">Precio: menor a mayor</option>
-                                <option value="price-high">Precio: mayor a menor</option>
-                                <option value="newest">Más recientes</option>
-                            </select>
-                        </div>
-                    </div>
+                <section class="legal-section">
+                    <h2>2. Descripción del Servicio</h2>
+                    <p>Forma programada es una plataforma de comercio electrónico especializada en:</p>
+                    <ul>
+                        <li>Venta de productos de impresión 3D personalizados</li>
+                        <li>Productos digitales (archivos STL y diseños)</li>
+                        <li>Productos físicos (objetos impresos en 3D)</li>
+                        <li>Servicios de impresión 3D bajo demanda</li>
+                    </ul>
+                </section>
 
-                    <div class="category-products-grid" id="category-products-grid">
-                        <!-- Products will be loaded dynamically -->
-                    </div>
+                <section class="legal-section">
+                    <h2>3. Registro de Usuario</h2>
+                    <p>Para realizar compras, debe:</p>
+                    <ul>
+                        <li>Proporcionar información precisa y completa durante el registro</li>
+                        <li>Mantener actualizada su información personal</li>
+                        <li>Ser responsable de la confidencialidad de su cuenta</li>
+                        <li>Notificar inmediatamente cualquier uso no autorizado</li>
+                    </ul>
+                </section>
 
-                    <!-- Loading State -->
-                    <div class="loading-state" id="loading-state">
-                        <div class="loading-spinner"></div>
-                        <p>Cargando productos...</p>
-                    </div>
+                <section class="legal-section">
+                    <h2>4. Productos y Precios</h2>
+                    <p>Respecto a nuestros productos:</p>
+                    <ul>
+                        <li>Los precios están sujetos a cambios sin previo aviso</li>
+                        <li>Las especificaciones técnicas pueden variar según disponibilidad</li>
+                        <li>Los colores mostrados pueden diferir ligeramente del producto final</li>
+                        <li>Los tiempos de producción son estimativos para productos físicos</li>
+                    </ul>
+                </section>
 
-                    <!-- Empty State -->
-                    <div class="empty-state" id="empty-state" style="display: none;">
-                        <div class="empty-state-content">
-                            <div class="empty-state-icon">
-                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                                    <circle cx="11" cy="11" r="8"/>
-                                    <path d="m21 21-4.35-4.35"/>
-                                </svg>
-                            </div>
-                            <h3>No se encontraron productos</h3>
-                            <p>Intenta ajustar los filtros o explora otras categorías.</p>
-                            <button class="empty-state-btn" onclick="clearFilters()">Limpiar filtros</button>
-                        </div>
-                    </div>
-                </div>
+                <section class="legal-section">
+                    <h2>5. Proceso de Compra</h2>
+                    <p>Al realizar una compra:</p>
+                    <ul>
+                        <li>Los pedidos están sujetos a confirmación de pago</li>
+                        <li>Los productos digitales se entregan por email tras el pago</li>
+                        <li>Los productos físicos requieren dirección de envío válida</li>
+                        <li>Los pagos se procesan a través de MercadoPago</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>6. Política de Entrega</h2>
+                    <h3>Productos Digitales:</h3>
+                    <ul>
+                        <li>Entrega inmediata por correo electrónico tras confirmación de pago</li>
+                        <li>Incluye archivos STL y documentación técnica</li>
+                        <li>Licencia para uso personal, no comercial</li>
+                    </ul>
+                    <h3>Productos Físicos:</h3>
+                    <ul>
+                        <li>Tiempo de producción: 3-7 días hábiles</li>
+                        <li>Envío: 2-5 días hábiles adicionales</li>
+                        <li>Seguimiento proporcionado al momento del envío</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>7. Política de Reembolsos</h2>
+                    <h3>Productos Físicos:</h3>
+                    <ul>
+                        <li>Reembolso disponible dentro de 30 días de la compra</li>
+                        <li>El producto debe estar en condiciones originales</li>
+                        <li>El cliente cubre los costos de devolución</li>
+                    </ul>
+                    <h3>Productos Digitales:</h3>
+                    <ul>
+                        <li>No se aceptan reembolsos una vez descargados</li>
+                        <li>Excepción por errores técnicos en los archivos</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>8. Propiedad Intelectual</h2>
+                    <p>Todos los diseños y contenidos son propiedad de Forma programada:</p>
+                    <ul>
+                        <li>Los archivos digitales son para uso personal únicamente</li>
+                        <li>Prohibida la redistribución comercial de archivos</li>
+                        <li>Respetamos los derechos de autor de terceros</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>9. Limitación de Responsabilidad</h2>
+                    <p>Forma programada no será responsable por:</p>
+                    <ul>
+                        <li>Daños indirectos o consecuenciales</li>
+                        <li>Pérdida de ganancias o datos</li>
+                        <li>Interrupciones del servicio por mantenimiento</li>
+                        <li>Problemas con impresoras 3D del usuario</li>
+                    </ul>
+                </section>
+
+                <section class="legal-section">
+                    <h2>10. Modificaciones</h2>
+                    <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios serán notificados a través de nuestra plataforma y entrarán en vigencia inmediatamente.</p>
+                </section>
+
+                <section class="legal-section">
+                    <h2>11. Contacto</h2>
+                    <p>Para consultas sobre estos términos:</p>
+                    <ul>
+                        <li>Email: legal@formaprogramada.com</li>
+                        <li>Teléfono: +54 11 1234-5678</li>
+                    </ul>
+                </section>
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -219,7 +249,7 @@
                 <div class="footer-bottom-content">
                     <p>&copy; 2025 Forma programada. Todos los derechos reservados.</p>
                     <div class="footer-links">
-                         <a href="/politicas-privacidad.html">Politicas de privacidad</a>
+                        <a href="/politicas-privacidad.html">Politicas de privacidad</a>
                         <a href="/terminos-servicios.html">Terminos de servicios</a>
                         <a href="/politicas-cookies.html">Politicas de cookies</a>
                     </div>
@@ -227,12 +257,12 @@
             </div>
         </div>
     </footer>
+
     <script src="auth-manager.js".js"></script>
     <script src="api.js"></script>
     <script src="admin-access.js"></script>
     <script src="carrito-visual.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <script src="busqueda-producto.js"></script>
-    <script src="categoria.js" defer></script>
 </body>
 </html>
