@@ -478,7 +478,7 @@ async confirmarPedido(pedido, quantity) {
                 throw new Error("Quantity inválida: " + quantity);
             }
 
-            const API_BASE_URL = "http://localhost:8080";
+            const API_BASE_URL = "https://forma-programada.onrender.com";
             const url = `${API_BASE_URL}/api/mp/confirmarPedido?quantity=${quantity}`;
             
             console.log("📍 URL completa:", url);
