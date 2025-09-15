@@ -152,26 +152,59 @@ class CategoryPage {
         });
     }
 
-    updateCategoryInfo() {
-        const categoryTitle = document.getElementById('category-title');
-        const categoryDescription = document.getElementById('category-description');
+   updateCategoryInfo() {
+    const categoryTitle = document.getElementById('category-title');
+    const categoryDescription = document.getElementById('category-description');
 
-        if (this.currentCategoryObj) {
-            const title = this.currentCategoryObj.nombre;
-            categoryTitle.textContent = title;
-            categoryDescription.textContent = `Explora nuestra colección de ${title.toLowerCase()}.`;
-        } else {
-            categoryTitle.textContent = 'Todos los Productos';
-            categoryDescription.textContent = 'Descubre toda nuestra colección de diseños 3D únicos.';
+    if (this.currentCategoryObj) {
+        let title = this.currentCategoryObj.nombre;
+        let description = this.currentCategoryObj.descripcion;
+
+        // Manejar diferentes tipos de búsqueda
+        switch (this.currentCategoryObj.id) {
+            case 'search-results':
+                categoryTitle.innerHTML = `<i class="fas fa-search"></i> Resultados para: ${title}`;
+                categoryDescription.textContent = description;
+                break;
+                
+            case 'advanced-search':
+                categoryTitle.innerHTML = `<i class="fas fa-filter"></i> ${title}`;
+                categoryDescription.textContent = description;
+                break;
+                
+            case 'simple-search':
+                categoryTitle.innerHTML = `<i class="fas fa-search"></i> Búsqueda: ${title}`;
+                categoryDescription.textContent = description;
+                break;
+                
+            default:
+                // Categorías normales
+                categoryTitle.textContent = title;
+                categoryDescription.textContent = description || `Explora nuestra colección de ${title.toLowerCase()}.`;
+                break;
         }
+    } else {
+        categoryTitle.innerHTML = '<i class="fas fa-th-large"></i> Todos los Productos';
+        categoryDescription.textContent = 'Descubre toda nuestra colección de diseños 3D únicos.';
     }
-    applyFilters() {
+}
+
+// También actualiza applyFilters para manejar búsquedas
+applyFilters() {
     this.filteredProducts = this.allProducts.filter(product => {
-        // No filtrar por categoría porque ya lo hace el backend
+        // Si estamos en modo búsqueda, no filtrar por categoría
+        if (this.currentCategoryObj && 
+            ['search-results', 'advanced-search', 'simple-search'].includes(this.currentCategoryObj.id)) {
+            // Solo aplicar filtros de precio para búsquedas
+            const price = parseFloat(product.precio);
+            const min = this.filters.priceMin != null ? this.filters.priceMin : 0;
+            const max = this.filters.priceMax != null ? this.filters.priceMax : Infinity;
+            
+            return price >= min && price <= max;
+        }
 
-        // Filtro precio por rango
+        // Comportamiento normal para categorías
         const price = parseFloat(product.precio);
-
         const min = this.filters.priceMin != null ? this.filters.priceMin : 0;
         const max = this.filters.priceMax != null ? this.filters.priceMax : Infinity;
 
@@ -184,7 +217,24 @@ class CategoryPage {
     this.renderProducts();
 }
 
-
+// Método adicional para manejar estados vacíos en búsquedas
+showEmptyState() {
+    const productGrid = document.querySelector('.products-grid, .product-grid, #products-grid');
+    if (productGrid) {
+        productGrid.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>No se encontraron productos</h3>
+                <p>Intenta con una búsqueda diferente o revisa los filtros aplicados.</p>
+                <button class="btn-primary" onclick="window.location.href='/'">
+                    <i class="fas fa-home"></i> Volver al inicio
+                </button>
+            </div>
+        `;
+    }
+}
 
 
     applySorting() {
@@ -460,11 +510,81 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.categoryPage = categoryPage;
     await categoryPage.init();
 
-    // Revisar si hay query de búsqueda
-    const searchData = JSON.parse(localStorage.getItem('searchData'));
-    const searchQuery = localStorage.getItem('searchQuery');
+    console.log('🔍 Iniciando categoria.js...');
 
-    if (searchData || searchQuery) {
+    // Revisar si hay resultados del nuevo motor de búsqueda
+    const searchResults = JSON.parse(localStorage.getItem('searchResults') || 'null');
+    const newSearchQuery = localStorage.getItem('searchQuery');
+
+    // Revisar si hay query de búsqueda del sistema anterior
+    const searchData = JSON.parse(localStorage.getItem('searchData') || 'null');
+    const oldSearchQuery = localStorage.getItem('searchQuery');
+
+    console.log('📊 Búsquedas detectadas:', {
+        searchResults: searchResults?.length || 0,
+        newSearchQuery,
+        searchData: !!searchData,
+        oldSearchQuery
+    });
+
+    // PRIORIDAD 1: Resultados del nuevo motor de búsqueda con Fuse.js
+    if (searchResults && searchResults.length > 0) {
+        console.log('🎯 Cargando resultados del motor de búsqueda:', searchResults.length);
+        
+        try {
+            // Los productos ya vienen procesados del motor de búsqueda
+            // Solo necesitamos adaptarlos al formato esperado
+            const products = searchResults.map(product => ({
+                id: product.id,
+                nombre: product.nombre,
+                descripcion: product.descripcion || '',
+                precio: product.precio,
+                categoriaId: product.categoria,
+                colores: product.colores || [],
+                archivoPrincipal: product.archivo ? { linkArchivo: product.archivo } : null,
+                // Estructura completa para normalizeProductDTO
+                producto: {
+                    id: product.id,
+                    nombre: product.nombre,
+                    descripcion: product.descripcion || '',
+                    precio: product.precio,
+                    categoriaId: product.categoria,
+                    archivo: product.archivo
+                }
+            }));
+
+            // Aplicar la normalización estándar
+            categoryPage.allProducts = products.map(p => categoryPage.normalizeProductDTO(p));
+            categoryPage.filteredProducts = [...categoryPage.allProducts];
+
+            // Configurar como búsqueda
+            categoryPage.filters.category = 'all';
+            categoryPage.currentCategoryId = null;
+            categoryPage.currentCategoryObj = {
+                id: 'search-results',
+                nombre: `"${newSearchQuery}"`,
+                descripcion: `${products.length} producto${products.length !== 1 ? 's' : ''} encontrado${products.length !== 1 ? 's' : ''}`
+            };
+
+            // Actualizar interfaz
+            categoryPage.updateCategoryInfo();
+            categoryPage.applyFilters();
+
+            console.log('✅ Resultados del motor de búsqueda cargados correctamente');
+
+        } catch (error) {
+            console.error('❌ Error procesando resultados del motor de búsqueda:', error);
+            categoryPage.showEmptyState();
+        }
+
+        // Limpiar localStorage del nuevo sistema
+        localStorage.removeItem('searchResults');
+        localStorage.removeItem('searchQuery');
+        
+    } else if (searchData || oldSearchQuery) {
+        // PRIORIDAD 2: Sistema de búsqueda anterior
+        console.log('🔍 Procesando búsqueda del sistema anterior...');
+        
         try {
             let productsResponse;
 
@@ -476,10 +596,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     precioMax: searchData.maxPrice || Infinity,
                     categoriaId: searchData.category || null
                 };
+                console.log('🔧 Aplicando filtros avanzados:', filtros);
                 productsResponse = await API.searchProductsAdvanced(filtros);
             } else {
                 // Búsqueda simple
-                productsResponse = await API.searchProducts(searchQuery);
+                console.log('🔍 Búsqueda simple:', oldSearchQuery);
+                productsResponse = await API.searchProducts(oldSearchQuery);
             }
 
             const products = productsResponse.map(p => categoryPage.normalizeProductDTO(p));
@@ -489,16 +611,41 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             categoryPage.filters.category = 'all';
             categoryPage.currentCategoryId = null;
-            categoryPage.currentCategoryObj = null;
+            
+            // Configurar información contextual
+            if (searchData) {
+                categoryPage.currentCategoryObj = {
+                    id: 'advanced-search',
+                    nombre: 'Búsqueda avanzada',
+                    descripcion: `Filtros: ${searchData.query || 'Sin término'}`
+                };
+            } else {
+                categoryPage.currentCategoryObj = {
+                    id: 'simple-search',
+                    nombre: `"${oldSearchQuery}"`,
+                    descripcion: `Resultados de búsqueda`
+                };
+            }
 
             categoryPage.updateCategoryInfo();
             categoryPage.applyFilters();
 
+            console.log('✅ Búsqueda anterior procesada correctamente');
+
         } catch (error) {
-            console.error('Error buscando productos por query/filtros:', error);
+            console.error('❌ Error buscando productos por query/filtros:', error);
+            categoryPage.showEmptyState();
         }
 
+        // Limpiar localStorage del sistema anterior
         localStorage.removeItem('searchData');
         localStorage.removeItem('searchQuery');
+        
+    } else {
+        // PRIORIDAD 3: Carga normal (sin búsquedas)
+        console.log('📂 Carga normal de categoría');
+        // El comportamiento normal ya está manejado por CategoryPage.init()
     }
+
+    console.log('✅ Categoria.js inicializado correctamente');
 });

@@ -105,24 +105,24 @@ public class PedidoMapper {
         return lista2;
     }
 
-
     public static List<PedidoDTO> toDTO(List<PedidoEntity> lista){
         List<PedidoDTO> lista2 = new ArrayList<>();
         for (PedidoEntity pedido: lista){
 
-
             PedidoDTO pedidoDTO= new PedidoDTO();
-            pedidoDTO.setFechaPedido(pedido.getFechaPedido());
-            pedidoDTO.setEstado(pedido.getEstado());
             pedidoDTO.setId(pedido.getId());
+            pedidoDTO.setFechaPedido(pedido.getFechaPedido());
             pedidoDTO.setTotal(pedido.getTotal());
-            pedidoDTO.setUsuarioId(pedido.getId());
+            pedidoDTO.setEstado(pedido.getEstado());
 
+            // ✅ Evitar NPE si usuarioId es null
+            pedidoDTO.setUsuarioId(pedido.getUsuarioId() != null ? pedido.getUsuarioId().getId() : null);
 
             lista2.add(pedidoDTO);
         }
         return lista2;
     }
+
     public static PedidoDTO toDTO(PedidoEntity pedido) {
         PedidoDTO dto = new PedidoDTO();
         dto.setId(pedido.getId());
@@ -135,7 +135,10 @@ public class PedidoMapper {
                 ? pedido.getProductos().stream().map(pp -> {
             ProductoEnPedidoDTO ppDTO = new ProductoEnPedidoDTO();
             ppDTO.setId(pp.getId());
-            ppDTO.setProductoId(pp.getProductoId().getId());
+
+            // 🔹 Evitar NullPointerException
+            ppDTO.setProductoId(pp.getProductoId() != null ? pp.getProductoId().getId() : null);
+
             ppDTO.setNombre(pp.getNombre());
             ppDTO.setPrecio(pp.getPrecio());
             ppDTO.setCantidad(pp.getCantidad());
@@ -144,19 +147,18 @@ public class PedidoMapper {
             ppDTO.setHex(pp.getColor() != null ? pp.getColor().getHex() : null);
             ppDTO.setPrecioTotal(pp.getPrecio() * pp.getCantidad());
 
-            // Color: DIGITAL si es digital
             ppDTO.setColorNombre(pp.getEsDigital() ? "DIGITAL" : (pp.getColor() != null ? pp.getColor().getColor() : null));
 
-            // 🔹 Mapear la primera imagen si existe
-            if (pp.getProductoId().getArchivos() != null && !pp.getProductoId().getArchivos().isEmpty()) {
-                pp.getProductoId().getArchivos().sort(Comparator.comparingInt(ProductoArchivoEntity::getOrden));
+            // Imagen
+            if (pp.getProductoId() != null && pp.getProductoId().getArchivos() != null && !pp.getProductoId().getArchivos().isEmpty()) {
+                pp.getProductoId().getArchivos().sort(Comparator.comparingInt(a -> a.getOrden()));
                 ppDTO.setImagen(pp.getProductoId().getArchivos().get(0).getLinkArchivo());
             } else {
                 ppDTO.setImagen(null);
             }
 
-            // 🔹 Traer archivo Base64 solo si es digital
-            if (pp.getEsDigital() && pp.getProductoId().getArchivo() != null) {
+            // Archivo Base64 solo si digital
+            if (pp.getEsDigital() && pp.getProductoId() != null && pp.getProductoId().getArchivo() != null) {
                 ppDTO.setArchivoBase64(Base64.getEncoder().encodeToString(pp.getProductoId().getArchivo()));
             } else {
                 ppDTO.setArchivoBase64(null);
@@ -165,6 +167,7 @@ public class PedidoMapper {
             return ppDTO;
         }).collect(Collectors.toList())
                 : new ArrayList<>();
+
 
         dto.setProductos(productos);
 

@@ -125,7 +125,24 @@ public class ProductoController {
                     .body("Error al obtener los productos: " + e.getMessage());
         }
     }
+    @GetMapping("/todos/busqueda")
+    public ResponseEntity<?> obtenerTodosLosProductosParaBusqueda() {
+        try {
+            // Llamar directamente al método que no pagina
+            List<ProductoConArchivoPrincipalYColoresDTO> productos =
+                    productoService.obtenerTodosLosProductosSinPaginado();
 
+            if (productos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                        .body("No hay productos disponibles");
+            }
+
+            return ResponseEntity.ok(productos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al obtener los productos: " + e.getMessage());
+        }
+    }
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<?> obtenerProductoPorId(@PathVariable Integer id) {
         try {

@@ -1,6 +1,5 @@
 package com.formaprogramada.ecommerce_backend.Domain.Service.Producto;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Producto.ProductoAprobar.ColorRequest;
-import com.formaprogramada.ecommerce_backend.Infrastructure.Elastic.ProductoSyncService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.Producto.*;
 import com.formaprogramada.ecommerce_backend.Domain.Service.ImgBB.ImgBBUploaderService;
 import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.ImgBB.ImgBBData;
@@ -66,8 +65,7 @@ public class ProductoServiceImpl implements ProductoService {
     private CacheManager cacheManager;
     @Autowired
     private ProductosPorCategoriaCacheKeys productosPorCategoriaCacheKeys;
-    @Autowired
-    private ProductoSyncService productoSyncService;
+
 
     @Transactional
     public ProductoResponse crearProducto(ProductoRequestConColores dto, MultipartFile archivoComprimido) throws IOException {
@@ -98,7 +96,6 @@ public class ProductoServiceImpl implements ProductoService {
             producto.setCategoriaId(categoria);
 
             ProductoEntity productoGuardado = productoRepository.save(producto);
-            productoSyncService.sincronizarProducto(productoGuardado.getId());
 
             String dimension = dto.getDimensionAlto() + "x" + dto.getDimensionAncho() + "x" + dto.getDimensionProfundidad();
 
@@ -262,7 +259,6 @@ public class ProductoServiceImpl implements ProductoService {
 
 
             ProductoEntity productoActualizado = productoRepository.save(producto);
-            productoSyncService.sincronizarProducto(productoActualizado.getId());
 
             // Actualizar producto_detalle asociado
             List<ProductoDetalleEntity> detalles = productoDetalleRepository.findByProductoId(producto.getId());
@@ -675,7 +671,6 @@ public class ProductoServiceImpl implements ProductoService {
 
             // Eliminar relaciones y producto localmente
             productoRepository.deleteById(id);
-            productoSyncService.eliminarDeIndice(id);
 
             // Refrescar caches manualmente
             productoCacheService.refrescarCacheProducto(id);

@@ -13,6 +13,21 @@ const API = {
             return []; // retorno seguro
         }
     },
+    async loadProducts() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/productos`);
+            if (response.status === 204) {
+                console.warn('No hay productos disponibles');
+                return;
+            }
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+            products = await response.json();
+        } catch (err) {
+            console.error('Error al cargar productos:', err);
+        }
+    },
+
 
     // Fetch all complete products
     async getCompleteProducts() {
@@ -74,7 +89,18 @@ const API = {
             return null;
         }
     },
-
+    // En tu archivo de API, agregar:
+    async getAllProductsForSearch() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/productos/todos/busqueda`);
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            const products = await response.json();
+            return products; // Ya es un array directo, no paginado
+        } catch (error) {
+            console.error('Error cargando productos para búsqueda:', error);
+            return [];
+        }
+    },
     async getCompleteProductById(id) {
         try {
             const response = await fetch(`${API_BASE_URL}/api/productos/${id}`);

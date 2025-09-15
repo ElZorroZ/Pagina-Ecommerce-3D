@@ -107,7 +107,6 @@ public class PedidoRepositoryImpl implements PedidoRepository {
         for (PedidoProductoEntity p : pedidoProducto) {
             ProductoEnPedidoDTO dto = new ProductoEnPedidoDTO();
             dto.setId(p.getId());
-            dto.setProductoId(p.getProductoId().getId());
             dto.setNombre(p.getNombre());
             dto.setCantidad(p.getCantidad());
             dto.setPrecio(p.getPrecio());
@@ -116,12 +115,18 @@ public class PedidoRepositoryImpl implements PedidoRepository {
             dto.setColorNombre(p.getColor() != null ? p.getColor().getColor() : null);
             dto.setPrecioTotal(p.getPrecio() * p.getCantidad());
 
-            // --- Aquí vamos a traer el archivo desde la tabla PRODUCTO ---
-            ProductoEntity productoReal = jpaProductoRepository.findById(p.getProductoId().getId())
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-            if (productoReal.getArchivo() != null) {
-                dto.setArchivoBase64(Base64.getEncoder().encodeToString(productoReal.getArchivo()));
+            if (p.getProductoId() != null) {
+                dto.setProductoId(p.getProductoId().getId());
+
+                ProductoEntity productoReal = jpaProductoRepository.findById(p.getProductoId().getId())
+                        .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                if (productoReal.getArchivo() != null) {
+                    dto.setArchivoBase64(Base64.getEncoder().encodeToString(productoReal.getArchivo()));
+                } else {
+                    dto.setArchivoBase64(null);
+                }
             } else {
+                dto.setProductoId(null);
                 dto.setArchivoBase64(null);
             }
 

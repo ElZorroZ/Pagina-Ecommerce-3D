@@ -36,7 +36,7 @@ public class PedidoProductoEntity {
     private double precio;
 
     @Column(length = 100, nullable = false)
-    private int colorId;
+    private Integer colorId;
 
     @Column(length = 50, nullable = false)
     private Boolean esDigital;

@@ -10,6 +10,7 @@
 		<relativePath/>
 	</parent>
 
+
 	<groupId>com.formaprogramada</groupId>
 	<artifactId>ecommerce-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -105,11 +106,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
-		</dependency>
-		
 		<!-- MapStruct -->
 		<dependency>
 			<groupId>org.mapstruct</groupId>
