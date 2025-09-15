@@ -168,45 +168,47 @@
     </div>
 
     <!-- SECCIÓN 3: Datos personales -->
-    <section class="perfil-seccion" id="datos-personales">
-      <h2>Datos Personales</h2>
-      <form id="perfil-form" class="perfil-form">
-        <div class="form-group">
-          <label for="nombre">Nombre</label>
-          <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" />
-        </div>
+<section class="perfil-seccion" id="datos-personales">
+  <h2>Datos Personales</h2>
+  <form id="perfil-form" class="perfil-form" autocomplete="off">
+    <div class="form-group">
+      <label for="nombre">Nombre</label>
+      <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" autocomplete="off" />
+    </div>
 
-        <div class="form-group">
-          <label for="apellido">Apellido</label>
-          <input type="text" id="apellido" name="apellido" placeholder="Tu apellido" />
-        </div>
+    <div class="form-group">
+      <label for="apellido">Apellido</label>
+      <input type="text" id="apellido" name="apellido" placeholder="Tu apellido" autocomplete="off" />
+    </div>
 
-        <div class="form-group">
-          <label for="direccion">Dirección</label>
-          <input type="text" id="direccion" name="direccion" placeholder="Tu dirección" />
-        </div>
+    <div class="form-group">
+      <label for="direccion">Dirección</label>
+      <input type="text" id="direccion" name="direccion" placeholder="Tu dirección" autocomplete="off" />
+    </div>
 
-        <div class="form-group">
-          <label for="codigoPostal">Código Postal</label>
-          <input type="text" id="codigoPostal" name="codigoPostal" placeholder="Código postal" />
-        </div>
+    <div class="form-group">
+      <label for="codigoPostal">Código Postal</label>
+      <input type="text" id="codigoPostal" name="codigoPostal" placeholder="Código postal" autocomplete="off" />
+    </div>
 
-        <div class="form-group">
-          <label for="ciudad">Ciudad</label>
-          <input type="text" id="ciudad" name="ciudad" placeholder="Ciudad" />
-        </div>
+    <div class="form-group">
+      <label for="ciudad">Ciudad</label>
+      <input type="text" id="ciudad" name="ciudad" placeholder="Ciudad" autocomplete="off" />
+    </div>
 
-        <div class="form-group">
-          <label for="telefono">Teléfono</label>
-          <input 
-            type="tel" 
-            id="telefono" 
-            name="telefono" 
-            placeholder="Número de teléfono"
-            inputmode="numeric"
-            required
-          />
-        </div>
+    <div class="form-group">
+      <label for="telefono">Teléfono</label>
+      <input 
+        type="tel" 
+        id="telefono" 
+        name="telefono" 
+        placeholder="Número de teléfono"
+        inputmode="numeric"
+        required
+        autocomplete="off"
+      />
+    </div>
+
 
 
         <button type="submit" class="btn-submit">Guardar Cambios</button>
