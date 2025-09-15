@@ -33,6 +33,9 @@ public class UsuarioEntity {
     @Column(nullable = false)
     private boolean verificado = false;
 
+    @Column(nullable = false)
+    private String proveedor; // LOCAL o GOOGLE
+
     @Column(nullable = false, length = 200)
     private String direccion;
 

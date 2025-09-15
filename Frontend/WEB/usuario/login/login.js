@@ -1,50 +1,59 @@
+// Login normal
 document.getElementById("login-form").addEventListener("submit", async function (e) {
   e.preventDefault();
 
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
+  if (!email || !password) {
+    mostrarError("Por favor, completa todos los campos");
+    return;
+  }
+
   try {
-    const response = await fetch("https://forma-programada.onrender.com/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        gmail: email,
-        password: password
-      })
-    });
+    mostrarCarga("Iniciando sesión..."); // Overlay mientras se procesa
+    const result = await authManager.login(email, password);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      alert("Error al iniciar sesión: " + errorText);
-      return;
-    }
+    if (result.success) {
+      mostrarExito("¡Login exitoso! Redirigiendo...");
 
-    const data = await response.json();
-  console.log("Respuesta del login:", data);
-
-    localStorage.setItem("accessToken", data.accessToken);
-    localStorage.setItem("refreshToken", data.refreshToken);
-
-    if (data.usuarioId !== undefined) {
-      localStorage.setItem("usuarioId", data.usuarioId.toString());
-
-      alert("Usuario ID guardado: " + data.usuarioId);
+      const lastPage = localStorage.getItem("lastPage");
+      setTimeout(() => {
+        if (lastPage) {
+          localStorage.removeItem("lastPage");
+          window.location.href = lastPage;
+        } else {
+          window.location.href = "/index.html";
+        }
+      }, 1000);
     } else {
-      alert("No se recibió usuarioId en la respuesta");
+      mostrarError("Error al iniciar sesión: " + result.error);
+      console.error("Error de login:", result.error);
     }
+  } catch (error) {
+    mostrarError("Ocurrió un error inesperado al intentar iniciar sesión. Intenta nuevamente.");
+    console.error("Error inesperado en login:", error);
+  } finally {
+    ocultarCarga(); // Ocultar overlay siempre
+  }
+});
 
+// Login con Google
+document.getElementById("google-login").addEventListener("click", function () {
+  // Redirige al flujo OAuth2 de Spring Security usando la URL base
+  window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+});
 
+// Verificar si el usuario ya está autenticado al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+  if (authManager.isAuthenticated()) {
+    console.log('Usuario ya autenticado, redirigiendo...');
     const lastPage = localStorage.getItem("lastPage");
     if (lastPage) {
+      localStorage.removeItem("lastPage");
       window.location.href = lastPage;
     } else {
       window.location.href = "/index.html";
     }
-  } catch (error) {
-    console.error("Error en la solicitud:", error);
-    alert("Ocurrió un error al intentar iniciar sesión.");
   }
 });

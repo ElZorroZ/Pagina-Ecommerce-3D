@@ -1,51 +1,3 @@
-    async function validarToken() {
-        const accessToken = localStorage.getItem('accessToken');
-        const refreshToken = localStorage.getItem('refreshToken');
-
-        if (!accessToken && !refreshToken) {
-            return null;
-        }
-
-        try {
-            let finalAccessToken = accessToken;
-
-            if (!accessToken || tokenExpirado(accessToken)) {
-                if (!refreshToken) throw new Error("No hay refresh token");
-
-                const response = await fetch("https://forma-programada.onrender.com/api/auth/refresh", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ refreshToken }),
-                });
-
-                if (!response.ok) throw new Error("Refresh token inválido");
-
-                const data = await response.json();
-                localStorage.setItem('accessToken', data.accessToken);
-                localStorage.setItem('refreshToken', data.refreshToken);
-                finalAccessToken = data.accessToken;
-            }
-
-            return finalAccessToken;
-
-        } catch (err) {
-            console.error('Error en validación de token:', err);
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            return null;
-        }
-    }
-
-    function tokenExpirado(token) {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const now = Math.floor(Date.now() / 1000);
-            return payload.exp && payload.exp < now;
-        } catch {
-            return true;
-        }
-    }
-
 document.addEventListener('DOMContentLoaded', () => {
     const accountBtn = document.getElementById('account-btn');
     const accountMenu = document.getElementById('account-menu');
@@ -59,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // --- Hover account ---
     const ocultarDropdownConDelay = () => {
         hoverTimeout = setTimeout(() => {
             accountMenu.classList.remove('show');
@@ -78,36 +31,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Logout ---
     if (logoutBtn) {
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('usuarioId');  
-            location.reload();
+            authManager.logout();
         });
     }
 
+    // --- Verificar roles y mostrar opciones ---
     async function verificarAccesoAdmin() {
-        const accessToken = localStorage.getItem("accessToken");
-        if (!accessToken || !adminDropdown || !adminOptions) return;
+        const token = authManager.getAccessToken();
+        if (!token || !adminDropdown || !adminOptions) return;
 
         try {
-            const payloadBase64 = accessToken.split('.')[1];
+            const payloadBase64 = token.split('.')[1];
             const payload = JSON.parse(atob(payloadBase64));
             const roles = payload.roles || [];
 
             if (roles.includes("ROLE_ADMIN") || roles.includes("ROLE_COLABORADOR")) {
-                adminDropdown.classList.remove("hidden"); // Mostrar el contenedor
-                
-                // Limpiar y agregar las opciones
+                adminDropdown.classList.remove("hidden");
+
                 adminOptions.innerHTML = "";
 
                 if (roles.includes("ROLE_ADMIN")) {
                     adminOptions.innerHTML = `
                         <a href="/admin/CRUDCategoria/CRUDcategoria.html" class="dropdown-category">Gestionar categorías</a>
                         <a href="/admin/CRUDProducto/CRUDproducto.html" class="dropdown-category">Gestionar productos</a>
-                        <a href="/admin/pedidos.html" class="dropdown-category">Gestionar pedidos</a>
+                        <a href="/admin/Pedidos/pedidos.html" class="dropdown-category">Gestionar pedidos</a>
                         <a href="/admin/Aprobacion/CRUDaprobacion.html" class="dropdown-category">Gestionar colaboradores</a>
                         <a href="/admin/AprobacionProducto/CRUDaprobacionProducto.html" class="dropdown-category">Gestionar productos sin aprobar</a>
                     `;
@@ -118,71 +69,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 initializeAdminDropdownHover();
-
             } else {
-                adminDropdown.classList.add("hidden"); // Ocultar el contenedor
+                adminDropdown.classList.add("hidden");
             }
         } catch (err) {
             console.warn("Error al verificar acceso admin/colaborador:", err.message);
             adminDropdown.classList.add("hidden");
         }
     }
-    
+
     function initializeAdminDropdownHover() {
-  const adminDropdown = document.getElementById("admin-dropdown");
-  if (!adminDropdown) return;
+        const adminDropdown = document.getElementById("admin-dropdown");
+        if (!adminDropdown) return;
 
-  const dropdownMenu = adminDropdown.querySelector(".dropdown-menu");
-  if (!dropdownMenu) return;
+        const dropdownMenu = adminDropdown.querySelector(".dropdown-menu");
+        if (!dropdownMenu) return;
 
-  if (adminDropdown._hoverInitialized) return;
-  adminDropdown._hoverInitialized = true;
+        if (adminDropdown._hoverInitialized) return;
+        adminDropdown._hoverInitialized = true;
 
-  let timeoutId;
+        let timeoutId;
 
-  adminDropdown.addEventListener("mouseenter", () => {
-    clearTimeout(timeoutId);
-    dropdownMenu.classList.add("show");
-  });
+        adminDropdown.addEventListener("mouseenter", () => {
+            clearTimeout(timeoutId);
+            dropdownMenu.classList.add("show");
+        });
 
-  adminDropdown.addEventListener("mouseleave", () => {
-    timeoutId = setTimeout(() => {
-      dropdownMenu.classList.remove("show");
-    }, 300);
-  });
+        adminDropdown.addEventListener("mouseleave", () => {
+            timeoutId = setTimeout(() => {
+                dropdownMenu.classList.remove("show");
+            }, 300);
+        });
 
-  // Evitar que al entrar al dropdown-menu o sus links se cierre el menú
-  dropdownMenu.addEventListener("mouseenter", () => {
-    clearTimeout(timeoutId);
-    dropdownMenu.classList.add("show");
-  });
+        dropdownMenu.addEventListener("mouseenter", () => {
+            clearTimeout(timeoutId);
+            dropdownMenu.classList.add("show");
+        });
 
-  dropdownMenu.addEventListener("mouseleave", () => {
-    timeoutId = setTimeout(() => {
-      dropdownMenu.classList.remove("show");
-    }, 300);
-  });
-}
+        dropdownMenu.addEventListener("mouseleave", () => {
+            timeoutId = setTimeout(() => {
+                dropdownMenu.classList.remove("show");
+            }, 300);
+        });
+    }
 
+    document.getElementById("admin-options").addEventListener("click", e => {
+        if (e.target.tagName === "A") {
+            e.preventDefault();
+            window.location.href = e.target.href;
+        }
+    });
 
-
-document.getElementById("admin-options").addEventListener("click", e => {
-  if(e.target.tagName === "A"){
-     e.preventDefault(); // Para controlar la navegación con JS
-    window.location.href = e.target.href; // Navegar a la URL del href
-  }
-});
-
+    // --- Account button ---
     accountBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        const token = await validarToken();
-        if (!token) {
-            // Si no hay token válido, redirigir al login
-            window.location.href = 'usuario/login/login.html';
+
+        if (!authManager.isAuthenticated()) {
+            authManager.redirectToLogin();
             return;
         }
 
-        // Si el menú está abierto, lo cerramos
         if (accountMenu.classList.contains('show')) {
             accountMenu.classList.remove('show');
         } else {
@@ -191,10 +137,10 @@ document.getElementById("admin-options").addEventListener("click", e => {
         }
     });
 
-
-    // ✅ Verificación inicial al cargar la página (solo valida, no abre menú)
+    // --- Verificación inicial ---
     (async () => {
-        const token = await validarToken();
-        if (token) await verificarAccesoAdmin();
+        if (authManager.isAuthenticated()) {
+            await verificarAccesoAdmin();
+        }
     })();
 });

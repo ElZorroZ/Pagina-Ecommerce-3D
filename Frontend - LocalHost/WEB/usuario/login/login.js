@@ -1,3 +1,4 @@
+// Login normal
 document.getElementById("login-form").addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -15,7 +16,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
 
     if (result.success) {
       mostrarExito("¡Login exitoso! Redirigiendo...");
-      
+
       const lastPage = localStorage.getItem("lastPage");
       setTimeout(() => {
         if (lastPage) {
@@ -29,13 +30,18 @@ document.getElementById("login-form").addEventListener("submit", async function 
       mostrarError("Error al iniciar sesión: " + result.error);
       console.error("Error de login:", result.error);
     }
-
   } catch (error) {
     mostrarError("Ocurrió un error inesperado al intentar iniciar sesión. Intenta nuevamente.");
     console.error("Error inesperado en login:", error);
   } finally {
     ocultarCarga(); // Ocultar overlay siempre
   }
+});
+
+// Login con Google
+document.getElementById("google-login").addEventListener("click", function () {
+  // Redirige al flujo OAuth2 de Spring Security
+  window.location.href = "http://localhost:8080/oauth2/authorization/google";
 });
 
 // Verificar si el usuario ya está autenticado al cargar la página
@@ -51,13 +57,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 });
-
-
-// Opcional: Manejar el botón "Recordarme" si lo tienes
-// const rememberCheckbox = document.getElementById("remember-me");
-// if (rememberCheckbox) {
-//   rememberCheckbox.addEventListener('change', function() {
-//     // Implementar lógica de "recordarme" si es necesario
-//     console.log('Recordarme:', this.checked);
-//   });
-// }

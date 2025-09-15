@@ -1,5 +1,3 @@
-const BACKEND_URL = 'https://forma-programada.onrender.com/api/auth/register';
-
 document.getElementById('register-form').onsubmit = async e => {
   e.preventDefault();
 
@@ -10,19 +8,32 @@ document.getElementById('register-form').onsubmit = async e => {
   const confirm = document.getElementById('confirm-password').value;
 
   if (password !== confirm) {
-    alert('Las contraseñas no coinciden');
+    mostrarError('Las contraseñas no coinciden');
     return;
   }
 
-  const res = await fetch(BACKEND_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nombre,apellido, gmail, password })
-  });
+  try {
+    mostrarCarga("Registrando usuario...");
 
-  if (res.ok) {
-    alert('Registrado correctamente. Revisa tu email.');
-  } else {
-    alert('Error: ' + await res.text());
+    // Usamos directamente fetch con la URL completa
+    const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, apellido, gmail, password })
+    });
+
+    if (res.ok) {
+      mostrarExito('Registrado correctamente. Revisa tu email para confirmar tu cuenta.');
+    } else {
+      const errorText = await res.text();
+      mostrarError('Error al registrar: ' + errorText);
+      console.error('Error en registro:', errorText);
+    }
+
+  } catch (err) {
+    mostrarError('Ocurrió un error de conexión al registrar.');
+    console.error('Error inesperado en registro:', err);
+  } finally {
+    ocultarCarga();
   }
 };

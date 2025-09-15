@@ -22,13 +22,16 @@ import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioActualizarMap
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioMapper;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioRegistroMapper;
 import com.formaprogramada.ecommerce_backend.Security.Hasher.PasswordHasher;
+import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.CustomUserDetailsService;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtService;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PessimisticLockException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,6 +43,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +68,9 @@ public class AuthController {
     private final JpaUsuarioRepository jpaUsuarioRepository;
     private final JwtTokenService jwtTokenService;
     private final PasswordHasher passwordHasher;
+    private final CustomUserDetailsService userDetailsService;
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -99,6 +108,7 @@ public class AuthController {
         var usuarioEntity = tokenOpt.get().getUsuario();
         var usuario = mapper.toDomain(usuarioEntity);
         usuario.setVerificado(true);
+        usuario.setProveedor("LOCAL");
         usuarioService.actualizarUsuario(usuario);
 
         return ResponseEntity.ok("Usuario validado correctamente.");
@@ -121,6 +131,11 @@ public class AuthController {
                 log.warn("Usuario no verificado: {}", request.getGmail());
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Usuario no verificado");
+            }
+
+            if (!"LOCAL".equals(usuario.getProveedor())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Usa el login con Google para este usuario");
             }
 
             var authToken = new UsernamePasswordAuthenticationToken(
@@ -278,48 +293,65 @@ public class AuthController {
     }
 
     @GetMapping("/oauth2/success")
-    public ResponseEntity<?> getUserInfo(OAuth2AuthenticationToken authentication) {
-        Map<String, Object> attributes = authentication.getPrincipal().getAttributes();
-        String email = (String) attributes.get("email");
-        String nombre = (String) attributes.get("given_name");
-        String apellido= (String) attributes.get("family_name");
-        String password="google.com";
-        Boolean verificado= (Boolean) attributes.get("email_verified");
-        //int id=(Integer) attributes.get("sub");
-        String hash = passwordHasher.hash(password);
-        Optional<Usuario> usuario = usuarioRepository.buscarPorGmail(email);
-        if (usuario.isEmpty()) {
-            Usuario usuarioReal= new Usuario();
-            usuarioReal.setGmail(email);
-            usuarioReal.setNombre(nombre);
-            usuarioReal.setApellido(apellido);
-            usuarioReal.setPassword(hash);
-            usuarioReal.setVerificado(verificado);
-            //usuarioReal.setId(id);
+    public void getUserInfo(HttpServletResponse response, OAuth2AuthenticationToken authentication) {
+        try {
+            Map<String, Object> attributes = authentication.getPrincipal().getAttributes();
+            String email = (String) attributes.get("email");
+            String nombre = (String) attributes.getOrDefault("given_name", "");
+            String apellido = (String) attributes.getOrDefault("family_name", "");
+            Boolean verificadoGoogle = (Boolean) attributes.getOrDefault("email_verified", true);
 
-            usuarioRepository.guardar(usuarioReal);
-            System.out.println(usuarioReal);
+            log.info("OAuth2 - Procesando usuario: {}", email);
+
+            // Buscar o crear usuario
+            Usuario usuario = usuarioRepository.buscarPorGmail(email)
+                    .orElseGet(() -> {
+                        log.info("OAuth2 - Creando nuevo usuario: {}", email);
+                        Usuario nuevo = new Usuario();
+                        nuevo.setGmail(email);
+                        nuevo.setNombre(nombre);
+                        nuevo.setApellido(apellido);
+                        nuevo.setVerificado(true);
+                        nuevo.setProveedor("GOOGLE");
+                        String passwordFicticio = passwordHasher.hash("google123!");
+                        nuevo.setPassword(passwordFicticio);
+                        return usuarioRepository.guardar(nuevo);
+                    });
+
+            // Cargar UserDetails para generar el token correctamente
+            UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getGmail());
+            log.info("OAuth2 - Authorities: {}", userDetails.getAuthorities());
+
+            // Generar tokens
+            AuthResponse tokens = jwtTokenService.generarTokens(userDetails);
+            log.info("OAuth2 - Tokens generados para usuario ID: {}", tokens.getUsuarioId());
+
+            if (tokens.getAccessToken() == null || tokens.getRefreshToken() == null) {
+                log.error("OAuth2 - Error: tokens nulos generados");
+                response.sendRedirect(frontendUrl + "/usuario/login/login.html?error=token_generation_failed");
+                return;
+            }
+
+            // Construir URL de redirección con tokens
+            String redirectUrl = String.format(
+                    "%s/index.html?accessToken=%s&refreshToken=%s&usuarioId=%d",
+                    frontendUrl,
+                    URLEncoder.encode(tokens.getAccessToken(), StandardCharsets.UTF_8),
+                    URLEncoder.encode(tokens.getRefreshToken(), StandardCharsets.UTF_8),
+                    tokens.getUsuarioId()
+            );
+
+            log.info("OAuth2 - Redirigiendo a: {}", redirectUrl.substring(0, Math.min(redirectUrl.length(), 100)) + "...");
+            response.sendRedirect(redirectUrl);
+
+        } catch (Exception e) {
+            log.error("OAuth2 - Error en procesamiento: ", e);
+            try {
+                response.sendRedirect(frontendUrl + "/usuario/login/login.html?error=oauth_processing_failed");
+            } catch (IOException ioException) {
+                log.error("OAuth2 - Error en redirección de error: ", ioException);
+            }
         }
-        var authToken = new UsernamePasswordAuthenticationToken(
-                email,
-                password
-        );
-        var auth = authManager.authenticate(authToken);
-        var userDetails = (UserDetails) auth.getPrincipal();
-
-        AuthResponse response = jwtTokenService.generarTokens(userDetails);
-
-
-        return ResponseEntity.ok(Map.of(
-                "accessToken", response.getAccessToken(),
-                "refreshToken", response.getRefreshToken(),
-                "usuarioId", response.getUsuarioId()
-        ));
-
-
-
-
     }
-
 
 }

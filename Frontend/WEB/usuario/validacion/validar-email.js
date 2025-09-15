@@ -1,33 +1,33 @@
 window.addEventListener('DOMContentLoaded', async () => {
-  const mensaje = document.getElementById('mensaje');
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
 
   if (!token) {
-    mensaje.textContent = "Token no proporcionado.";
-    mensaje.classList.add("error");
+    mostrarError("Token no proporcionado.");
     return;
   }
 
   try {
-    const res = await fetch(`https://forma-programada.onrender.com/api/auth/validate?token=${token}`);
+    mostrarCarga("Validando cuenta...");
+
+    const res = await fetch(`${API_BASE_URL}/api/auth/validate?token=${encodeURIComponent(token)}`);
 
     if (res.ok) {
-      mensaje.textContent = "¡Cuenta validada correctamente! Ya podés iniciar sesión.";
-      mensaje.classList.add("success");
+      mostrarExito("¡Cuenta validada correctamente! Ya podés iniciar sesión.");
       // Redirigir al login luego de 3 segundos
       setTimeout(() => {
         window.location.href = '/usuario/login/login.html';
       }, 3000);
     } else {
-      const error = await res.text();
-      mensaje.textContent = "Error: " + error;
-      mensaje.classList.add("error");
+      const errorText = await res.text();
+      mostrarError("Error: " + errorText);
+      console.error("Error en validar cuenta:", errorText);
     }
+
   } catch (e) {
-    mensaje.textContent = "Error de conexión con el servidor.";
-    mensaje.classList.add("error");
-    console.error(e);
+    mostrarError("Error de conexión con el servidor.");
+    console.error("Error inesperado al validar cuenta:", e);
+  } finally {
+    ocultarCarga();
   }
 });
- 

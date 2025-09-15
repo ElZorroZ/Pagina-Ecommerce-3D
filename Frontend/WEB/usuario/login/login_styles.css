@@ -88,3 +88,22 @@ button:hover {
     padding: 12px;
   }
 }
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 15px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #4285F4;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.google-btn:hover {
+  background-color: #357ae8;
+}

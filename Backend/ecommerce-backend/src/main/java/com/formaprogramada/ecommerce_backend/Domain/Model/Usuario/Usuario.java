@@ -15,6 +15,7 @@ public class Usuario {
     private String gmail;
     private String password;
     private boolean verificado = false;
+    private String proveedor; // LOCAL o GOOGLE
     private String direccion;
     private String cp;      // código postal
     private String ciudad;

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-@Profile("dev")
+@Profile("prod")
 public interface ProductoSearchRepository extends ElasticsearchRepository<ProductoDocument, Integer> {
 
     // Búsqueda por nombre

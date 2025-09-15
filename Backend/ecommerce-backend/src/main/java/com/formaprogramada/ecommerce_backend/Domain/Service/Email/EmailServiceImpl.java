@@ -10,6 +10,7 @@ import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpec
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,28 +29,30 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
     private final JwtSpecialTokenService jwtSpecialTokenService;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JpaUsuarioRepository jpaUsuarioRepository;
     private final TokenVerificacionService tokenService;
     private final UsuarioMapper usuarioMapper;
     private final UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JpaUsuarioRepository jpaUsuarioRepository;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl; // <-- URL del frontend desde application.properties
 
     @Override
     public void enviarEmailHtml(String destinatario, String asunto, Map<String, Object> variables, String plantilla) {
         Context context = new Context();
         context.setVariables(variables);
         String contenidoHtml = templateEngine.process(plantilla, context);
-
         try {
             MimeMessage mensaje = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
-
             helper.setTo(destinatario);
             helper.setSubject(asunto);
             helper.setText(contenidoHtml, true);
-
             mailSender.send(mensaje);
         } catch (MessagingException e) {
             throw new RuntimeException("Error al enviar correo", e);
@@ -62,25 +65,18 @@ public class EmailServiceImpl implements EmailService {
         UsuarioEntity usuarioEntity = usuarioMapper.toEntity(usuario);
         String token = tokenService.crearTokenParaUsuario(usuarioEntity).getToken();
 
-        // URL del frontend
-        String frontendUrl = "http://localhost:5501";
         String link = frontendUrl + "/usuario/validacion/validar-email.html?token=" + token;
 
-        // Variables para la plantilla
         Map<String, Object> variables = Map.of(
                 "nombre", usuario.getNombre(),
                 "urlValidacion", link
         );
 
-        // Asunto y plantilla
         String asunto = "Verifica tu cuenta";
         String plantilla = "email-verificacion";
 
-        //Enviar el email
         enviarEmailHtml(usuario.getGmail(), asunto, variables, plantilla);
     }
-
-
 
     @Override
     public void solicitarRestablecerPassword(String gmail) throws IllegalArgumentException {
@@ -88,15 +84,12 @@ public class EmailServiceImpl implements EmailService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
         String token = jwtSpecialTokenService.generateResetPasswordToken(gmail);
-
-        String frontendUrl = "http://localhost:5501";
         String link = frontendUrl + "/usuario/confirmacion-password/confirmar-password.html?token=" + token;
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("link", link);
 
         String asunto = "Restablecimiento de contraseña";
-
         enviarEmailHtml(gmail, asunto, variables, "reset-password");
     }
 
@@ -105,27 +98,22 @@ public class EmailServiceImpl implements EmailService {
         UsuarioEntity usuario = jpaUsuarioRepository.findByGmail(gmailActual)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        // Validar que el nuevo email no esté en uso
-        boolean existeNuevoEmail = jpaUsuarioRepository.existsByGmail(nuevoEmail);
-        if (existeNuevoEmail) {
+        if (jpaUsuarioRepository.existsByGmail(nuevoEmail)) {
             throw new IllegalArgumentException("El nuevo email ya está en uso");
         }
 
         String token = jwtSpecialTokenService.generateConfirmEmailToken(nuevoEmail, gmailActual);
-
-        String frontendUrl = "http://localhost:5501"; // o el puerto donde tengas tu frontend
         String link = frontendUrl + "/usuario/confirmacion/confirmar-email.html?token=" + token;
-
-        String asunto = "Confirmación de cambio de email";
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("link", link);
 
+        String asunto = "Confirmación de cambio de email";
         enviarEmailHtml(nuevoEmail, asunto, variables, "confirmar-email");
     }
 
+    @Override
     public void confirmarCambioEmail(String token) {
-        // Extraer datos del token
         String nuevoEmail = jwtSpecialTokenService.getSubjectFromToken(token);
         String gmailActual = jwtSpecialTokenService.getClaimFromToken(token, "gmailActual", String.class);
 
@@ -133,40 +121,29 @@ public class EmailServiceImpl implements EmailService {
             throw new IllegalArgumentException("Token inválido o mal formado");
         }
 
-        // Validar token con los datos extraídos
         if (!jwtSpecialTokenService.validateConfirmEmailToken(token, nuevoEmail)) {
             throw new IllegalArgumentException("Token inválido o expirado");
         }
 
-        // Buscar usuario por email actual
         UsuarioEntity usuario = jpaUsuarioRepository.findByGmail(gmailActual)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        // Validar que el nuevo email no esté en uso
         if (jpaUsuarioRepository.existsByGmail(nuevoEmail)) {
             throw new IllegalArgumentException("El nuevo email ya está en uso");
         }
 
-        // Actualizar email
         usuario.setGmail(nuevoEmail);
         jpaUsuarioRepository.save(usuario);
     }
 
     @Override
     public void enviarConfirmacionCompra(String gmail) {
-
-        String token = jwtSpecialTokenService.generateResetPasswordToken(gmail);
-
-        String frontendUrl = "http://localhost:5501";
         String link = frontendUrl + "/usuario/confirmacion-compra/confirmar-compra.html";
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("link", link);
 
         String asunto = "Confirmación de compra";
-
         enviarEmailHtml(gmail, asunto, variables, "confirmar-compra");
     }
-
-
 }

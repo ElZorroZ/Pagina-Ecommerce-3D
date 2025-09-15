@@ -61,17 +61,30 @@
                         <div class="dropdown-menu" id="account-menu" style="display: none;">
                             <div class="dropdown-content">
                             <a href="/usuario/perfil/perfil.html">Acceder Cuenta</a>
+                            <a href="/historial-pedidos.html">Ver pedidos</a>
                             <a href="#" id="logout-btn">Salir de la cuenta</a>
                             </div>
                         </div>
                     </div>
 
-                    <button class="icon-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"/>
-                            <path d="m21 21-4.35-4.35"/>
-                        </svg>
-                    </button>
+                    <div class="search-container">
+                        <input 
+                            type="text" 
+                            id="search-input" 
+                            placeholder="Buscar productos..." 
+                            class="search-input"
+                            autocomplete="off"
+                        />
+                        <button class="icon-btn" id="search-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                        </button>
+                        <div id="suggestions-box" class="suggestions-box"></div>
+
+                    </div>
+
                     <button class="icon-btn cart-btn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="m2 2 3.6 7.8A1 1 0 0 0 6.5 11H19a1 1 0 0 0 .9-1.4L17 3H6.5"/>
@@ -309,7 +322,6 @@
                     <ul>
                         <li><a href="#">Centro de ayuda</a></li>
                         <li><a href="#">Envios</a></li>
-                        <li><a href="#">Reembolsos</a></li>
                         <li><a href="#">Guia de medidas</a></li>
                     </ul>
                 </div>
@@ -327,9 +339,12 @@
             </div>
         </div>
     </footer>
-    <script src="carrito-visual.js"></script>
+    <script src="auth-manager.js".js"></script>
     <script src="api.js"></script>
     <script src="admin-access.js"></script>
+    <script src="carrito-visual.js"></script>
+    <script src="mensajes.js"></script>
+    <script src="busqueda-producto.js"></script>
     <script src="producto.js"></script>
 </body>
 </html>

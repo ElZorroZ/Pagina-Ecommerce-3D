@@ -25,8 +25,13 @@ public class UsuarioMapper {
         usuario.setCp(entity.getCp());
         usuario.setCiudad(entity.getCiudad());
         usuario.setTelefono(entity.getTelefono());
+
+        // Nuevo campo: proveedor
+        usuario.setProveedor(entity.getProveedor());
+
         return usuario;
     }
+
 
 
     public UsuarioEntity toEntity(Usuario usuario) {
@@ -38,7 +43,7 @@ public class UsuarioMapper {
         entity.setPassword(usuario.getPassword());
         entity.setPermiso(usuario.getPermiso());
         entity.setVerificado(usuario.isVerificado());
-
+        entity.setProveedor(usuario.getProveedor());
         // Agregamos los nuevos campos
         entity.setDireccion(usuario.getDireccion());
         entity.setCp(usuario.getCp());

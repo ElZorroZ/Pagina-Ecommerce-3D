@@ -1,38 +1,51 @@
+const cartBtn = document.querySelector('.cart-btn'); 
 const cartCount = document.querySelector('.cart-count');
 
-function actualizarCantidadCarrito() {
-  const usuarioId = localStorage.getItem('usuarioId');
-  const token = localStorage.getItem('accessToken');
-  const cartCount = document.querySelector('#cart-count'); // Ajusta el selector a tu HTML
-
-  if (!usuarioId || !token) {
-    console.warn('No hay usuarioId o token en localStorage');
+async function actualizarCantidadCarrito() {
+  if (!authManager.isAuthenticated()) {
+    console.warn('Usuario no autenticado');
+    if (cartCount) cartCount.textContent = '0';
     return;
   }
 
-  fetch(`https://forma-programada.onrender.com/api/carrito/verCarrito/${usuarioId}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`
+  const usuarioId = authManager.getUserId();
+
+  try {
+    const response = await authManager.fetchWithAuth(`${API_BASE_URL}/api/carrito/verCarrito/${usuarioId}`);
+    
+    if (!response.ok) {
+      throw new Error(`Error en la respuesta del servidor: ${response.status}`);
     }
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Error en la respuesta del servidor');
-      }
-      return response.json();
-    })
-    .then(data => {
-      // data ahora es un array de IDs, así que la cantidad es su longitud
-      const cantidad = data.length;
-      if (cartCount) {
-        cartCount.textContent = cantidad;
-      }
-    })
-    .catch(error => {
-      console.error('Error al cargar carrito:', error);
+
+    const data = await response.json();
+    console.log("Datos recibidos del carrito:", data);
+
+    // Sumar cantidades totales sin filtrar duplicados
+    let cantidadTotal = 0;
+    data.forEach(item => {
+      cantidadTotal += Number(item.cantidad) || 0;
     });
+
+    if (cartCount) cartCount.textContent = cantidadTotal;
+
+    console.log(`Carrito actualizado: ${cantidadTotal} items (sumando todas las cantidades)`);
+
+  } catch (error) {
+    console.error('Error al cargar carrito:', error);
+    if (cartCount) cartCount.textContent = '0';
+  }
 }
 
+if (cartBtn) {
+  cartBtn.addEventListener('click', () => {
+    if (authManager.isAuthenticated()) {
+      window.location.href = '/carrito.html';
+    } else {
+      console.warn('Usuario no autenticado, redirigiendo al login...');
+      authManager.redirectToLogin();
+    }
+  });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   actualizarCantidadCarrito();

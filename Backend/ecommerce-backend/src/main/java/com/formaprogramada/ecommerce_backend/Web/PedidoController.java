@@ -49,7 +49,6 @@ public class PedidoController {
 
             carritoController.VaciarCarrito(pedidoFinal.getUsuarioId());
             
-            emailService.enviarConfirmacionCompra(usuarioService.existePorId(id));
             return ResponseEntity.ok(pedidoFinal);
         } catch (Exception e) {
             throw new RuntimeException(e);

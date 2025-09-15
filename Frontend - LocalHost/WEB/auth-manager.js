@@ -1,4 +1,4 @@
-// auth-manager.js - Gestor optimizado para tokens de 15 minutos
+// auth-manager.js - Gestor optimizado para tokens de 15 minutos + OAuth2
 const API_BASE_URL = "http://localhost:8080";
 
 class AuthManager {
@@ -12,8 +12,34 @@ class AuthManager {
     this.REFRESH_BUFFER = 2 * 60 * 1000; // 2 minutos antes de expirar
     this.MIN_REFRESH_INTERVAL = 30 * 1000; // Mínimo 30 segundos entre refresh
     
+    // 🔍 Procesar tokens de OAuth2 al inicializar
+    this.processOAuth2Tokens();
+    
     // 🚀 Iniciar renovación proactiva
     this.startProactiveRefresh();
+  }
+
+  // 🔍 Procesar tokens de OAuth2 desde URL
+  processOAuth2Tokens() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('accessToken');
+    const refreshToken = urlParams.get('refreshToken');
+    const usuarioId = urlParams.get('usuarioId');
+
+    if (accessToken && refreshToken && usuarioId) {
+      console.log('🔍 Tokens OAuth2 detectados en URL');
+      
+      // Guardar tokens
+      this.saveAuthData(accessToken, refreshToken, usuarioId);
+      
+      // Limpiar URL sin recargar la página
+      const newUrl = window.location.protocol + "//" + 
+                    window.location.host + 
+                    window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+      
+      console.log('✅ Tokens OAuth2 procesados y URL limpiada');
+    }
   }
 
   getAccessToken() {
@@ -31,7 +57,12 @@ class AuthManager {
   isAuthenticated() {
     return !!(this.getAccessToken() && this.getRefreshToken() && this.getUserId());
   }
-  
+  getUserRole() {
+    const userInfo = this.getUserInfo();
+    if (!userInfo || !userInfo.roles || userInfo.roles.length === 0) return null;
+    return userInfo.roles[0]; // Si puede tener varios roles, elegís el primero
+}
+
   getUserInfo() {
     const token = this.getAccessToken();
     if (!token) return null;
@@ -297,14 +328,15 @@ class AuthManager {
         
         tokenInfo = {
           expiresIn: Math.round(timeUntilExpiration / 1000),
-          needsRefresh: this.needsImmediateRefresh()
+          needsRefresh: this.needsImmediateRefresh(),
+          payload: payload
         };
       } catch (e) {
         tokenInfo = { error: 'Token inválido' };
       }
     }
 
-    console.log('🔍 Estado:', {
+    console.log('🔍 Estado Auth:', {
       accessToken: !!this.getAccessToken(),
       refreshToken: !!this.getRefreshToken(),
       usuarioId: this.getUserId(),
@@ -312,6 +344,14 @@ class AuthManager {
       isRefreshing: !!this.refreshPromise,
       tokenInfo
     });
+    
+    return {
+      accessToken: !!this.getAccessToken(),
+      refreshToken: !!this.getRefreshToken(),
+      usuarioId: this.getUserId(),
+      isAuthenticated: this.isAuthenticated(),
+      tokenInfo
+    };
   }
 }
 

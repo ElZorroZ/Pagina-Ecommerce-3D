@@ -315,7 +315,7 @@ async function loadReviews(productId) {
     try {
         const allData = await API.obtenerReviews(productId); // Array que puede incluir reviews y respuestas mezcladas
         const currentUserRole = getCurrentUserRole();
-        
+        console.log(currentUserRole)
         console.log('Datos completos desde API:', allData);
 
         // CORRECCIÓN: Filtrar solo las reviews principales
@@ -345,109 +345,156 @@ async function loadReviews(productId) {
         updateRatingDisplay(0, []); // Pasar valores seguros
     }
 }
-// Mostrar reviews
-function displayReviews(reviews, currentUserRole) {
+
+function displayReviews(reviews, currentUserRole, purchasedProducts = [], currentProductId) {
     const reviewsList = document.getElementById('reviews-list');
+    const writeReviewBtn = document.getElementById('write-review-btn');
+
+    // Normalizar rol
+    const role = Array.isArray(currentUserRole) ? currentUserRole[0] : currentUserRole;
+    console.log("ROL ACTUAL:", role);
+
+    // Convertimos currentProductId a número
+    const productIdNumber = Number(currentProductId);
+    const purchasedProductNumbers = purchasedProducts.map(p => Number(p));
+
+    // Mostrar botón "Escribir reseña" solo para clientes que compraron
+    writeReviewBtn.style.display = 'none';
+    if (role === 'ROLE_CLIENTE' && purchasedProductNumbers.includes(productIdNumber)) {
+        writeReviewBtn.style.display = 'inline-block';
+    }
+
     if (!Array.isArray(reviews) || reviews.length === 0) {
         reviewsList.innerHTML = '<p>No hay reseñas aún. ¡Sé el primero en escribir una!</p>';
         return;
     }
+
     reviewsList.innerHTML = '';
-    
-    // Filtrar solo reviews principales (que tienen calificación y no son respuestas)
+
     const mainReviews = reviews.filter(r => r.calificacion != null && r.calificacion > 0);
-    
+
     mainReviews.forEach(review => {
+        const hasRespuesta = review.respuesta && review.respuesta.mensaje;
+
         const reviewerName = review.nombre && review.apellido
             ? `${review.nombre} ${review.apellido}`
             : `Usuario #${review.usuarioId}`;
-        
+
         const reviewElement = document.createElement('div');
         reviewElement.className = 'review-item';
-        reviewElement.innerHTML = `
-            <div class="review-header">
-                <div class="reviewer-info">
-                    <h4>${reviewerName}</h4>
-                    <div class="review-rating">${generateStars(review.calificacion)}</div>
-                </div>
-            </div>
-            <p class="review-text">${review.mensaje || 'Sin comentario'}</p>
-        `;
-        
-        // Verificar si esta review tiene una respuesta
-        if (review.respuesta && review.respuesta.mensaje) {
-            const respuesta = review.respuesta;
-            const respName = respuesta.nombre && respuesta.apellido
-                ? `${respuesta.nombre} ${respuesta.apellido}`
-                : `Usuario #${respuesta.usuarioId}`;
-            
+        reviewElement.style.position = 'relative';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'review-header';
+        const reviewerInfo = document.createElement('div');
+        reviewerInfo.className = 'reviewer-info';
+        const h4 = document.createElement('h4');
+        h4.textContent = reviewerName;
+        const ratingDiv = document.createElement('div');
+        ratingDiv.className = 'review-rating';
+        ratingDiv.innerHTML = generateStars(review.calificacion);
+        reviewerInfo.appendChild(h4);
+        reviewerInfo.appendChild(ratingDiv);
+        header.appendChild(reviewerInfo);
+        reviewElement.appendChild(header);
+
+        // Texto review
+        const reviewText = document.createElement('p');
+        reviewText.className = 'review-text';
+        reviewText.textContent = review.mensaje || 'Sin comentario';
+        reviewElement.appendChild(reviewText);
+
+        // Respuesta si existe
+        if (hasRespuesta) {
+            const respName = review.respuesta.nombre && review.respuesta.apellido
+                ? `${review.respuesta.nombre} ${review.respuesta.apellido}`
+                : `Usuario #${review.respuesta.usuarioId}`;
+
             const respuestaElement = document.createElement('div');
             respuestaElement.className = 'review-response';
             respuestaElement.innerHTML = `
-                <div class="response-header">
-                    <strong>${respName} respondió:</strong>
-                </div>
-                <p>${respuesta.mensaje}</p>
+                <div class="response-header"><strong>${respName} respondió:</strong></div>
+                <p>${review.respuesta.mensaje}</p>
             `;
-            
-            // Estilos tipo árbol/hilo
-            respuestaElement.style.position = 'relative';
-            respuestaElement.style.marginLeft = '20px';
-            respuestaElement.style.marginTop = '15px';
-            respuestaElement.style.paddingLeft = '20px';
-            respuestaElement.style.backgroundColor = '#f8fafc';
-            respuestaElement.style.borderRadius = '8px';
-            respuestaElement.style.padding = '12px 16px';
-            
-            // Crear la línea vertical y horizontal
             const connector = document.createElement('div');
-            connector.style.position = 'absolute';
-            connector.style.left = '-10px';
-            connector.style.top = '0px';
-            connector.style.width = '2px';
-            connector.style.height = '100%';
-            connector.style.backgroundColor = '#cbd5e1';
-            connector.style.borderRadius = '1px';
-            
+            connector.className = 'review-connector';
             const horizontalLine = document.createElement('div');
-            horizontalLine.style.position = 'absolute';
-            horizontalLine.style.left = '-10px';
-            horizontalLine.style.top = '20px';
-            horizontalLine.style.width = '15px';
-            horizontalLine.style.height = '2px';
-            horizontalLine.style.backgroundColor = '#cbd5e1';
-            horizontalLine.style.borderRadius = '1px';
-            
+            horizontalLine.className = 'review-horizontal-line';
             respuestaElement.appendChild(connector);
             respuestaElement.appendChild(horizontalLine);
-            
             reviewElement.appendChild(respuestaElement);
         }
-        
-        // Botón "Responder" para ADMIN o COLABORADOR (solo si no tiene respuesta aún)
-        if ((currentUserRole === 'ROLE_ADMIN' || currentUserRole === 'ROLE_COLABORADOR') && 
-            (!review.respuesta || !review.respuesta.mensaje)) {
+
+        // Botón Responder (admin/colaborador) solo si NO hay respuesta
+        if ((role === 'ROLE_ADMIN' || role === 'ROLE_COLABORADOR') && !hasRespuesta) {
             const replyBtn = document.createElement('button');
             replyBtn.textContent = 'Responder';
-            replyBtn.className = 'write-review-btn';
-            replyBtn.style.backgroundColor = '#3b82f6';
+            replyBtn.className = 'write-review-btn reply-btn';
             replyBtn.onclick = () => openReplyModal(review.id, reviewElement);
             reviewElement.appendChild(replyBtn);
         }
-        
-        // Botón "Eliminar" solo para ADMIN
-        if (currentUserRole === 'ROLE_ADMIN') {
+
+        // Botón Eliminar (solo admin)
+        if (role === 'ROLE_ADMIN') {
             const deleteBtn = document.createElement('button');
             deleteBtn.textContent = 'Eliminar';
-            deleteBtn.className = 'write-review-btn';
-            deleteBtn.style.backgroundColor = '#ef4444';
-            deleteBtn.onclick = () => handleDelete(review.id, reviewElement);
+            deleteBtn.className = 'write-review-btn delete-btn';
+            deleteBtn.onclick = () => {
+                mostrarConfirmacion("¿Deseas eliminar esta reseña?", (confirm) => {
+                    if (confirm) {
+                        handleDelete(review.id, reviewElement)
+                            .then(() => mostrarExito("Reseña eliminada"))
+                            .catch(() => mostrarError("No se pudo eliminar la reseña"));
+                    }
+                });
+            };
             reviewElement.appendChild(deleteBtn);
         }
-        
+
         reviewsList.appendChild(reviewElement);
     });
 }
+
+
+
+async function initReviews(currentProductId) {
+    try {
+        // 1️⃣ Obtener datos del usuario desde authManager
+        const currentUserId = authManager.getUserId();
+        const currentUserRole = authManager.getUserRole(); // <-- usar JWT / authManager
+
+        let purchasedProducts = [];
+
+        // 2️⃣ Si el usuario es cliente, traemos sus pedidos para verificar si compró este producto
+        if (currentUserRole === 'ROLE_CLIENTE' && currentUserId) {
+            console.log("🟢 currentUserId:", currentUserId);
+            console.log(`${API_BASE_URL}/api/pedido/verPedidosDeUsuario?id=${currentUserId}`);
+
+            const pedidos = await API.verPedidosDeUsuario(currentUserId);
+            console.log("📦 Pedidos obtenidos:", pedidos);
+
+            // Filtrar solo pedidos PAGADOS
+            const pedidosPagados = pedidos.filter(pedido => pedido.estado === "PAGADO");
+            console.log("✅ Pedidos PAGADOS:", pedidosPagados);
+
+            purchasedProducts = pedidosPagados.flatMap(pedido =>
+                pedido.productos.map(prod => Number(prod.productoId))
+            );
+        }
+
+        // 3️⃣ Traer las reviews del producto
+        const reviewsData = await API.obtenerReviews(currentProductId);
+        console.log("Reviews obtenidas:", reviewsData);
+
+        // 4️⃣ Mostrar reviews
+        displayReviews(reviewsData, currentUserRole, purchasedProducts, currentProductId);
+
+    } catch (error) {
+        console.error('Error inicializando reseñas:', error);
+    }
+}
+
 
 // Responder review (misma estética)
 async function handleReply(reviewId, reviewElement) {
@@ -457,9 +504,15 @@ async function handleReply(reviewId, reviewElement) {
     try {
         console.log('Respondiendo review con ID:', reviewId);
 
+        // Obtener usuarioId desde AuthManager
+        const usuarioId = parseInt(authManager.getUserId());
+        if (!usuarioId) {
+            throw new Error("Usuario no autenticado");
+        }
+
         const respuesta = await window.API.responderReview(reviewId, { 
             mensaje: replyText,
-            usuarioId: parseInt(localStorage.getItem('usuarioId'))
+            usuarioId: usuarioId
         });
 
         // Obtener el nombre completo del usuario que respondió
@@ -474,10 +527,9 @@ async function handleReply(reviewId, reviewElement) {
                 <strong>${respName} respondió:</strong>
             </div>
             <p>${respuesta.mensaje}</p>
-            ${respuesta.fecha ? `<small>${new Date(respuesta.fecha).toLocaleString()}</small>` : ''}
         `;
 
-        // Estilos tipo árbol/hilo (idénticos a displayReviews)
+        // Estilos tipo hilo
         respuestaElement.style.position = 'relative';
         respuestaElement.style.marginLeft = '20px';
         respuestaElement.style.marginTop = '15px';
@@ -486,7 +538,7 @@ async function handleReply(reviewId, reviewElement) {
         respuestaElement.style.borderRadius = '8px';
         respuestaElement.style.padding = '12px 16px';
         
-        // Crear la línea vertical y horizontal
+        // Línea vertical y horizontal
         const connector = document.createElement('div');
         connector.style.position = 'absolute';
         connector.style.left = '-10px';
@@ -508,14 +560,11 @@ async function handleReply(reviewId, reviewElement) {
         respuestaElement.appendChild(connector);
         respuestaElement.appendChild(horizontalLine);
 
-        // Remover el botón "Responder" una vez que se agregó la respuesta
+        // Remover el botón "Responder"
         const replyBtn = reviewElement.querySelector('button[onclick*="openReplyModal"]');
-        if (replyBtn) {
-            replyBtn.remove();
-        }
+        if (replyBtn) replyBtn.remove();
 
         reviewElement.appendChild(respuestaElement);
-        
         alert('✅ Respuesta enviada correctamente');
     } catch (error) {
         console.error('Error al responder review:', error);
@@ -523,7 +572,7 @@ async function handleReply(reviewId, reviewElement) {
     }
 }
 
-// Abrir modal para responder
+
 function openReplyModal(reviewId, reviewElement) {
     const modal = document.getElementById('reply-modal');
     const textarea = modal.querySelector('textarea');
@@ -543,9 +592,14 @@ function openReplyModal(reviewId, reviewElement) {
 
         try {
             console.log('Respondiendo review con ID (modal):', reviewId);
+
+            // Obtener usuarioId desde AuthManager
+            const usuarioId = parseInt(authManager.getUserId());
+            if (!usuarioId) throw new Error("Usuario no autenticado");
+
             const respuesta = await window.API.responderReview(reviewId, { 
                 mensaje,
-                usuarioId: parseInt(localStorage.getItem('usuarioId'))
+                usuarioId
             });
 
             // Obtener el nombre completo del usuario que respondió
@@ -563,7 +617,7 @@ function openReplyModal(reviewId, reviewElement) {
                 ${respuesta.fecha ? `<small>${new Date(respuesta.fecha).toLocaleString()}</small>` : ''}
             `;
 
-            // Estilos tipo árbol/hilo (idénticos a displayReviews)
+            // Estilos tipo árbol/hilo
             respuestaElement.style.position = 'relative';
             respuestaElement.style.marginLeft = '20px';
             respuestaElement.style.marginTop = '15px';
@@ -572,7 +626,7 @@ function openReplyModal(reviewId, reviewElement) {
             respuestaElement.style.borderRadius = '8px';
             respuestaElement.style.padding = '12px 16px';
             
-            // Crear la línea vertical y horizontal
+            // Crear línea vertical y horizontal
             const connector = document.createElement('div');
             connector.style.position = 'absolute';
             connector.style.left = '-10px';
@@ -594,11 +648,9 @@ function openReplyModal(reviewId, reviewElement) {
             respuestaElement.appendChild(connector);
             respuestaElement.appendChild(horizontalLine);
 
-            // Remover el botón "Responder" una vez que se agregó la respuesta
+            // Remover botón "Responder"
             const replyBtn = reviewElement.querySelector('button[onclick*="openReplyModal"]');
-            if (replyBtn) {
-                replyBtn.remove();
-            }
+            if (replyBtn) replyBtn.remove();
 
             reviewElement.appendChild(respuestaElement);
             modal.classList.remove('active');
@@ -612,10 +664,6 @@ function openReplyModal(reviewId, reviewElement) {
 
 // Función para eliminar review (solo ADMIN)
 async function handleDelete(reviewId, reviewElement) {
-    if (!confirm('¿Seguro quieres eliminar este comentario? Esta acción no se puede deshacer.')) {
-        return;
-    }
-
     try {
         await window.API.eliminarReview(reviewId);
         
@@ -626,22 +674,14 @@ async function handleDelete(reviewId, reviewElement) {
         setTimeout(() => {
             reviewElement.remove();
         }, 300);
-        
-        alert('Review eliminada correctamente');
-        
+
+        // Ya no usamos alert aquí; mostrarExito se llama desde mostrarConfirmacion
     } catch (error) {
         console.error('Error al eliminar review:', error);
-        
-        // Mostrar mensaje de error específico
-        if (error.message.includes('403') || error.message.includes('Forbidden')) {
-            alert('❌ No tienes permisos para eliminar esta review. Solo los administradores pueden hacerlo.');
-        } else if (error.message.includes('404') || error.message.includes('Not Found')) {
-            alert('❌ La review ya no existe o ha sido eliminada.');
-        } else {
-            alert('❌ Error al eliminar la review. Inténtalo de nuevo.');
-        }
+        throw error; // Se lanza para que mostrarError lo capture
     }
 }
+
 
 
 // Format price
@@ -673,19 +713,21 @@ function initializeModal() {
     const closeModalBtn = document.getElementById('close-review-modal');
     const reviewForm = document.getElementById('review-form');
     const starRating = document.getElementById('star-rating');
-    
+
+    let currentRating = 0;
+
     // Open modal
     writeReviewBtn.addEventListener('click', () => {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
     });
-    
+
     // Close modal
     closeModalBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
-    
+
     function closeModal() {
         modal.classList.remove('active');
         document.body.style.overflow = 'auto';
@@ -693,7 +735,7 @@ function initializeModal() {
         currentRating = 0;
         updateStarRating();
     }
-    
+
     // Star rating functionality
     const stars = starRating.querySelectorAll('.star');
     stars.forEach((star, index) => {
@@ -701,7 +743,7 @@ function initializeModal() {
             currentRating = index + 1;
             updateStarRating();
         });
-        
+
         star.addEventListener('mouseenter', () => {
             updateStarRating(index + 1);
         });
@@ -717,40 +759,64 @@ function initializeModal() {
             star.classList.toggle('active', index < rating);
         });
     }
-    
+
     // Form submission
-    reviewForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    // Form submission
+reviewForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-        if (currentRating === 0) {
-            alert('Por favor selecciona una calificación');
-            return;
+    if (!authManager.isAuthenticated()) {
+        mostrarError('Debes iniciar sesión para enviar una reseña.');
+        authManager.redirectToLogin();
+        return;
+    }
+
+    if (currentRating === 0) {
+        mostrarError('Por favor selecciona una calificación');
+        return;
+    }
+
+    const reviewData = {
+        productId: getProductIdFromUrl(),
+        usuarioId: authManager.getUserId(), // usuario del token
+        mensaje: document.getElementById('review-text').value.trim(),
+        calificacion: currentRating
+    };
+
+    try {
+        const response = await authManager.fetchWithAuth(`${API_BASE_URL}/api/reviews`, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reviewData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Error al enviar la reseña');
         }
 
-        const reviewData = {
-            productId: getProductIdFromUrl(),
-            usuarioId: parseInt(localStorage.getItem('usuarioId')), // <-- convertir a número
-            mensaje: document.getElementById('review-text').value,
-            calificacion: currentRating
-        };
+        const result = await response.json();
+        console.log('Review enviada:', result);
+        mostrarExito('¡Gracias por tu reseña! Se ha enviado correctamente.');
 
-        try {
-            const result = await API.enviarReview(reviewData);
-            console.log('Review enviada:', result);
-            alert('¡Gracias por tu reseña! Se ha enviado correctamente.');
-            closeModal();
-        } catch (error) {
-            console.error('Error al enviar la reseña:', error);
-            alert('Error al enviar la reseña. Por favor intenta de nuevo.');
-        }
-    });
+        // Recargar la página después de mostrar el mensaje
+        setTimeout(() => {
+            location.reload();
+        }, 1000); // espera 1s para que se vea el mensaje
+
+    } catch (error) {
+        console.error('Error al enviar la reseña:', error);
+        mostrarError('❌ Error al enviar la reseña. Por favor intenta de nuevo.');
+    }
+});
+
+
 }
 async function initializeAddToCart() {
     const addToCartBtn = document.getElementById('add-to-cart-btn');
 
     addToCartBtn.addEventListener('click', async () => {
-        const token = await validarToken();
-        if (!token) {
+        if (!authManager.isAuthenticated()) {
             window.location.href = '/usuario/login/login.html';
             return;
         }
@@ -761,11 +827,11 @@ async function initializeAddToCart() {
         const digitalPrice = currentProduct.precioDigital || (basePrice * 0.7);
         const currentPrice = selectedFormat === 'digital' ? digitalPrice : basePrice;
 
-        const usuarioId = Number(localStorage.getItem('usuarioId'));
+        const usuarioId = Number(authManager.getUserId());
 
         const carritoRequest = {
             productoId: currentProduct.id,
-            usuarioId,
+            usuarioId, // ahora sí es un número válido
             cantidad: 1,
             precioUnitario: currentPrice,
             precioTotal: currentPrice,
@@ -776,7 +842,11 @@ async function initializeAddToCart() {
         console.log("DTO que se va a enviar al backend:", carritoRequest);
 
         try {
-            const carrito = await API.obtenerCarrito(usuarioId);
+            mostrarCarga("Agregando producto al carrito...");
+            // Obtenemos el carrito actual usando fetchWithAuth
+            const carritoResponse = await authManager.fetchWithAuth(`${API_BASE_URL}/api/carrito/verCarrito/${usuarioId}`);
+            if (!carritoResponse.ok) throw new Error("Error al obtener el carrito");
+            const carrito = await carritoResponse.json();
 
             // Validación digital vs físico
             const productoExistenteDigital = carrito.find(item =>
@@ -797,30 +867,23 @@ async function initializeAddToCart() {
             );
 
             if (productoFisicoExistente && carritoRequest.esDigital === 0) {
-                await API.sumarCantidadCarrito(productoFisicoExistente.id, 1);
+                await authManager.fetchWithAuth(`${API_BASE_URL}/api/carrito/sumarCantidad/${productoFisicoExistente.id}/1`, { method: 'PUT' });
             } else {
                 // Agregar producto al carrito
-                const response = await fetch('https://forma-programada.onrender.com/api/carrito/agregarProductoaCarrito', {
+                const response = await authManager.fetchWithAuth(`${API_BASE_URL}/api/carrito/agregarProductoaCarrito`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` // <--- necesario si Spring Security protege el endpoint
-                    },
                     body: JSON.stringify(carritoRequest)
                 });
 
                 if (!response.ok) {
                     let mensaje = "Error interno del servidor";
-
                     try {
                         const errorData = await response.json();
                         mensaje = errorData.reason || errorData.error || mensaje;
-                    } catch(e) {
-                        // No hay JSON, usamos mensaje por defecto
+                    } catch (e) {
                         if (response.status === 403) mensaje = "No tienes permiso para realizar esta acción.";
                         else if (response.status === 400) mensaje = "Ya existe este producto en el carrito con el mismo color";
                     }
-
                     mostrarMensajeError(mensaje);
                     return;
                 }
@@ -846,7 +909,11 @@ async function initializeAddToCart() {
             console.error('Error al agregar al carrito:', error);
             mostrarMensajeError("Ocurrió un error al agregar el producto al carrito.");
         }
-
+        finally {
+            // Ocultar overlay al terminar
+            ocultarCarga();
+        }
+        
         function mostrarMensajeError(text) {
             addToCartBtn.textContent = 'ERROR';
             addToCartBtn.style.background = '#dc2626';
@@ -956,6 +1023,9 @@ function initializeDropdown() {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
+    const currentProductId = getProductIdFromUrl(); // sacamos del URL
+    if (!currentProductId) return;
+    initReviews(currentProductId);
     loadProduct();
     initializeModal();
     initializeAddToCart();
