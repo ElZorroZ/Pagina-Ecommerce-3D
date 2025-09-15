@@ -67,6 +67,7 @@ public class SecurityConfig {
                                 "/api/mp/webhook-debug"
                         ).permitAll()
                         // ENDPOINTS PROTEGIDOS
+                        .requestMatchers(HttpMethod.PUT, "/api/mp/confirmarPedido").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/carrito/**").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.GET, "/api/carrito/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("CLIENTE", "ADMIN", "COLABORADOR")
@@ -106,12 +107,9 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Agregá tu dominio de Netlify
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5500",
-                "http://127.0.0.1:5500",
-                "http://localhost:5501",
-                "http://127.0.0.1:5501",
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "http://127.0.0.1:*",
                 "https://forma-programada.netlify.app"
         ));
 

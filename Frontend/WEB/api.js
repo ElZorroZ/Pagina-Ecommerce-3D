@@ -464,29 +464,89 @@ const API = {
 
    // Confirmar pedido (Mercado Pago)
 async confirmarPedido(pedido, quantity) {
-    try {
-        const response = await authManager.fetchWithAuth(
-            `${API_BASE_URL}/api/mp/confirmarPedido?quantity=${quantity}`,
-            {
-                method: 'PUT',
-                headers: { "Content-Type": "application/json" }, // <-- IMPORTANTE
-                body: JSON.stringify(pedido)
+        console.log("\n🚀 === INICIANDO confirmarPedido ===");
+        
+        try {
+            // Validaciones iniciales
+            if (!pedido) {
+                throw new Error("Pedido es null o undefined");
             }
-        );
+            if (!pedido.id) {
+                throw new Error("Pedido no tiene ID");
+            }
+            if (!quantity || quantity <= 0) {
+                throw new Error("Quantity inválida: " + quantity);
+            }
 
-        if (!response.ok) {
-            let errorMsg = await response.text().catch(() => response.statusText);
-            throw new Error(`Error al confirmar pedido: ${errorMsg}`);
+            const API_BASE_URL = "http://localhost:8080";
+            const url = `${API_BASE_URL}/api/mp/confirmarPedido?quantity=${quantity}`;
+            
+            console.log("📍 URL completa:", url);
+            console.log("📦 Pedido a enviar:", JSON.stringify(pedido, null, 2));
+            console.log("🔢 Quantity:", quantity);
+            console.log("🔐 AuthManager disponible:", !!authManager);
+            console.log("🎫 Token disponible:", !!authManager.getAccessToken());
+
+            // Verificar estado de autenticación
+            if (!authManager.isAuthenticated()) {
+                throw new Error("Usuario no autenticado");
+            }
+
+            // Preparar request
+            const requestBody = JSON.stringify(pedido);
+            console.log("📝 Request body:", requestBody);
+
+            const requestOptions = {
+                method: 'PUT',
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                body: requestBody
+            };
+
+            console.log("⚙️ Request options (antes de auth):", requestOptions);
+
+            // Hacer la petición CON autenticación
+            console.log("📡 Enviando request...");
+            const response = await authManager.fetchWithAuth(url, requestOptions);
+
+            console.log("📡 Response recibida:");
+            console.log("   - Status:", response.status);
+            console.log("   - Ok:", response.ok);
+            console.log("   - StatusText:", response.statusText);
+            console.log("   - Headers:", [...response.headers.entries()]);
+
+            if (!response.ok) {
+                let errorMsg;
+                try {
+                    errorMsg = await response.text();
+                } catch (e) {
+                    errorMsg = response.statusText;
+                }
+                console.error("❌ Response error:", errorMsg);
+                throw new Error(`Error ${response.status}: ${errorMsg}`);
+            }
+
+            const data = await response.json();
+            console.log("✅ Response data:", data);
+            
+            if (!data.initPoint) {
+                throw new Error("Response no contiene initPoint: " + JSON.stringify(data));
+            }
+            
+            console.log("🎯 InitPoint obtenido:", data.initPoint);
+            return data.initPoint;
+
+        } catch (error) {
+            console.error("\n❌ === ERROR EN confirmarPedido ===");
+            console.error("Error completo:", error);
+            console.error("Error name:", error.name);
+            console.error("Error message:", error.message);
+            console.error("Error stack:", error.stack);
+            console.error("=== FIN ERROR ===\n");
+            throw error;
         }
-
-        const data = await response.json();
-        return data.initPoint; // URL de Mercado Pago
-    } catch (error) {
-        console.error("Error en confirmarPedido API:", error);
-        throw error;
-    }
-},
-
+    },
     // Ver pedidos de usuario
     async verPedidosDeUsuario(userId) {
         try {

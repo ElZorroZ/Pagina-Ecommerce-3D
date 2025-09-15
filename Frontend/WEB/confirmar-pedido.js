@@ -372,7 +372,13 @@ async renderOrderSummary() {
     }
 
     async confirmOrder() {
+    console.log("\n🎬 === INICIANDO confirmOrder ===");
+    
+    // Ejecutar diagnóstico
+    await this.testConnectivity();
+    
     if (!this.validateOrderData()) {
+        console.log("❌ Validación de datos falló");
         return;
     }
 
@@ -387,16 +393,52 @@ async renderOrderSummary() {
 
     try {
         const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+        console.log("💳 Método de pago seleccionado:", paymentMethod);
 
         // 1️⃣ Crear el pedido en backend
+        console.log("📦 Creando pedido...");
+        console.log("🛒 Cart:", this.cart);
+        
         const pedidoCreado = await window.API.crearPedido(this.cart);
-        console.log("ID del pedido creado:", pedidoCreado.id);
+        console.log("✅ Pedido creado:", pedidoCreado);
+
+        // Validaciones del pedido creado
+        if (!pedidoCreado) {
+            throw new Error("crearPedido devolvió null o undefined");
+        }
+        if (!pedidoCreado.id) {
+            throw new Error("El pedido creado no tiene un ID válido. Pedido completo: " + JSON.stringify(pedidoCreado));
+        }
+        if (!pedidoCreado.total || pedidoCreado.total <= 0) {
+            throw new Error("El pedido creado no tiene un total válido: " + pedidoCreado.total);
+        }
+
+        console.log("📋 Estructura del pedido validada:", {
+            id: pedidoCreado.id,
+            total: pedidoCreado.total,
+            fechaPedido: pedidoCreado.fechaPedido,
+            estado: pedidoCreado.estado,
+            completo: pedidoCreado
+        });
 
         // 2️⃣ Si es Mercado Pago → confirmarlo
         if (paymentMethod === "mercadopago") {
-            const initPoint = await window.API.confirmarPedido(pedidoCreado, this.cart.length);
-            window.location.href = initPoint; // redirige al checkout
-
+            console.log("💳 Procesando con MercadoPago...");
+            console.log("🛒 Cantidad de items:", this.cart.length);
+            
+            const initPoint = await API.confirmarPedido(pedidoCreado, this.cart.length);
+            
+            if (!initPoint) {
+                throw new Error("No se recibió el link de pago de MercadoPago");
+            }
+            
+            console.log("🔗 Redirigiendo a:", initPoint);
+            
+            // Pequeña pausa antes de redirigir para ver los logs
+            setTimeout(() => {
+                window.location.href = initPoint;
+            }, 1000);
+            
             return;
         }
 
@@ -405,11 +447,41 @@ async renderOrderSummary() {
         this.showSuccessModal(paymentMethod);
 
     } catch (error) {
-        console.error('Error confirming order:', error);
-        this.showError('Error al procesar el pedido. Por favor, intenta nuevamente.');
+        console.error('\n❌ === ERROR EN confirmOrder ===');
+        console.error('Error completo:', error);
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('=== FIN ERROR ===\n');
+        
+        this.showError('Error al procesar el pedido: ' + error.message);
         confirmBtn.innerHTML = originalText;
         confirmBtn.disabled = false;
     }
+}
+async testConnectivity() {
+    console.log("🔍 DIAGNÓSTICO DE CONECTIVIDAD");
+    
+    // Test 1: Verificar URL base
+    const API_BASE_URL = "http://localhost:8080";
+    console.log("📍 API_BASE_URL:", API_BASE_URL);
+    
+    // Test 2: Ping básico al servidor
+    try {
+        const pingResponse = await fetch(`${API_BASE_URL}/api/health`, { method: 'GET' });
+        console.log("🏥 Health check:", pingResponse.status, pingResponse.ok);
+    } catch (error) {
+        console.error("❌ Health check falló:", error);
+    }
+    
+    // Test 3: Verificar authManager
+    console.log("🔐 AuthManager status:");
+    console.log("   - isAuthenticated:", authManager.isAuthenticated());
+    console.log("   - hasAccessToken:", !!authManager.getAccessToken());
+    console.log("   - hasRefreshToken:", !!authManager.getRefreshToken());
+    console.log("   - userId:", authManager.getUserId());
+    
+   
 }
 
 

@@ -28,6 +28,28 @@
     margin: 0 auto;
     padding: 0 1rem;
 }
+.payment-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.payment-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.payment-logo {
+    width: 10000000000000000000000000000%;   /* ocupa 30% del ancho del label */
+    height: auto;
+    object-fit: contain;
+}
+
 
 /* Loading state */
 .loading {
