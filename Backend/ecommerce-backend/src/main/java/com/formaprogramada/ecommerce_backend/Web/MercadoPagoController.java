@@ -32,7 +32,6 @@ import java.util.*;
 public class MercadoPagoController {
 
     private final MercadoPagoService mercadoPagoService;
-
     @Autowired
     private PedidoService pedidoService;
 
@@ -50,21 +49,15 @@ public class MercadoPagoController {
 
     // Confirmar pedido y obtener link de pago
     @PutMapping("/confirmarPedido")
-    public ResponseEntity<Map<String, String>> confirmarPedido(@RequestBody Pedido pedido, @RequestParam int quantity) {
+    public ResponseEntity<Map<String, String>> confirmarPedido(@RequestBody Pedido pedido) { // quitar quantity
         try {
-            // 🔥 VALIDACIÓN MEJORADA DE CONFIGURACIÓN
+            // 🔥 VALIDACIÓN DE TOKEN
             if (mercadolibreToken == null || mercadolibreToken.isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Token de MercadoPago no configurado"));
             }
 
-            // 🔥 VERIFICAR que el token se configuró correctamente
-            System.out.println("🔑 Token configurado: " + (mercadolibreToken.startsWith("TEST-") ? "SANDBOX" : "PRODUCTION"));
-            // Validaciones existentes
             if (pedido == null || pedido.getId() == null) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Pedido inválido o sin ID"));
-            }
-            if (quantity <= 0) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Cantidad debe ser mayor a 0"));
             }
             if (pedido.getTotal() <= 0) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Total del pedido debe ser mayor a 0"));
@@ -72,17 +65,15 @@ public class MercadoPagoController {
 
             // Construir título descriptivo
             String title = "Pedido #" + pedido.getId() + " - " + pedido.getFechaPedido();
-            BigDecimal price = BigDecimal.valueOf(pedido.getTotal());
+            BigDecimal price = BigDecimal.valueOf(pedido.getTotal()); // ya es el total
 
-            // 🔥 LOG DE CONFIGURACIÓN ANTES DE PROCESAR
+            // 🔥 LOG
             System.out.println("🔧 Procesando pago con configuración:");
-            System.out.println("   - Ambiente: " + (sandboxEnabled ? "SANDBOX" : "PRODUCCIÓN"));
-            System.out.println("   - Token tipo: " + (mercadolibreToken.startsWith("TEST-") ? "TEST" : "PRODUCCIÓN"));
             System.out.println("   - Pedido ID: " + pedido.getId());
             System.out.println("   - Total: $" + price);
 
-            // Crear preferencia y obtener link
-            String initPoint = mercadoPagoService.confirmarPedido(mercadolibreToken, title, price, pedido.getId().toString(), quantity);
+            // Crear preferencia y obtener link SIN multiplicar por quantity
+            String initPoint = mercadoPagoService.confirmarPedido(mercadolibreToken, title, price, pedido.getId().toString(), 1); // pasar 1
 
             // Actualizar estado del pedido a "PROCESANDO"
             pedidoService.CambiarEstado("PROCESANDO", pedido.getId());
@@ -101,24 +92,15 @@ public class MercadoPagoController {
             System.err.println("❌ Error confirmando pedido: " + e.getMessage());
             e.printStackTrace();
 
-            // 🔥 ERROR HANDLING MEJORADO
-            String errorMessage = "Error procesando pago";
-            if (e.getMessage().contains("401")) {
-                errorMessage = "Token de acceso inválido. Verifica las credenciales de MercadoPago";
-            } else if (e.getMessage().contains("400")) {
-                errorMessage = "Datos inválidos. Verifica la configuración del pedido";
-            } else if (e.getMessage().contains("credentials")) {
-                errorMessage = "Error de credenciales. Verifica el token de MercadoPago";
-            }
-
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of(
-                            "error", errorMessage,
+                            "error", "Error procesando pago",
                             "details", e.getMessage(),
                             "environment", sandboxEnabled ? "sandbox" : "production"
                     ));
         }
     }
+
     @PostMapping("/webhook")
     public ResponseEntity<String> webhook(@RequestBody(required = false) String body,
                                           @RequestParam(required = false) String topic,

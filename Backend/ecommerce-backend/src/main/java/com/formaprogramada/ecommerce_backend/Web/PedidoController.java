@@ -47,8 +47,7 @@ public class PedidoController {
             int id=lista.get(0).getUsuarioId();
             Pedido pedidoFinal= pedidoService.CrearPedido(pedido,id);
 
-            carritoController.VaciarCarrito(pedidoFinal.getUsuarioId());
-            
+
             return ResponseEntity.ok(pedidoFinal);
         } catch (Exception e) {
             throw new RuntimeException(e);

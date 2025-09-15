@@ -205,11 +205,10 @@ async renderOrderSummary() {
 
         // Detectar productos físicos
         const hasPhysicalProducts = Object.values(grouped).some(item => !item.linkArchivo);
-        const shippingCost = hasPhysicalProducts ? 500 : 0;
+        const shippingCost = hasPhysicalProducts ? 0 : 0;
         const total = subtotal + shippingCost;
 
         document.getElementById('subtotal').textContent = `$${subtotal.toLocaleString()}`;
-        document.getElementById('shipping-cost').textContent = shippingCost > 0 ? `$${shippingCost.toLocaleString()}` : 'Gratis';
         document.getElementById('total').textContent = `$${total.toLocaleString()}`;
 
         // Guardar en sessionStorage para que coincida con confirmar-pedido
@@ -372,93 +371,100 @@ async renderOrderSummary() {
     }
 
     async confirmOrder() {
-    console.log("\n🎬 === INICIANDO confirmOrder ===");
-    
-    // Ejecutar diagnóstico
-    await this.testConnectivity();
-    
-    if (!this.validateOrderData()) {
-        console.log("❌ Validación de datos falló");
-        return;
-    }
-
-    const confirmBtn = document.getElementById('confirm-order-btn');
-    const originalText = confirmBtn.innerHTML;
-
-    confirmBtn.innerHTML = `
-        <div style="width: 20px; height: 20px; border: 2px solid transparent; border-top: 2px solid currentColor; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        Procesando...
-    `;
-    confirmBtn.disabled = true;
-
-    try {
-        const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
-        console.log("💳 Método de pago seleccionado:", paymentMethod);
-
-        // 1️⃣ Crear el pedido en backend
-        console.log("📦 Creando pedido...");
-        console.log("🛒 Cart:", this.cart);
+        console.log("\n🎬 === INICIANDO confirmOrder ===");
         
-        const pedidoCreado = await window.API.crearPedido(this.cart);
-        console.log("✅ Pedido creado:", pedidoCreado);
-
-        // Validaciones del pedido creado
-        if (!pedidoCreado) {
-            throw new Error("crearPedido devolvió null o undefined");
-        }
-        if (!pedidoCreado.id) {
-            throw new Error("El pedido creado no tiene un ID válido. Pedido completo: " + JSON.stringify(pedidoCreado));
-        }
-        if (!pedidoCreado.total || pedidoCreado.total <= 0) {
-            throw new Error("El pedido creado no tiene un total válido: " + pedidoCreado.total);
-        }
-
-        console.log("📋 Estructura del pedido validada:", {
-            id: pedidoCreado.id,
-            total: pedidoCreado.total,
-            fechaPedido: pedidoCreado.fechaPedido,
-            estado: pedidoCreado.estado,
-            completo: pedidoCreado
-        });
-
-        // 2️⃣ Si es Mercado Pago → confirmarlo
-        if (paymentMethod === "mercadopago") {
-            console.log("💳 Procesando con MercadoPago...");
-            console.log("🛒 Cantidad de items:", this.cart.length);
-            
-            const initPoint = await API.confirmarPedido(pedidoCreado, this.cart.length);
-            
-            if (!initPoint) {
-                throw new Error("No se recibió el link de pago de MercadoPago");
-            }
-            
-            console.log("🔗 Redirigiendo a:", initPoint);
-            
-            // Pequeña pausa antes de redirigir para ver los logs
-            setTimeout(() => {
-                window.location.href = initPoint;
-            }, 1000);
-            
+        // Ejecutar diagnóstico
+        await this.testConnectivity();
+        
+        if (!this.validateOrderData()) {
+            console.log("❌ Validación de datos falló");
             return;
         }
 
-        // 3️⃣ Si es otro método → seguir con el flujo simulado
-        await this.processOrder(paymentMethod);
-        this.showSuccessModal(paymentMethod);
+        const confirmBtn = document.getElementById('confirm-order-btn');
+        const originalText = confirmBtn.innerHTML;
 
-    } catch (error) {
-        console.error('\n❌ === ERROR EN confirmOrder ===');
-        console.error('Error completo:', error);
-        console.error('Error name:', error.name);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-        console.error('=== FIN ERROR ===\n');
-        
-        this.showError('Error al procesar el pedido: ' + error.message);
-        confirmBtn.innerHTML = originalText;
-        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = `
+            <div style="width: 20px; height: 20px; border: 2px solid transparent; border-top: 2px solid currentColor; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            Procesando...
+        `;
+        confirmBtn.disabled = true;
+
+        try {
+            const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+            console.log("💳 Método de pago seleccionado:", paymentMethod);
+
+            // 1️⃣ Crear el pedido en backend
+            console.log("📦 Creando pedido...");
+            console.log("🛒 Cart:", this.cart);
+            
+            const pedidoCreado = await window.API.crearPedido(this.cart);
+            console.log("✅ Pedido creado:", pedidoCreado);
+
+            // Validaciones del pedido creado
+            if (!pedidoCreado) {
+                throw new Error("crearPedido devolvió null o undefined");
+            }
+            if (!pedidoCreado.id) {
+                throw new Error("El pedido creado no tiene un ID válido. Pedido completo: " + JSON.stringify(pedidoCreado));
+            }
+            if (!pedidoCreado.total || pedidoCreado.total <= 0) {
+                throw new Error("El pedido creado no tiene un total válido: " + pedidoCreado.total);
+            }
+
+            console.log("📋 Estructura del pedido validada:", {
+                id: pedidoCreado.id,
+                total: pedidoCreado.total,
+                fechaPedido: pedidoCreado.fechaPedido,
+                estado: pedidoCreado.estado,
+                completo: pedidoCreado
+            });
+
+            // 2️⃣ Si es Mercado Pago → confirmarlo
+            if (paymentMethod === "mercadopago") {
+                console.log("💳 Procesando con MercadoPago...");
+
+                const linkPago = await API.confirmarPedido(
+                    {
+                        id: pedidoCreado.id,
+                        total: pedidoCreado.total,
+                        fechaPedido: pedidoCreado.fechaPedido
+                    },
+                    1 // quantity = 1 si ya pasaste total
+                );
+
+                console.log("🎯 Link de pago obtenido:", linkPago);
+
+                if (!linkPago) {
+                    throw new Error("No se recibió el link de pago de MercadoPago");
+                }
+
+                // Redirigir
+                window.location.href = linkPago;
+                return;
+            }
+
+
+
+
+
+            // 3️⃣ Si es otro método → seguir con el flujo simulado
+            await this.processOrder(paymentMethod);
+            this.showSuccessModal(paymentMethod);
+
+        } catch (error) {
+            console.error('\n❌ === ERROR EN confirmOrder ===');
+            console.error('Error completo:', error);
+            console.error('Error name:', error.name);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+            console.error('=== FIN ERROR ===\n');
+            
+            this.showError('Error al procesar el pedido: ' + error.message);
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+        }
     }
-}
 async testConnectivity() {
     console.log("🔍 DIAGNÓSTICO DE CONECTIVIDAD");
     
@@ -532,7 +538,6 @@ async testConnectivity() {
         const modal = document.getElementById('success-modal');
         const subtotal = this.cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
         const hasPhysicalProducts = this.cart.some(item => item.tipo === 'fisico');
-        const shippingCost = hasPhysicalProducts ? 500 : 0;
         const total = subtotal + shippingCost;
 
         // Update modal content
