@@ -562,5 +562,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeDropdown();
     initializeMobileMenu();
     loadCategories();
-    document.addEventListener('click', handleClicks);
 });

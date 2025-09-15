@@ -462,26 +462,30 @@ const API = {
         }
     },
 
-    // Confirmar pedido (Mercado Pago)
-    async confirmarPedido(pedido, quantity) {
-        try {
-            const response = await authManager.fetchWithAuth(`${API_BASE_URL}/api/mp/confirmarPedido?quantity=${quantity}`, {
+   // Confirmar pedido (Mercado Pago)
+async confirmarPedido(pedido, quantity) {
+    try {
+        const response = await authManager.fetchWithAuth(
+            `${API_BASE_URL}/api/mp/confirmarPedido?quantity=${quantity}`,
+            {
                 method: 'PUT',
+                headers: { "Content-Type": "application/json" }, // <-- IMPORTANTE
                 body: JSON.stringify(pedido)
-            });
-
-            if (!response.ok) {
-                let errorMsg = await response.text().catch(() => response.statusText);
-                throw new Error(`Error al confirmar pedido: ${errorMsg}`);
             }
+        );
 
-            const data = await response.json();
-            return data.initPoint; // URL de Mercado Pago
-        } catch (error) {
-            console.error('Error en confirmarPedido API:', error);
-            throw error;
+        if (!response.ok) {
+            let errorMsg = await response.text().catch(() => response.statusText);
+            throw new Error(`Error al confirmar pedido: ${errorMsg}`);
         }
-    },
+
+        const data = await response.json();
+        return data.initPoint; // URL de Mercado Pago
+    } catch (error) {
+        console.error("Error en confirmarPedido API:", error);
+        throw error;
+    }
+},
 
     // Ver pedidos de usuario
     async verPedidosDeUsuario(userId) {
