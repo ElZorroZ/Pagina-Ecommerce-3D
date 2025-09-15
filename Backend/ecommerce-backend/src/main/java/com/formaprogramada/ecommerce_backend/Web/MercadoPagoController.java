@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.resources.payment.Payment;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.*;
 
@@ -38,180 +39,13 @@ public class MercadoPagoController {
     @Value("${mercadopago.access-token}")
     private String mercadolibreToken;
 
+    @Value("${mercadopago.base-url}")
+    private String baseUrl;
     @Value("${mercadopago.sandbox.enabled:true}")
     private boolean sandboxEnabled;
 
     public MercadoPagoController(MercadoPagoService mercadoPagoService) {
         this.mercadoPagoService = mercadoPagoService;
-    }
-
-
-
-    // 🔥 ENDPOINT PARA OBTENER INFORMACIÓN DE UN PAGO ESPECÍFICO
-    @GetMapping("/payment-info/{paymentId}")
-    public ResponseEntity<Map<String, Object>> getPaymentInfo(@PathVariable String paymentId) {
-        Map<String, Object> info = new HashMap<>();
-
-        try {
-            System.out.println("🔍 Obteniendo información del pago: " + paymentId);
-
-            MercadoPagoConfig.setAccessToken(mercadolibreToken);
-            PaymentClient paymentClient = new PaymentClient();
-            Payment payment = paymentClient.get(Long.valueOf(paymentId));
-
-            info.put("success", true);
-            info.put("paymentId", payment.getId());
-            info.put("status", payment.getStatus());
-            info.put("externalReference", payment.getExternalReference());
-            info.put("amount", payment.getTransactionAmount());
-            info.put("currencyId", payment.getCurrencyId());
-            info.put("dateCreated", payment.getDateCreated());
-            info.put("dateApproved", payment.getDateApproved());
-            info.put("paymentMethodId", payment.getPaymentMethodId());
-            info.put("paymentTypeId", payment.getPaymentTypeId());
-
-            // Información del pedido asociado
-            if (payment.getExternalReference() != null) {
-                try {
-                    Integer pedidoId = Integer.valueOf(payment.getExternalReference());
-                    Pedido pedido = pedidoService.obtenerPedidoPorId(pedidoId);
-
-                    if (pedido != null) {
-                        info.put("pedidoFound", true);
-                        info.put("pedidoId", pedido.getId());
-                        info.put("pedidoEstado", pedido.getEstado());
-                        info.put("pedidoTotal", pedido.getTotal());
-                    } else {
-                        info.put("pedidoFound", false);
-                        info.put("pedidoError", "Pedido no encontrado con ID: " + pedidoId);
-                    }
-                } catch (NumberFormatException e) {
-                    info.put("pedidoFound", false);
-                    info.put("pedidoError", "External reference no es un ID válido: " + payment.getExternalReference());
-                }
-            }
-
-            return ResponseEntity.ok(info);
-
-        } catch (Exception e) {
-            System.err.println("❌ Error obteniendo info del pago: " + e.getMessage());
-            info.put("success", false);
-            info.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(info);
-        }
-    }
-    @GetMapping("/auto-detect-environment")
-    public ResponseEntity<Map<String, Object>> autoDetectEnvironment() {
-        Map<String, Object> detection = new HashMap<>();
-
-        try {
-            if (mercadolibreToken == null) {
-                detection.put("error", "Token no configurado");
-                return ResponseEntity.badRequest().body(detection);
-            }
-
-            // Crear una preferencia de prueba para detectar el ambiente
-            MercadoPagoConfig.setAccessToken(mercadolibreToken);
-
-            PreferenceItemRequest item = PreferenceItemRequest.builder()
-                    .title("Test Environment Detection")
-                    .quantity(1)
-                    .unitPrice(new BigDecimal("1.00"))
-                    .currencyId("ARS")
-                    .build();
-
-            PreferenceRequest request = PreferenceRequest.builder()
-                    .items(List.of(item))
-                    .externalReference("env-detection-test")
-                    .expires(true)
-                    .expirationDateFrom(OffsetDateTime.now())
-                    .expirationDateTo(OffsetDateTime.now().plusMinutes(1)) // Expira en 1 minuto
-                    .build();
-
-            PreferenceClient client = new PreferenceClient();
-            Preference preference = client.create(request);
-
-            String initPoint = preference.getInitPoint();
-            boolean isActualSandbox = initPoint.contains("sandbox.mercadopago");
-            boolean isActualProduction = initPoint.contains("www.mercadopago") && !initPoint.contains("sandbox");
-
-            String realEnvironment = isActualSandbox ? "SANDBOX" :
-                    isActualProduction ? "PRODUCTION" : "UNKNOWN";
-
-            String tokenType = mercadolibreToken.startsWith("TEST-") ? "TEST" :
-                    mercadolibreToken.startsWith("APP_USR-") ? "PRODUCTION" : "UNKNOWN";
-
-            boolean isConsistent = (sandboxEnabled && isActualSandbox) || (!sandboxEnabled && isActualProduction);
-
-            detection.put("currentConfig", sandboxEnabled ? "SANDBOX" : "PRODUCTION");
-            detection.put("detectedEnvironment", realEnvironment);
-            detection.put("tokenType", tokenType);
-            detection.put("isConsistent", isConsistent);
-            detection.put("initPointGenerated", initPoint);
-            detection.put("preferenceId", preference.getId());
-
-            if (!isConsistent) {
-                detection.put("recommendation", Map.of(
-                        "issue", "Configuración inconsistente detectada",
-                        "solution", realEnvironment.equals("PRODUCTION") ?
-                                "Cambiar mercadopago.sandbox.enabled=false en application.properties" :
-                                "Cambiar mercadopago.sandbox.enabled=true en application.properties",
-                        "alternativeSolution", "O cambiar el token por uno que coincida con la configuración actual"
-                ));
-            } else {
-                detection.put("recommendation", "✅ Configuración correcta");
-            }
-
-            return ResponseEntity.ok(detection);
-
-        } catch (Exception e) {
-            detection.put("error", "Error detectando ambiente: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(detection);
-        }
-    }
-    @GetMapping("/config-status")
-    public ResponseEntity<Map<String, Object>> getConfigStatus() {
-        Map<String, Object> status = new HashMap<>();
-
-        try {
-            // Verificar token
-            boolean tokenValid = mercadolibreToken != null && !mercadolibreToken.isEmpty();
-            String tokenType = "UNKNOWN";
-
-            if (tokenValid) {
-                if (mercadolibreToken.startsWith("TEST-")) {
-                    tokenType = "TEST/SANDBOX";
-                } else if (mercadolibreToken.startsWith("APP_USR-")) {
-                    tokenType = "PRODUCCIÓN";
-                }
-            }
-
-            status.put("tokenConfigured", tokenValid);
-            status.put("tokenType", tokenType);
-            status.put("sandboxEnabled", sandboxEnabled);
-            status.put("tokenLength", tokenValid ? mercadolibreToken.length() : 0);
-            status.put("recommendation", getRecommendation(tokenType, sandboxEnabled));
-
-            return ResponseEntity.ok(status);
-
-        } catch (Exception e) {
-            status.put("error", "Error verificando configuración: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(status);
-        }
-    }
-
-    private String getRecommendation(String tokenType, boolean sandboxEnabled) {
-        if ("TEST/SANDBOX".equals(tokenType) && sandboxEnabled) {
-            return "✅ Configuración correcta para sandbox";
-        } else if ("PRODUCCIÓN".equals(tokenType) && !sandboxEnabled) {
-            return "✅ Configuración correcta para producción";
-        } else if ("TEST/SANDBOX".equals(tokenType) && !sandboxEnabled) {
-            return "⚠️ Token de sandbox pero configurado para producción";
-        } else if ("PRODUCCIÓN".equals(tokenType) && sandboxEnabled) {
-            return "⚠️ Token de producción pero configurado para sandbox";
-        } else {
-            return "❌ Configuración inválida";
-        }
     }
 
     // Confirmar pedido y obtener link de pago
@@ -376,15 +210,14 @@ public class MercadoPagoController {
 
     // 🔥 ENDPOINTS DE REDIRECCIÓN MEJORADOS
     @GetMapping("/pago-exitoso")
-    public String pagoExitoso(@RequestParam int pedidoId,
-                              @RequestParam(required = false) String collection_status,
-                              @RequestParam(required = false) Long payment_id) {
+    public ResponseEntity<Void> pagoExitoso(@RequestParam int pedidoId,
+                                            @RequestParam(required = false) String collection_status,
+                                            @RequestParam(required = false) Long payment_id) {
         System.out.println("✅ Pago exitoso para pedido: " + pedidoId);
         System.out.println("📋 Status: " + collection_status);
         System.out.println("💳 Payment ID: " + payment_id);
 
         try {
-            // Siempre intentar verificar el pago real si tenemos payment_id
             if (payment_id != null) {
                 MercadoPagoConfig.setAccessToken(mercadolibreToken);
                 PaymentClient paymentClient = new PaymentClient();
@@ -394,21 +227,22 @@ public class MercadoPagoController {
                 pedidoService.CambiarEstado(estadoReal, pedidoId);
                 System.out.println("✅ Estado actualizado según pago real: " + estadoReal);
             } else if ("approved".equals(collection_status)) {
-                // Fallback si no tenemos payment_id pero el status indica aprobado
                 pedidoService.CambiarEstado("PAGADO", pedidoId);
                 System.out.println("✅ Estado actualizado a PAGADO por collection_status");
             }
         } catch (Exception e) {
             System.err.println("⚠️ Error actualizando estado en redirect: " + e.getMessage());
-            // No fallar el redirect por esto
         }
 
-        return "redirect:https://forma-programada.netlify.app/confirmar-pago.html";
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("https://forma-programada.netlify.app/confirmar-pago.html"))
+                .build();
     }
 
+
     @GetMapping("/pago-pendiente")
-    public String pagoPendiente(@RequestParam int pedidoId,
-                                @RequestParam(required = false) Long payment_id) {
+    public ResponseEntity<Void> pagoPendiente(@RequestParam int pedidoId,
+                                              @RequestParam(required = false) Long payment_id) {
         System.out.println("⏳ Pago pendiente para pedido: " + pedidoId);
 
         try {
@@ -427,12 +261,14 @@ public class MercadoPagoController {
             System.err.println("⚠️ Error actualizando estado: " + e.getMessage());
         }
 
-        return "redirect:https://forma-programada.netlify.app/pago-pendiente.html";
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("https://forma-programada.netlify.app/pago-pendiente.html"))
+                .build();
     }
 
     @GetMapping("/pago-fallido")
-    public String pagoFallido(@RequestParam int pedidoId,
-                              @RequestParam(required = false) Long payment_id) {
+    public ResponseEntity<Void> pagoFallido(@RequestParam int pedidoId,
+                                            @RequestParam(required = false) Long payment_id) {
         System.out.println("❌ Pago fallido para pedido: " + pedidoId);
 
         try {
@@ -451,8 +287,11 @@ public class MercadoPagoController {
             System.err.println("⚠️ Error actualizando estado: " + e.getMessage());
         }
 
-        return "redirect:https://forma-programada.netlify.app/pago-fallido.html";
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("https://forma-programada.netlify.app/pago-fallido.html"))
+                .build();
     }
+
 
     // 🔥 ENDPOINT PARA VERIFICACIÓN MANUAL DE PAGO
     @GetMapping("/verificar-pago/{pedidoId}")

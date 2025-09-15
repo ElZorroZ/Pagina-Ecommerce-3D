@@ -28,7 +28,6 @@ import java.util.List;
 @Profile("!test")
 @Configuration
 @EnableMethodSecurity
-
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtFilter;
     private final JwtAuthenticationProvider jwtProvider;
@@ -55,17 +54,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/completo").permitAll()
+
+                        // 🔥 MERCADOPAGO - TODOS LOS ENDPOINTS PÚBLICOS
                         .requestMatchers(
-                                "/api/mp/auto-detect-environment",
-                                "/api/mp/simulate-webhook",
-                                "/api/mp/webhook",
-                                "/api/mp/payment-info/**",
-                                "/api/mp/check-payment/{pedidoId}",
-                                "/api/mp/config-status",
-                                "/api/mp/webhook-test",
-                                "/api/mp/verificar-pago/**",
-                                "/api/mp/webhook-debug"
+                                "/api/mp/**",
+                                "/pago-exitoso",
+                                "/pago-pendiente",
+                                "/pago-fallido"
                         ).permitAll()
+
+                        // 🔥 OAUTH2 - ENDPOINTS ESPECÍFICOS
+                        .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
+
                         // ENDPOINTS PROTEGIDOS
                         .requestMatchers(HttpMethod.PUT, "/api/mp/confirmarPedido").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/carrito/**").hasRole("CLIENTE")
@@ -89,15 +89,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                // 🔥 CONFIGURACIÓN OAUTH2 ESPECÍFICA
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/api/auth/oauth2/success", true)
+                        .failureUrl("/login?error")
+                        .permitAll()
+                )
                 // Autenticación
                 .authenticationProvider(daoAuthenticationProvider)
                 .authenticationProvider(jwtProvider)
                 // JWT filter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                // OAuth2 login
-                .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("/api/auth/oauth2/success", true) // endpoint donde se maneja token JWT
-                )
                 // Deshabilitar login clásico
                 .formLogin(AbstractHttpConfigurer::disable)
                 .build();
@@ -110,7 +113,9 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:*",
                 "http://127.0.0.1:*",
-                "https://forma-programada.netlify.app"
+                "https://forma-programada.netlify.app",
+                "https://www.mercadopago.com.ar",
+                "https://www.mercadopago.com"
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -121,8 +126,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-
 
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider(CustomUserDetailsService userDetailsService,
