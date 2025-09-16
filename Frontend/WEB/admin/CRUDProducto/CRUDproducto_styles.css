@@ -694,8 +694,14 @@ input[type="file"]:hover::before {
   background: #ddd;
 }
 /* --- INPUT ARCHIVO COMPRIMIDO --- */
+#archivo-comprimido {
+  display: inline-block;
+  cursor: pointer;
+}
+
 #archivo-comprimido::-webkit-file-upload-button {
   visibility: hidden;
+  pointer-events: none;
 }
 
 #archivo-comprimido::before {
@@ -711,6 +717,7 @@ input[type="file"]:hover::before {
 #archivo-comprimido:hover::before {
   background: #ddd;
 }
+
 /* Botones debajo del preview */
 .form-botones {
   display: flex;
