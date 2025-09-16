@@ -29,6 +29,9 @@ public class MercadoPagoServiceImpl implements MercadoPagoService {
     @Autowired
     private PedidoService pedidoService;
 
+    @Autowired
+    private JpaUsuarioRepository usuarioRepository;
+
     @Value("${mercadopago.webhook.key}")
     private String webhookKey;
 
@@ -37,15 +40,57 @@ public class MercadoPagoServiceImpl implements MercadoPagoService {
 
     @Value("${mercadopago.base-url:https://forma-programada.onrender.com}")
     private String baseUrl;
+
+    // Clase interna para encapsular solo lo que necesita MercadoPago
+    public static class UsuarioInfoMP {
+        private String nombre;
+        private String apellido;
+        private String email;
+        private String direccion;
+        private String cp;
+        private String ciudad;
+
+        // Getters y setters
+        public String getNombre() { return nombre; }
+        public void setNombre(String nombre) { this.nombre = nombre; }
+        public String getApellido() { return apellido; }
+        public void setApellido(String apellido) { this.apellido = apellido; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getDireccion() { return direccion; }
+        public void setDireccion(String direccion) { this.direccion = direccion; }
+        public String getCp() { return cp; }
+        public void setCp(String cp) { this.cp = cp; }
+        public String getCiudad() { return ciudad; }
+        public void setCiudad(String ciudad) { this.ciudad = ciudad; }
+    }
+
+    public UsuarioInfoMP getUsuarioParaPago(int usuarioId) {
+        UsuarioEntity usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + usuarioId));
+
+        UsuarioInfoMP infoMP = new UsuarioInfoMP();
+        infoMP.setNombre(usuario.getNombre());
+        infoMP.setApellido(usuario.getApellido());
+        infoMP.setEmail(usuario.getGmail());
+        infoMP.setDireccion(usuario.getDireccion());
+        infoMP.setCp(usuario.getCp());
+        infoMP.setCiudad(usuario.getCiudad());
+
+        return infoMP;
+    }
+
     @Override
-    public String confirmarPedido(String mercadolibreToken, String title, BigDecimal price, String pedidoId, int quantity) {
+    public String confirmarPedido(String mercadolibreToken, String title, BigDecimal price, String pedidoId, int quantity, int usuarioId) {
         try {
-            // 1️⃣ Validaciones básicas
             if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException("El precio debe ser mayor a 0");
             }
 
-            // 2️⃣ Detectar ambiente automáticamente
+            // Buscar usuario real
+            UsuarioInfoMP usuario = getUsuarioParaPago(usuarioId);
+
+            // Validar token
             boolean isTestToken = mercadolibreToken.startsWith("TEST-");
             boolean isProductionToken = mercadolibreToken.startsWith("APP_USR-");
 
@@ -53,194 +98,74 @@ public class MercadoPagoServiceImpl implements MercadoPagoService {
                 throw new IllegalArgumentException("Token inválido. Debe comenzar con TEST- o APP_USR-");
             }
 
-            // 3️⃣ Configurar MercadoPago
+            // Configurar MercadoPago
             MercadoPagoConfig.setAccessToken(mercadolibreToken);
 
-            String ambiente = isTestToken ? "SANDBOX" : "PRODUCCIÓN";
-            System.out.println("🔑 Token configurado para: " + ambiente);
-            System.out.println("📦 Procesando pedido: " + pedidoId + " por $" + price);
-
-            // 4️⃣ Crear item
+            // Crear item
             PreferenceItemRequest itemRequest = PreferenceItemRequest.builder()
                     .id(pedidoId)
                     .title(title)
-                    .quantity(quantity)
+                    .quantity(quantity) // usualmente 1
                     .unitPrice(price)
                     .currencyId("ARS")
-                    .categoryId("others") // Categoría general
+                    .categoryId("others")
                     .build();
 
-            // 5️⃣ URLs de retorno
+            // URLs de retorno
             String successUrl = baseUrl + "/api/mp/pago-exitoso?pedidoId=" + pedidoId;
             String pendingUrl = baseUrl + "/api/mp/pago-pendiente?pedidoId=" + pedidoId;
             String failureUrl = baseUrl + "/api/mp/pago-fallido?pedidoId=" + pedidoId;
             String webhookUrl = baseUrl + "/api/mp/webhook";
 
-            // 6️⃣ Configuración según el ambiente
+            // Construir preferencia
             PreferenceRequest.PreferenceRequestBuilder requestBuilder = PreferenceRequest.builder()
                     .items(List.of(itemRequest))
-
-                    // URLs de retorno
-                    .backUrls(
-                            PreferenceBackUrlsRequest.builder()
-                                    .success(successUrl)
-                                    .pending(pendingUrl)
-                                    .failure(failureUrl)
-                                    .build()
-                    )
-
-                    // Referencias para tracking
+                    .backUrls(PreferenceBackUrlsRequest.builder()
+                            .success(successUrl)
+                            .pending(pendingUrl)
+                            .failure(failureUrl)
+                            .build())
                     .externalReference(pedidoId)
                     .notificationUrl(webhookUrl)
-
-                    // Expiración
                     .expires(true)
                     .expirationDateFrom(OffsetDateTime.now())
                     .expirationDateTo(OffsetDateTime.now().plusHours(24))
+                    .statementDescriptor("PEDIDO " + pedidoId)
+                    .payer(PreferencePayerRequest.builder()
+                            .name(usuario.getNombre())
+                            .surname(usuario.getApellido())
+                            .email(usuario.getEmail())
+                            .build());
 
-                    // Descriptor en el resumen de la tarjeta
-                    .statementDescriptor("PEDIDO " + pedidoId);
-
-            // 🔥 CONFIGURACIÓN ESPECÍFICA SEGÚN AMBIENTE
+            // Configuración según ambiente
             if (isTestToken) {
-                // CONFIGURACIÓN SANDBOX
-                requestBuilder
-                        .binaryMode(false) // Permitir estados intermedios
-                        .autoReturn("approved")
-                        .paymentMethods(
-                                PreferencePaymentMethodsRequest.builder()
-                                        .excludedPaymentTypes(List.of()) // No excluir nada en test
-                                        .excludedPaymentMethods(List.of())
-                                        .installments(12) // Hasta 12 cuotas en test
-                                        .defaultInstallments(1)
-                                        .build()
-                        );
+                requestBuilder.binaryMode(false).autoReturn("approved");
             } else {
-                // 🏭 CONFIGURACIÓN PRODUCCIÓN
-                requestBuilder
-                        .binaryMode(true) // Solo approved/rejected en producción
-                        .autoReturn("approved")
-                        .paymentMethods(
-                                PreferencePaymentMethodsRequest.builder()
-                                        // Métodos excluidos (opcional)
-                                        .excludedPaymentTypes(List.of(
-                                                // "ticket", // Excluir efectivo si no quieres
-                                                // "atm" // Excluir cajeros si no quieres
-                                        ))
-                                        .excludedPaymentMethods(List.of(
-                                                // "rapipago", // Excluir Rapipago
-                                                // "pagofacil" // Excluir Pago Fácil
-                                        ))
-                                        .installments(12) // Máximo cuotas permitidas
-                                        .defaultInstallments(1) // Cuotas por defecto
-                                        .build()
-                        )
-
-                        // 🔒 CONFIGURACIÓN ADICIONAL DE SEGURIDAD PARA PRODUCCIÓN
-                        .additionalInfo("Compra en tienda online")
-                        .marketplace("NONE") // No es marketplace
-
-                        // 📧 Información del comprador (recomendado en producción)
-                        .payer(
-                                PreferencePayerRequest.builder()
-                                        .name("Cliente")
-                                        .surname("Tienda")
-                                        .email("cliente@email.com") // Email genérico
-                                        .build()
-                        );
+                requestBuilder.binaryMode(true).autoReturn("approved");
             }
 
-            // 7️⃣ Crear la preferencia
+            // Crear preferencia
             PreferenceRequest preferenceRequest = requestBuilder.build();
             PreferenceClient client = new PreferenceClient();
             Preference preference = client.create(preferenceRequest);
 
-            // 8️⃣ Validar que se creó correctamente
             if (preference.getId() == null || preference.getId().isEmpty()) {
-                throw new RuntimeException("❌ Preference creada sin ID válido");
+                throw new RuntimeException("Preference creada sin ID válido");
             }
 
-            // 9️⃣ Obtener URL según ambiente
-            String initPoint;
-            if (isTestToken) {
-                // SANDBOX: Usar sandbox init point
-                initPoint = preference.getSandboxInitPoint();
-                if (initPoint == null || initPoint.isEmpty()) {
-                    initPoint = "https://sandbox.mercadopago.com.ar/checkout/v1/redirect?pref_id=" + preference.getId();
-                }
-            } else {
-                // PRODUCCIÓN: Usar init point normal
-                initPoint = preference.getInitPoint();
-                if (initPoint == null || initPoint.isEmpty()) {
-                    throw new RuntimeException("❌ No se pudo obtener URL de pago de producción");
-                }
-            }
+            // Guardar preference ID en pedido
+            pedidoService.guardarMercadoPagoId(pedidoId, preference.getId());
 
-            // 🔟 Verificación final según ambiente
-            if (isTestToken && !initPoint.contains("sandbox")) {
-                throw new RuntimeException("❌ ERROR: Token TEST pero URL no es de sandbox");
-            }
-            if (isProductionToken && initPoint.contains("sandbox")) {
-                throw new RuntimeException("❌ ERROR: Token PRODUCCIÓN pero URL es de sandbox");
-            }
-
-            // 1️⃣1️⃣ Guardar preference ID en base de datos
-            try {
-                pedidoService.guardarMercadoPagoId(pedidoId, preference.getId());
-                System.out.println("✅ Preference ID guardado: " + preference.getId());
-            } catch (Exception e) {
-                System.err.println("⚠️ Error guardando preference ID: " + e.getMessage());
-            }
-
-            // 1️⃣2️⃣ Logs de éxito
-            System.out.println("✅ Preferencia creada exitosamente en " + ambiente);
-            System.out.println("🆔 Preference ID: " + preference.getId());
-            System.out.println("🔗 " + ambiente + " URL: " + initPoint);
-            System.out.println("🎯 External Reference: " + pedidoId);
-
-            if (isTestToken) {
-                System.out.println("💳 Usar tarjetas de TEST de MercadoPago");
-            } else {
-                System.out.println("💰 PRODUCCIÓN: Procesará pagos REALES");
-            }
-
-            return initPoint;
-
-        } catch (MPApiException e) {
-            System.err.println("❌ ERROR API MercadoPago:");
-            System.err.println("   📊 Status Code: " + e.getStatusCode());
-            System.err.println("   💬 Mensaje: " + e.getMessage());
-
-            if (e.getApiResponse() != null) {
-                System.err.println("   📄 Respuesta: " + e.getApiResponse().getContent());
-            }
-
-            // Sugerencias según el error
-            switch (e.getStatusCode()) {
-                case 400:
-                    System.err.println("💡 Verificar: Formato de datos, URLs HTTPS válidas");
-                    break;
-                case 401:
-                    System.err.println("🔐 Token inválido o expirado");
-                    break;
-                case 403:
-                    System.err.println("🚫 Token sin permisos para crear preferencias");
-                    break;
-                case 429:
-                    System.err.println("⏱️ Rate limit excedido, reintentar en unos minutos");
-                    break;
-                default:
-                    System.err.println("🔍 Error no documentado, revisar con soporte MP");
-            }
-
-            throw new RuntimeException("Error API MercadoPago: " + e.getMessage(), e);
+            // Retornar URL de pago
+            return isTestToken ? preference.getSandboxInitPoint() : preference.getInitPoint();
 
         } catch (Exception e) {
-            System.err.println("❌ ERROR INESPERADO: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Error procesando pago: " + e.getMessage(), e);
         }
     }
+
+
+
     public boolean verifySignature(String signature, Map<String, Object> payload) {
         System.out.println("🔐 Verificando webhook signature:");
         System.out.println("   - Signature recibida: " + (signature != null ? "SÍ" : "NO"));

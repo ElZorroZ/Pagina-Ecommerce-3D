@@ -459,7 +459,8 @@ async saveShippingInfo() {
                     {
                         id: pedidoCreado.id,
                         total: pedidoCreado.total,
-                        fechaPedido: pedidoCreado.fechaPedido
+                        fechaPedido: pedidoCreado.fechaPedido,
+                        usuarioId: pedidoCreado.usuarioId // 🔹 agregar
                     },
                     1
                 );

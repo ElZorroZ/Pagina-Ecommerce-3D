@@ -57,7 +57,7 @@ public class MercadoPagoController {
 
     // Confirmar pedido y obtener link de pago
     @PutMapping("/confirmarPedido")
-    public ResponseEntity<Map<String, String>> confirmarPedido(@RequestBody Pedido pedido) { // quitar quantity
+    public ResponseEntity<Map<String, String>> confirmarPedido(@RequestBody Pedido pedido) {
         try {
             // 🔥 VALIDACIÓN DE TOKEN
             if (mercadolibreToken == null || mercadolibreToken.isEmpty()) {
@@ -80,8 +80,15 @@ public class MercadoPagoController {
             System.out.println("   - Pedido ID: " + pedido.getId());
             System.out.println("   - Total: $" + price);
 
-            // Crear preferencia y obtener link SIN multiplicar por quantity
-            String initPoint = mercadoPagoService.confirmarPedido(mercadolibreToken, title, price, pedido.getId().toString(), 1); // pasar 1
+            // Crear preferencia y obtener link usando usuarioId del pedido
+            String initPoint = mercadoPagoService.confirmarPedido(
+                    mercadolibreToken,
+                    title,
+                    price,
+                    pedido.getId().toString(),
+                    1, // quantity
+                    pedido.getUsuarioId() // usuario real del pedido
+            );
 
             // Actualizar estado del pedido a "PROCESANDO"
             pedidoService.CambiarEstado("PROCESANDO", pedido.getId());
@@ -108,6 +115,7 @@ public class MercadoPagoController {
                     ));
         }
     }
+
 
     @PostMapping("/webhook")
     public ResponseEntity<String> webhook(@RequestBody(required = false) String body,
