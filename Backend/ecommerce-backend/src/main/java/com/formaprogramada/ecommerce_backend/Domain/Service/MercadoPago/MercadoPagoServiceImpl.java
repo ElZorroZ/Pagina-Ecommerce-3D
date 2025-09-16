@@ -50,29 +50,43 @@ public class MercadoPagoServiceImpl implements MercadoPagoService {
                 throw new IllegalArgumentException("El pedidoId no puede ser nulo o vacío");
             }
 
-            // 2️⃣ Configurar token
-            MercadoPagoConfig.setAccessToken(mercadolibreToken);
+            // 2️⃣ Verificar que el token sea TEST
             boolean isTestToken = mercadolibreToken.startsWith("TEST-");
+            if (!isTestToken) {
+                throw new IllegalArgumentException("En desarrollo solo se permiten tokens TEST");
+            }
 
-            System.out.println("🔑 Token configurado: " + (isTestToken ? "SANDBOX" : "PRODUCTION"));
-            System.out.println("⚠️ SDK bug: URLs pueden ser de producción pero funcionan con tokens TEST");
-            // 3️⃣ Crear item
+            // 3️⃣ Configurar MercadoPago para sandbox
+            MercadoPagoConfig.setAccessToken(mercadolibreToken);
+
+            // 🔥 FORZAR SANDBOX MODE
+            System.setProperty("ENVIRONMENT", "sandbox");
+
+            System.out.println("🔑 Token configurado: SANDBOX");
+            System.out.println("🌐 Forzando modo sandbox");
+
+            // 4️⃣ Crear item con configuración específica para sandbox
             PreferenceItemRequest itemRequest = PreferenceItemRequest.builder()
                     .title(title)
                     .quantity(quantity)
                     .unitPrice(price)
                     .currencyId("ARS")
                     .id(pedidoId)
+                    .categoryId("others") // 🔥 IMPORTANTE: Categoría para sandbox
                     .build();
 
-            // 4️⃣ URLs dinámicas según ambiente
+            // 5️⃣ URLs con dominio de test
             String successUrl = baseUrl + "/api/mp/pago-exitoso?pedidoId=" + pedidoId;
             String pendingUrl = baseUrl + "/api/mp/pago-pendiente?pedidoId=" + pedidoId;
             String failureUrl = baseUrl + "/api/mp/pago-fallido?pedidoId=" + pedidoId;
             String webhookUrl = baseUrl + "/api/mp/webhook";
 
-            // 5️⃣ Crear preferencia con configuración específica para sandbox
-            PreferenceRequest.PreferenceRequestBuilder requestBuilder = PreferenceRequest.builder()
+            System.out.println("🔍 URLs configuradas:");
+            System.out.println("   - Success: " + successUrl);
+            System.out.println("   - Webhook: " + webhookUrl);
+
+            // 6️⃣ Configuración específica para sandbox
+            PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                     .items(List.of(itemRequest))
                     .backUrls(
                             PreferenceBackUrlsRequest.builder()
@@ -81,67 +95,75 @@ public class MercadoPagoServiceImpl implements MercadoPagoService {
                                     .failure(failureUrl)
                                     .build()
                     )
-                    .externalReference(pedidoId) // 🔥 CLAVE: Para identificar en webhook
-                    .notificationUrl(webhookUrl) // 🔥 Webhook URL
+                    .externalReference(pedidoId)
+                    .notificationUrl(webhookUrl)
+
+                    // 🔥 CONFIGURACIÓN CRÍTICA PARA SANDBOX
+                    .binaryMode(false) // IMPORTANTE: false para sandbox
+                    .autoReturn("approved") // Auto retorno en aprobados
+
+                    // Configuración de pagos para sandbox
+                    .paymentMethods(
+                            PreferencePaymentMethodsRequest.builder()
+                                    .excludedPaymentTypes(List.of()) // No excluir nada
+                                    .excludedPaymentMethods(List.of()) // No excluir métodos
+                                    .installments(12) // Hasta 12 cuotas
+                                    .defaultInstallments(1)
+                                    .defaultPaymentMethodId("visa") // Método por defecto
+                                    .build()
+                    )
+
+                    // Información del pagador para sandbox (opcional pero recomendado)
+                    .payer(
+                            PreferencePayerRequest.builder()
+                                    .name("Test")
+                                    .surname("User")
+                                    .email("test_user_123456@testuser.com") // Email de test válido
+                                    .build()
+                    )
+
+                    // Configuración de expiración
                     .expires(true)
                     .expirationDateFrom(OffsetDateTime.now())
                     .expirationDateTo(OffsetDateTime.now().plusHours(24))
-                    .statementDescriptor("Pedido #" + pedidoId);
+                    .statementDescriptor("Test Pedido #" + pedidoId)
 
-            // 🔥 CONFIGURACIÓN ESPECÍFICA SEGÚN AMBIENTE
-            if (isTestToken) {
-                // Para sandbox/test
-                requestBuilder
-                        .binaryMode(false) // Permitir más estados en sandbox
-                        .paymentMethods(
-                                PreferencePaymentMethodsRequest.builder()
-                                        .excludedPaymentTypes(List.of()) // No excluir nada en sandbox
-                                        .excludedPaymentMethods(List.of())
-                                        .installments(12) // Máximo 12 cuotas
-                                        .defaultInstallments(1)
-                                        .build()
-                        );
-            } else {
-                // Para producción
-                requestBuilder
-                        .binaryMode(true) // Solo aprobado/rechazado en producción
-                        .paymentMethods(
-                                PreferencePaymentMethodsRequest.builder()
-                                        .excludedPaymentTypes(List.of())
-                                        .excludedPaymentMethods(List.of())
-                                        .installments(6)
-                                        .defaultInstallments(1)
-                                        .build()
-                        );
-            }
+                    // 🔥 METADATOS PARA IDENTIFICAR SANDBOX
+                    .metadata(Map.of(
+                            "environment", "sandbox",
+                            "pedido_id", pedidoId,
+                            "integration_test", "true"
+                    ))
 
+                    .build();
 
-            // 6️⃣ Crear la preferencia
-            // En confirmarPedido(), después de crear la preferencia
-            PreferenceRequest preferenceRequest = requestBuilder.build();
+            // 7️⃣ Crear la preferencia con cliente configurado para sandbox
             PreferenceClient client = new PreferenceClient();
             Preference preference = client.create(preferenceRequest);
 
-            // 🔥 VALIDAR QUE LA PREFERENCIA SE CREÓ CORRECTAMENTE
+            // 8️⃣ Validaciones post-creación
             if (preference.getId() == null || preference.getId().isEmpty()) {
                 throw new RuntimeException("Error: Preference creada sin ID válido");
             }
 
-            if (preference.getInitPoint() == null || preference.getInitPoint().isEmpty()) {
-                throw new RuntimeException("Error: Preference creada sin init_point válido");
+            // 9️⃣ OBTENER URL DE SANDBOX CORRECTAMENTE
+            String initPoint = preference.getSandboxInitPoint();
+
+            // 🔥 FALLBACK si getSandboxInitPoint es null
+            if (initPoint == null || initPoint.isEmpty()) {
+                initPoint = preference.getInitPoint();
+                System.out.println("⚠️ Usando initPoint estándar como fallback");
             }
 
-            // 🔥 VALIDAR URLs DE WEBHOOK
-                        System.out.println("🔍 Validando configuración de webhook:");
-                        System.out.println("   - Notification URL: " + webhookUrl);
-                        System.out.println("   - External Reference: " + pedidoId);
-
-            // Verificar que el webhook URL sea alcanzable (opcional)
-            if (!webhookUrl.startsWith("https://") && !isTestToken) {
-                System.err.println("⚠️ CRÍTICO: Webhook debe usar HTTPS en producción");
+            // 🔥 VALIDACIÓN CRÍTICA: Asegurar que sea URL de sandbox
+            if (!initPoint.contains("sandbox")) {
+                // Forzar URL de sandbox si no la detecta
+                String preferenceId = preference.getId();
+                initPoint = "https://sandbox.mercadopago.com.ar/checkout/v1/redirect?pref_id=" + preferenceId;
+                System.out.println("🔧 URL de sandbox forzada: " + initPoint);
             }
 
-            // 7️⃣ Guardar preference ID
+            // 🔟 Guardar preference ID
             try {
                 pedidoService.guardarMercadoPagoId(pedidoId, preference.getId());
                 System.out.println("✅ Preference ID guardado: " + preference.getId());
@@ -149,18 +171,11 @@ public class MercadoPagoServiceImpl implements MercadoPagoService {
                 System.err.println("⚠️ Error guardando preference ID: " + e.getMessage());
             }
 
-            // 8️⃣ Log detallado del resultado
-            String initPoint = preference.getInitPoint();
+            // 1️⃣1️⃣ Log detallado del resultado
             System.out.println("✅ Preferencia creada: " + preference.getId());
             System.out.println("🔗 URL generada: " + initPoint);
-            System.out.println("🌐 Tipo de token: " + (isTestToken ? "TEST" : "PRODUCTION"));
-            System.out.println("🏛️ Ambiente detectado: " + (initPoint.contains("sandbox") ? "SANDBOX" : "PRODUCTION"));
-
-            // 🔥 VALIDACIÓN FINAL
-            if (isTestToken && !initPoint.contains("sandbox")) {
-                System.err.println("⚠️ WARNING: Token TEST pero URL de producción generada");
-                System.err.println("💡 Esto puede causar problemas en el webhook");
-            }
+            System.out.println("🏛️ Ambiente confirmado: SANDBOX");
+            System.out.println("💳 Usar tarjetas de test: https://www.mercadopago.com.ar/developers/es/docs/testing/test-cards");
 
             return initPoint;
 
@@ -170,11 +185,14 @@ public class MercadoPagoServiceImpl implements MercadoPagoService {
             System.err.println("   - Mensaje: " + e.getMessage());
             System.err.println("   - Respuesta: " + e.getApiResponse());
 
+            // Mensajes específicos para errores comunes en sandbox
             if (e.getStatusCode() == 400) {
-                System.err.println("💡 Posibles causas:");
-                System.err.println("   - Token inválido para el ambiente");
-                System.err.println("   - Configuración de preferencia incorrecta");
-                System.err.println("   - URLs webhook malformadas");
+                System.err.println("💡 Verificar:");
+                System.err.println("   - Token TEST válido y activo");
+                System.err.println("   - Cuenta de test creada correctamente");
+                System.err.println("   - URLs webhook accesibles desde internet");
+            } else if (e.getStatusCode() == 401) {
+                System.err.println("🔐 Token inválido o expirado");
             }
 
             throw new RuntimeException("Error creando preferencia: " + e.getMessage(), e);
@@ -184,7 +202,6 @@ public class MercadoPagoServiceImpl implements MercadoPagoService {
             throw new RuntimeException("Error procesando pago: " + e.getMessage(), e);
         }
     }
-
     public boolean verifySignature(String signature, Map<String, Object> payload) {
         System.out.println("🔐 Verificando webhook signature:");
         System.out.println("   - Signature recibida: " + (signature != null ? "SÍ" : "NO"));

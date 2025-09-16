@@ -224,8 +224,8 @@ function initializeDropdown() {
 
 // Utility function to format price
 function formatPrice(price) {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('es-CL', {
         style: 'currency',
-        currency: 'USD'
+        currency: 'CLP'
     }).format(price);
 }

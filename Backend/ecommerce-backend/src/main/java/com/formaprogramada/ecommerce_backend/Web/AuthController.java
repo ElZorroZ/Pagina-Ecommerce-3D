@@ -303,20 +303,68 @@ public class AuthController {
 
             log.info("OAuth2 - Procesando usuario: {}", email);
 
-            // Buscar o crear usuario
-            Usuario usuario = usuarioRepository.buscarPorGmail(email)
-                    .orElseGet(() -> {
-                        log.info("OAuth2 - Creando nuevo usuario: {}", email);
-                        Usuario nuevo = new Usuario();
-                        nuevo.setGmail(email);
-                        nuevo.setNombre(nombre);
-                        nuevo.setApellido(apellido);
-                        nuevo.setVerificado(true);
-                        nuevo.setProveedor("GOOGLE");
-                        String passwordFicticio = passwordHasher.hash("google123!");
-                        nuevo.setPassword(passwordFicticio);
-                        return usuarioRepository.guardar(nuevo);
-                    });
+            // Buscar usuario existente
+            Optional<Usuario> usuarioExistente = usuarioRepository.buscarPorGmail(email);
+            Usuario usuario;
+
+            if (usuarioExistente.isPresent()) {
+                // Usuario ya existe - actualizar solo datos necesarios
+                usuario = usuarioExistente.get();
+                log.info("OAuth2 - Usuario existente encontrado: {}", email);
+
+                // Actualizar solo si los datos están vacíos o si es la primera vez con Google
+                boolean necesitaActualizacion = false;
+
+                if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty()) {
+                    usuario.setNombre(nombre);
+                    necesitaActualizacion = true;
+                }
+
+                if (usuario.getApellido() == null || usuario.getApellido().trim().isEmpty()) {
+                    usuario.setApellido(apellido);
+                    necesitaActualizacion = true;
+                }
+
+                // Marcar como verificado si viene de Google y no estaba verificado
+                if (!usuario.isVerificado() && verificadoGoogle) {
+                    usuario.setVerificado(true);
+                    necesitaActualizacion = true;
+                }
+
+                // Actualizar proveedor si no estaba establecido o era diferente
+                if (usuario.getProveedor() == null || !usuario.getProveedor().contains("GOOGLE")) {
+                    // Si ya tenía un proveedor, agregar GOOGLE, si no, establecer GOOGLE
+                    String proveedorActual = usuario.getProveedor();
+                    if (proveedorActual == null || proveedorActual.trim().isEmpty()) {
+                        usuario.setProveedor("GOOGLE");
+                    } else if (!proveedorActual.contains("GOOGLE")) {
+                        usuario.setProveedor(proveedorActual + ",GOOGLE");
+                    }
+                    necesitaActualizacion = true;
+                }
+
+                // Guardar solo si hay cambios
+                if (necesitaActualizacion) {
+                    usuario = usuarioRepository.guardar(usuario);
+                    log.info("OAuth2 - Usuario actualizado: {}", email);
+                }
+
+                // NO modificamos la contraseña existente
+
+            } else {
+                // Usuario nuevo - crear con todos los datos
+                log.info("OAuth2 - Creando nuevo usuario: {}", email);
+                usuario = new Usuario();
+                usuario.setGmail(email);
+                usuario.setNombre(nombre);
+                usuario.setApellido(apellido);
+                usuario.setVerificado(true);
+                usuario.setProveedor("GOOGLE");
+                // Solo para usuarios nuevos creamos una contraseña ficticia
+                String passwordFicticio = passwordHasher.hash("google123!");
+                usuario.setPassword(passwordFicticio);
+                usuario = usuarioRepository.guardar(usuario);
+            }
 
             // Cargar UserDetails para generar el token correctamente
             UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getGmail());
@@ -353,5 +401,5 @@ public class AuthController {
             }
         }
     }
-
 }
+
