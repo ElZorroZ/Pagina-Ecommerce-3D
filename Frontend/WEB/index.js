@@ -99,7 +99,7 @@ function createProductCard(dto) {
         </div>
         <div class="product-info">
             <h3 class="product-name">${producto.nombre}</h3>
-            <p class="product-price">$${producto.precio}</p>
+            <p class="product-price">${formatPrice(producto.precio)}</p>
         </div>
     `;
 
