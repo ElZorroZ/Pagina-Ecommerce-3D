@@ -179,7 +179,10 @@ if (form) {
       const descripcion = document.getElementById("descripcion").value.trim();
       const categoriaId = parseInt(document.getElementById("categoria").value);
       const precio = parseFloat(document.getElementById("precio").value);
-      const precioDigital = parseFloat(document.getElementById("precioDigital").value);
+      const precioDigitalInput = document.getElementById("precioDigital");
+      if (precioDigitalInput) {
+        precioDigitalInput.value = producto.precioDigital || "";
+      }
       const codigoInicial = document.getElementById("codigo-inicial").value.trim();
       const version = document.getElementById("version").value.trim();
       const seguimiento = document.getElementById("seguimiento").value.trim();
