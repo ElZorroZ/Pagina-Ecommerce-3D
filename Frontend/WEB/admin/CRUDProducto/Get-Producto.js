@@ -391,7 +391,10 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
   document.getElementById("nombre").value = producto.nombre || "";
   document.getElementById("descripcion").value = producto.descripcion || "";
   document.getElementById("precio").value = producto.precio || "";
-  document.getElementById("precioDigital").value = producto.precioDigital || "";
+    const precioDigitalInput = document.getElementById("precioDigital");
+    if (precioDigitalInput) {
+      precioDigitalInput.value = producto.precioDigital || "";
+    }
 
   // Nuevos campos
   document.getElementById("codigo-inicial").value = producto.codigoInicial || "";
