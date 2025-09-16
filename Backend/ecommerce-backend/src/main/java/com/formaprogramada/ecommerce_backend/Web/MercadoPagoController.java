@@ -3,9 +3,12 @@ package com.formaprogramada.ecommerce_backend.Web;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.formaprogramada.ecommerce_backend.Domain.Model.Pedido.Pedido;
+import com.formaprogramada.ecommerce_backend.Domain.Model.Usuario.Usuario;
 import com.formaprogramada.ecommerce_backend.Domain.Service.MercadoPago.MercadoPagoService;
 
 import com.formaprogramada.ecommerce_backend.Domain.Service.Pedido.PedidoService;
+import com.formaprogramada.ecommerce_backend.Domain.Service.Usuario.UsuarioService;
+import com.formaprogramada.ecommerce_backend.Infrastructure.DTO.Pedido.PedidoUsuarioDTO;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.PreferenceClient;
@@ -13,6 +16,7 @@ import com.mercadopago.client.preference.PreferenceItemRequest;
 import com.mercadopago.client.preference.PreferenceRequest;
 import com.mercadopago.net.MPResourceList;
 import com.mercadopago.resources.payment.Payment;
+import com.mercadopago.resources.payment.PaymentPayer;
 import com.mercadopago.resources.preference.Preference;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +38,10 @@ public class MercadoPagoController {
     private final MercadoPagoService mercadoPagoService;
     @Autowired
     private PedidoService pedidoService;
+
+    private CarritoController carritoController;
+
+    private UsuarioService usuarioService;
 
     @Value("${mercadopago.access-token}")
     private String mercadolibreToken;
@@ -109,6 +117,8 @@ public class MercadoPagoController {
         try {
             System.out.println("🔔 WEBHOOK RECIBIDO - " + new Date());
             System.out.println("📋 Body completo: " + body);
+            
+
 
             String paymentId = null;
 
@@ -164,6 +174,11 @@ public class MercadoPagoController {
                     estadoInterno,                        // estado mapeado
                     Integer.parseInt(payment.getExternalReference()) // id convertido a int
             );
+            PedidoUsuarioDTO pedidoUsuarioDTO = pedidoService.verPedido(Integer.parseInt(payment.getExternalReference()));
+            PaymentPayer payer = payment.getPayer();
+            Optional<Usuario> usuario = usuarioService.buscarPorGmail(payer.getEmail());
+            Usuario usuari1=usuario.orElse(new Usuario());
+            carritoController.VaciarCarrito(usuari1.getId());
 
         } catch (Exception e) {
             System.err.println("❌ ERROR EN WEBHOOK: " + e.getMessage());
