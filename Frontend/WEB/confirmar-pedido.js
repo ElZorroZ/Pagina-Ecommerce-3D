@@ -485,10 +485,11 @@ async saveShippingInfo() {
                 restoreButton();
                 
                 // Pequeña pausa para que se vea la restauración
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 10000));
 
                 // Redirigir a MercadoPago
                 console.log("🚀 Redirigiendo a MercadoPago...");
+
                 window.location.href = initPoint;
                 
                 // Si por alguna razón no redirige, restaurar botón
@@ -745,6 +746,7 @@ function initializeMobileMenu() {
 document.addEventListener('DOMContentLoaded', async () => {
     const checkoutManager = new CheckoutManager();
     await checkoutManager.init();
+    await this.initializeMercadoPago();
     // En algún lugar de tu código
     window.MERCADOPAGO_PUBLIC_KEY = "APP_USR-c9d6ba4f-ff10-4d26-b362-fb393755c1b7";
     // Initialize navigation components
