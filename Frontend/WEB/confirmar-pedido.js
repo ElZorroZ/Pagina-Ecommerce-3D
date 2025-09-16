@@ -331,31 +331,35 @@ async renderOrderSummary() {
         }
     }
 
+async saveShippingInfo() {
+    const formData = new FormData(document.getElementById('shipping-info-form'));
+    
+    // Construir objeto de cambios
+    const cambios = {
+        direccion: formData.get('direccion'),
+        cp: formData.get('cp'),
+        ciudad: formData.get('ciudad')
+    };
 
-    async saveShippingInfo() {
-        const formData = new FormData(document.getElementById('shipping-info-form'));
-        
-        // Update local data
-        this.userInfo.direccion = formData.get('direccion');
-        this.userInfo.cp = formData.get('cp');
-        this.userInfo.ciudad = formData.get('ciudad');
+    try {
+        // Llamada a la API (ajusta si necesitas un endpoint específico)
+        await window.API.modificarPedido(cambios);
 
-        try {
-            // Simulate API call to save shipping info
-            console.log('Saving shipping info:', this.userInfo);
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Update display and exit edit mode
-            this.renderShippingInfo();
-            this.toggleShippingEdit(false);
-            
-            // Show success feedback
-            this.showSuccessMessage('Información de envío actualizada');
-        } catch (error) {
-            console.error('Error saving shipping info:', error);
-            this.showError('Error al guardar la información de envío');
-        }
+        // Actualizar localmente
+        this.userInfo = { ...this.userInfo, ...cambios };
+
+        // Actualizar display y salir del modo edición
+        this.renderShippingInfo();
+        this.toggleShippingEdit(false);
+
+        // Mensaje de éxito
+        this.showSuccessMessage('Información de envío actualizada');
+    } catch (error) {
+        console.error('Error saving shipping info:', error);
+        this.showError('Error al guardar la información de envío');
     }
+}
+
 
     showSuccessMessage(message) {
         // Simple success feedback - in a real app, you'd want a toast notification
@@ -370,101 +374,208 @@ async renderOrderSummary() {
         }, 2000);
     }
 
-    async confirmOrder() {
-        console.log("\n🎬 === INICIANDO confirmOrder ===");
-        
-        // Ejecutar diagnóstico
-        await this.testConnectivity();
-        
-        if (!this.validateOrderData()) {
-            console.log("❌ Validación de datos falló");
-            return;
-        }
+   async confirmOrder() {
+    console.log("\n🎬 === INICIANDO confirmOrder ===");
+    
+    // Ejecutar diagnóstico
+    await this.testConnectivity();
+    
+    if (!this.validateOrderData()) {
+        console.log("❌ Validación de datos falló");
+        return;
+    }
 
-        const confirmBtn = document.getElementById('confirm-order-btn');
-        const originalText = confirmBtn.innerHTML;
+    const confirmBtn = document.getElementById('confirm-order-btn');
+    const originalText = confirmBtn.innerHTML;
+    const originalDisabled = confirmBtn.disabled;
 
+    // Función para restaurar el botón
+    const restoreButton = () => {
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = originalDisabled;
+        console.log("🔄 Botón restaurado");
+    };
+
+    // Función para deshabilitar el botón
+    const disableButton = () => {
         confirmBtn.innerHTML = `
             <div style="width: 20px; height: 20px; border: 2px solid transparent; border-top: 2px solid currentColor; border-radius: 50%; animation: spin 1s linear infinite;"></div>
             Procesando...
         `;
         confirmBtn.disabled = true;
+        console.log("⏳ Botón deshabilitado");
+    };
 
-        try {
-            const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
-            console.log("💳 Método de pago seleccionado:", paymentMethod);
+    disableButton();
 
-            // 1️⃣ Crear el pedido en backend
-            console.log("📦 Creando pedido...");
-            console.log("🛒 Cart:", this.cart);
+    try {
+        const paymentMethod = document.querySelector('input[name="payment-method"]:checked');
+        
+        if (!paymentMethod) {
+            throw new Error("Por favor selecciona un método de pago");
+        }
+        
+        const paymentValue = paymentMethod.value;
+        console.log("💳 Método de pago seleccionado:", paymentValue);
+
+        // 1️⃣ Crear el pedido en backend
+        console.log("📦 Creando pedido...");
+        console.log("🛒 Cart:", this.cart);
+        
+        const pedidoCreado = await window.API.crearPedido(this.cart);
+        console.log("✅ Pedido creado:", pedidoCreado);
+
+        // Validaciones del pedido creado
+        if (!pedidoCreado) {
+            throw new Error("crearPedido devolvió null o undefined");
+        }
+        if (!pedidoCreado.id) {
+            throw new Error("El pedido creado no tiene un ID válido. Pedido completo: " + JSON.stringify(pedidoCreado));
+        }
+        if (!pedidoCreado.total || pedidoCreado.total <= 0) {
+            throw new Error("El pedido creado no tiene un total válido: " + pedidoCreado.total);
+        }
+
+        console.log("📋 Estructura del pedido validada:", {
+            id: pedidoCreado.id,
+            total: pedidoCreado.total,
+            fechaPedido: pedidoCreado.fechaPedido,
+            estado: pedidoCreado.estado
+        });
+
+        // 2️⃣ Si es Mercado Pago → usar API directa
+        if (paymentValue === "mercadopago") {
+            console.log("💳 Procesando con MercadoPago API directa...");
             
-            const pedidoCreado = await window.API.crearPedido(this.cart);
-            console.log("✅ Pedido creado:", pedidoCreado);
+            try {
+                // Verificar que MercadoPago SDK esté cargado
+                if (typeof MercadoPago === 'undefined') {
+                    throw new Error("MercadoPago SDK no está cargado. Verifica que el script esté incluido.");
+                }
 
-            // Validaciones del pedido creado
-            if (!pedidoCreado) {
-                throw new Error("crearPedido devolvió null o undefined");
-            }
-            if (!pedidoCreado.id) {
-                throw new Error("El pedido creado no tiene un ID válido. Pedido completo: " + JSON.stringify(pedidoCreado));
-            }
-            if (!pedidoCreado.total || pedidoCreado.total <= 0) {
-                throw new Error("El pedido creado no tiene un total válido: " + pedidoCreado.total);
-            }
-
-            console.log("📋 Estructura del pedido validada:", {
-                id: pedidoCreado.id,
-                total: pedidoCreado.total,
-                fechaPedido: pedidoCreado.fechaPedido,
-                estado: pedidoCreado.estado,
-                completo: pedidoCreado
-            });
-
-            // 2️⃣ Si es Mercado Pago → confirmarlo
-            if (paymentMethod === "mercadopago") {
-                console.log("💳 Procesando con MercadoPago...");
-
-                const linkPago = await API.confirmarPedido(
+                // Obtener preferencia del backend
+                console.log("🔄 Obteniendo preferencia de pago...");
+                const response = await API.confirmarPedido(
                     {
                         id: pedidoCreado.id,
                         total: pedidoCreado.total,
                         fechaPedido: pedidoCreado.fechaPedido
                     },
-                    1 // quantity = 1 si ya pasaste total
+                    1
                 );
 
-                console.log("🎯 Link de pago obtenido:", linkPago);
+                console.log("📄 Respuesta del backend:", response);
 
-                if (!linkPago) {
+                let initPoint;
+                if (typeof response === 'string') {
+                    initPoint = response;
+                } else if (response && response.initPoint) {
+                    initPoint = response.initPoint;
+                } else {
+                    throw new Error("Respuesta del backend inválida: " + JSON.stringify(response));
+                }
+
+                if (!initPoint) {
                     throw new Error("No se recibió el link de pago de MercadoPago");
                 }
 
-                // Redirigir
-                window.location.href = linkPago;
+                console.log("🎯 Link de pago obtenido:", initPoint);
+
+                // Restaurar botón antes de redireccionar
+                restoreButton();
+                
+                // Pequeña pausa para que se vea la restauración
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Redirigir a MercadoPago
+                console.log("🚀 Redirigiendo a MercadoPago...");
+                window.location.href = initPoint;
+                
+                // Si por alguna razón no redirige, restaurar botón
+                setTimeout(() => {
+                    if (confirmBtn.disabled) {
+                        restoreButton();
+                        console.log("⚠️ Redirección falló, botón restaurado");
+                    }
+                }, 3000);
+
+                return;
+
+            } catch (mpError) {
+                console.error("❌ Error específico de MercadoPago:", mpError);
+                restoreButton();
+                this.showError('Error al procesar el pago con MercadoPago: ' + mpError.message);
                 return;
             }
-
-
-
-
-
-            // 3️⃣ Si es otro método → seguir con el flujo simulado
-            await this.processOrder(paymentMethod);
-            this.showSuccessModal(paymentMethod);
-
-        } catch (error) {
-            console.error('\n❌ === ERROR EN confirmOrder ===');
-            console.error('Error completo:', error);
-            console.error('Error name:', error.name);
-            console.error('Error message:', error.message);
-            console.error('Error stack:', error.stack);
-            console.error('=== FIN ERROR ===\n');
-            
-            this.showError('Error al procesar el pedido: ' + error.message);
-            confirmBtn.innerHTML = originalText;
-            confirmBtn.disabled = false;
         }
+
+        // 3️⃣ Si es otro método de pago
+        console.log("💰 Procesando con método:", paymentValue);
+        await this.processOrder(paymentValue);
+        
+        // Restaurar botón
+        restoreButton();
+        
+        // Mostrar éxito
+        this.showSuccessModal(paymentValue);
+
+    } catch (error) {
+        console.error('\n❌ === ERROR EN confirmOrder ===');
+        console.error('Error completo:', error);
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('=== FIN ERROR ===\n');
+        
+        // ✅ SIEMPRE restaurar el botón en caso de error
+        restoreButton();
+        this.showError('Error al procesar el pedido: ' + error.message);
     }
+}
+
+// 🔧 Método auxiliar para verificar el estado de MercadoPago
+checkMercadoPagoStatus() {
+    console.log("🔍 === DIAGNÓSTICO MERCADOPAGO ===");
+    
+    // Verificar SDK
+    if (typeof MercadoPago === 'undefined') {
+        console.error("❌ MercadoPago SDK no cargado");
+        return false;
+    } else {
+        console.log("✅ MercadoPago SDK cargado");
+    }
+
+    // Verificar configuración
+    console.log("🔑 Public Key configurada:", window.MERCADOPAGO_PUBLIC_KEY ? "✅ Sí" : "❌ No");
+    
+    return true;
+}
+
+// 🔧 Método para inicializar MercadoPago (llamar al cargar la página)
+async initializeMercadoPago() {
+    try {
+        console.log("🚀 Inicializando MercadoPago...");
+        
+        if (typeof MercadoPago === 'undefined') {
+            console.warn("⚠️ MercadoPago SDK no disponible");
+            return false;
+        }
+
+        // Configurar con tu public key
+        if (window.MERCADOPAGO_PUBLIC_KEY) {
+            MercadoPago.setPublishableKey(window.MERCADOPAGO_PUBLIC_KEY);
+            console.log("✅ MercadoPago inicializado correctamente");
+            return true;
+        } else {
+            console.error("❌ MERCADOPAGO_PUBLIC_KEY no definida");
+            return false;
+        }
+        
+    } catch (error) {
+        console.error("❌ Error inicializando MercadoPago:", error);
+        return false;
+    }
+}
 async testConnectivity() {
     console.log("🔍 DIAGNÓSTICO DE CONECTIVIDAD");
     
@@ -634,7 +745,8 @@ function initializeMobileMenu() {
 document.addEventListener('DOMContentLoaded', async () => {
     const checkoutManager = new CheckoutManager();
     await checkoutManager.init();
-    
+    // En algún lugar de tu código
+    window.MERCADOPAGO_PUBLIC_KEY = "APP_USR-c9d6ba4f-ff10-4d26-b362-fb393755c1b7";
     // Initialize navigation components
     initializeDropdown();
     initializeMobileMenu();

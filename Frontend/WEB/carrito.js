@@ -96,7 +96,7 @@ cartItemsContainer.innerHTML = this.cart.map(item => {
 
       <td>${colorTexto}</td> <!-- Nueva columna color -->
 
-      <td><span class="price">$${item.precio.toFixed(2)}</span></td>
+      <td><span class="price">${formatPrice(item.precio)}</span></td>
       
       <td>
         ${
@@ -119,7 +119,7 @@ cartItemsContainer.innerHTML = this.cart.map(item => {
         }
       </td>
 
-      <td><span class="price">$${(item.precio * item.cantidad).toFixed(2)}</span></td>
+      <td><span class="price">${formatPrice(item.precio * item.cantidad)}</span></td>
       
       <td>
         <button class="remove-btn" onclick="cartManager.removeItem(${item.id})" title="Eliminar producto">
@@ -248,10 +248,10 @@ updateSummary() {
     const subtotal = this.cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
     const total = subtotal;
 
-    document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-    document.getElementById('shipping').textContent = '-';  // o vacío
-    document.getElementById('taxes').textContent = '-';    // o vacío
-    document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('subtotal').textContent = formatPrice(subtotal);
+    document.getElementById('shipping').textContent = '-';  
+    document.getElementById('taxes').textContent = '-';    
+    document.getElementById('total').textContent = formatPrice(total);
 }
 
 
@@ -358,6 +358,12 @@ function handleClicks(e) {
         }
     }
 
+}
+function formatPrice(price) {
+    return new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP'
+    }).format(price);
 }
 
 const categoriesDropdown = document.getElementById('categories-dropdown');
