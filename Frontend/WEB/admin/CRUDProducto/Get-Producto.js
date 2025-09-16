@@ -412,6 +412,7 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
     mostrarArchivoComprimido(producto.archivoComprimido);
   } else {
     document.getElementById('comprimido-preview').innerHTML = "";
+    if (preview) preview.innerHTML = "";
   }
 
 }
