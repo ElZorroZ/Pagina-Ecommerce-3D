@@ -164,61 +164,33 @@ function updateProductPrice(product) {
     const currentPrice = selectedFormat === 'digital' ? digitalPrice : basePrice;
     document.getElementById('product-price').textContent = formatPrice(currentPrice);
 }
-
-// Initialize format options
 function initializeFormatOptions() {
     const formatButtons = document.querySelectorAll('.format-option');
-    
+
+    // Forzar formato físico desde el inicio
+    selectedFormat = 'fisico';
+
     formatButtons.forEach(button => {
+        // Quitar listener si querés que no se pueda cambiar
+        button.classList.remove('active');
+        if (button.dataset.format === 'fisico') button.classList.add('active');
+        
         button.addEventListener('click', () => {
+            // Siempre forzar físico
+            selectedFormat = 'fisico';
+
             formatButtons.forEach(b => b.classList.remove('active'));
             button.classList.add('active');
-            selectedFormat = button.dataset.format;
-            
-            // Update price when format changes
+
+            // Actualizar precio (si aplica)
             if (currentProduct) {
                 updateProductPrice(currentProduct);
             }
-            
-            // Update color options visibility (only show for physical format)
+
+            // Mostrar siempre selector de color
             const colorSelector = document.getElementById('color-selector');
-            if (selectedFormat === 'digital') {
-                colorSelector.style.display = 'none';
-            } else {
-                colorSelector.style.display = 'block';
-            }
+            if (colorSelector) colorSelector.style.display = 'block';
         });
-    });
-}
-let selectedColorId = null; // variable global o dentro del scope
-
-function initializeColorOptions(product) {
-    const colorContainer = document.getElementById('color-options');
-    const colors = product.colores || [];
-
-    colorContainer.innerHTML = '';
-    if (colors.length === 0) return;
-
-    colors.forEach((color, index) => {
-        const colorOption = document.createElement('div');
-        colorOption.className = `color-option ${index === 0 ? 'active' : ''}`;
-        colorOption.style.backgroundColor = color.hex || '#cccccc';
-        colorOption.title = color.nombre || 'Color desconocido';
-
-        // Seleccionamos el primer color por defecto
-        if (index === 0) {
-            selectedColor = color.nombre;
-            selectedColorId = color.id; // <--- guardar el id
-        }
-
-        colorOption.addEventListener('click', () => {
-            document.querySelectorAll('.color-option').forEach(c => c.classList.remove('active'));
-            colorOption.classList.add('active');
-            selectedColor = color.nombre;
-            selectedColorId = color.id; // <--- actualizar id
-        });
-
-        colorContainer.appendChild(colorOption);
     });
 }
 
