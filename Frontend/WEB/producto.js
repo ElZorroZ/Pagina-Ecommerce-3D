@@ -164,6 +164,8 @@ function updateProductPrice(product) {
     const currentPrice = selectedFormat === 'digital' ? digitalPrice : basePrice;
     document.getElementById('product-price').textContent = formatPrice(currentPrice);
 }
+
+// Initialize format options
 function initializeFormatOptions() {
     const formatButtons = document.querySelectorAll('.format-option');
 
@@ -191,6 +193,38 @@ function initializeFormatOptions() {
             const colorSelector = document.getElementById('color-selector');
             if (colorSelector) colorSelector.style.display = 'block';
         });
+    });
+}
+
+let selectedColorId = null; // variable global o dentro del scope
+
+function initializeColorOptions(product) {
+    const colorContainer = document.getElementById('color-options');
+    const colors = product.colores || [];
+
+    colorContainer.innerHTML = '';
+    if (colors.length === 0) return;
+
+    colors.forEach((color, index) => {
+        const colorOption = document.createElement('div');
+        colorOption.className = `color-option ${index === 0 ? 'active' : ''}`;
+        colorOption.style.backgroundColor = color.hex || '#cccccc';
+        colorOption.title = color.nombre || 'Color desconocido';
+
+        // Seleccionamos el primer color por defecto
+        if (index === 0) {
+            selectedColor = color.nombre;
+            selectedColorId = color.id; // <--- guardar el id
+        }
+
+        colorOption.addEventListener('click', () => {
+            document.querySelectorAll('.color-option').forEach(c => c.classList.remove('active'));
+            colorOption.classList.add('active');
+            selectedColor = color.nombre;
+            selectedColorId = color.id; // <--- actualizar id
+        });
+
+        colorContainer.appendChild(colorOption);
     });
 }
 
