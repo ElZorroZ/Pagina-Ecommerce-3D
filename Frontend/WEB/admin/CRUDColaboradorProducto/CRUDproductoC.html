@@ -141,11 +141,16 @@
         <input type="file" id="imagenes" multiple accept="image/*" />
         <div id="preview-imagenes" style="display:flex; gap:10px; margin-top:10px;"></div>
            <!-- NUEVOS CAMPOS -->
+                 <!--  <label for="archivo-comprimido">Archivo comprimido (ZIP, RAR, 7Z, TAR, etc.):</label>
+        <input type="file" id="archivo-comprimido" accept=".zip,.rar,.7z,.tar,.gz,.bz2" />
+        <div id="comprimido-preview" style="display:flex; gap:10px; margin-top:10px;"></div>-->
+
         <label for="archivo-comprimido">Archivo comprimido (ZIP, RAR, 7Z, TAR, etc.):</label>
         <input type="file" id="archivo-comprimido" accept=".zip,.rar,.7z,.tar,.gz,.bz2" />
-        <div id="comprimido-preview" style="display:flex; gap:10px; margin-top:10px;"></div>
+        <div id="comprimido-preview" style="display:none;"></div>
+        
 
-      <label for="codigo-inicial">Código Inicial (3 letras):</label>
+      <label for="codigo-inicial">Inicial de Diseñador(3 letras):</label>
       <input type="text" 
             id="codigo-inicial" 
             pattern="[A-Za-z]{3}" 
@@ -154,7 +159,7 @@
             maxlength="3" 
             oninput="this.value = this.value.replace(/[^A-Za-z]/g,'');" />
 
-       <label for="version">Versión (4 dígitos):</label>
+       <label for="version">Revisión (4 dígitos):</label>
       <input 
         type="text" 
         id="version" 
@@ -180,7 +185,7 @@
         />
 
 
-        <label>Dimensiones (cm):</label>
+        <label>Dimensiones (mm):</label>
         <div style="display: flex; gap: 10px;">
           <input type="number" id="dimension-alto" placeholder="Alto" min="0" required />
           <input type="number" id="dimension-ancho" placeholder="Ancho" min="0" required />
@@ -190,7 +195,7 @@
         <label for="material">Material:</label>
         <input type="text" id="material" maxlength="255" required />  
 
-        <label for="peso">Peso (kg):</label>
+        <label for="peso">Peso (g):</label>
         <input type="number" id="peso" min="0" step="0.01" required />
 
         <label for="tecnica">Técnica:</label>
