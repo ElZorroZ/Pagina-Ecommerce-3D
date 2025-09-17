@@ -88,8 +88,11 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarCarga("Cargando productos..."); // Mostrar overlay
     const res = await authManager.fetchWithAuth(`${API_BASE_URL}/api/productosAprobacion/VerProductos`);
     if (!res.ok) throw new Error("Error al obtener los productos");
-    const productos = await res.json();
-    tablaBody.innerHTML = "";
+    let productos = [];
+    if (res.status !== 204) {
+      productos = await res.json();
+    }   
+     tablaBody.innerHTML = "";
 
     productos.forEach(wrapper => {
       const producto = wrapper.producto;
@@ -290,7 +293,6 @@ function renderCategories(categorias) {
     setVal("nombre", producto.nombre);
     setVal("descripcion", producto.descripcion);
     setVal("precio", producto.precio);
-    setVal("precioDigital", producto.precioDigital);
     setVal("codigo-inicial", producto.codigoInicial);
     setVal("version", producto.version);
     setVal("seguimiento", producto.seguimiento);
@@ -301,8 +303,7 @@ function renderCategories(categorias) {
     setVal("tecnica", producto.tecnica);
     setVal("peso", parseFloat(producto.peso?.toString().replace(/[^\d.]/g, "")) || "");
 
-    if (producto.archivo) mostrarArchivoComprimido(producto.archivo);
-    else document.getElementById('comprimido-preview').innerHTML = "";
+
   }
 function cargarProductoPreview(producto, colores = [], archivos = []) {
   console.log("Cargando producto:", producto, colores, archivos);
@@ -333,7 +334,6 @@ function cargarProductoPreview(producto, colores = [], archivos = []) {
   setValue("nombre", producto.nombre);
   setValue("descripcion", producto.descripcion);
   setValue("precio", producto.precio);
-  setValue("precioDigital", producto.precioDigital);
 
   // --- Imágenes ---
   const mainImage = document.getElementById("main-product-image");
@@ -393,33 +393,9 @@ function cargarProductoPreview(producto, colores = [], archivos = []) {
   }
 
   // --- Formatos ---
-  const formatButtons = document.querySelectorAll(".format-option");
-  const actualizarColores = (mostrar) => {
-    if (colorSelectorDiv) colorSelectorDiv.style.display = mostrar ? "flex" : "none";
-  };
-
-  formatButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      formatButtons.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      const precioElemento = document.getElementById("product-price");
-
-      if (btn.dataset.format === "digital" && producto.precioDigital != null) {
-        if (precioElemento) precioElemento.textContent = `$${producto.precioDigital.toFixed(2)}`;
-        if (document.getElementById("precio")) document.getElementById("precio").value = producto.precioDigital;
-        actualizarColores(false);
-      } else {
-        if (precioElemento) precioElemento.textContent = `$${(producto.precio || 0).toFixed(2)}`;
-        if (document.getElementById("precio")) document.getElementById("precio").value = producto.precio;
-        actualizarColores(true);
-      }
-    });
-  });
-
-  // --- Ajuste inicial según formato ---
-  if (producto.formato === "digital") actualizarColores(false);
-  else actualizarColores(true);
+  // --- Precio (solo físico) ---
+  const precioElemento = document.getElementById("product-price");
+  if (precioElemento) precioElemento.textContent = `$${(producto.precio || 0).toFixed(2)}`;
 }
 
  // --- Eliminar producto ---

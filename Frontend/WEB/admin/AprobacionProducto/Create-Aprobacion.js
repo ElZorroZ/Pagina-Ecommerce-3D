@@ -122,20 +122,7 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
   });
 }
 
-  const inputArchivoComprimido = document.getElementById("archivo-comprimido");
-  const previewComprimido = document.getElementById("comprimido-preview");
-
-  inputArchivoComprimido.addEventListener("change", function () {
-    const archivo = this.files[0];
-    const extensionesPermitidas = [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2"];
-    if (archivo && extensionesPermitidas.some(ext => archivo.name.endsWith(ext))) {
-      window.productoState.archivoComprimido = archivo;
-      actualizarPreviewComprimido();
-    } else {
-      alert("El archivo debe ser uno de estos: .zip,.rar,.7z,.tar,.gz,.bz2");
-      this.value = ""; // limpiar input
-    }
-  });
+  
 
  function actualizarPreviewComprimido() {
   previewComprimido.innerHTML = "";
@@ -166,7 +153,6 @@ async function aprobarProducto(id, codigoInicial, versionStr, seguimiento) {
   const nombre = document.getElementById("nombre").value.trim();
   const descripcion = document.getElementById("descripcion").value.trim();
   const precio = parseFloat(document.getElementById("precio").value);
-    const precioDigital = parseFloat(document.getElementById("precioDigital").value); // nuevo
   const codigoInicial = document.getElementById("codigo-inicial").value.trim();
   const versionInput = document.getElementById('version');
   const versionValue = versionInput.value.trim();

@@ -120,9 +120,10 @@
         <label>Precio:</label>
         <input type="number" id="precio" min="0" step="0.01" required placeholder="Ej: 1234.56" />
 
+         <!-- 
         <label>Precio Digital:</label>
-        <input type="number" id="precioDigital" min="0" step="0.01" required placeholder="Ej: 1234.56" />
-
+        <input type="number" id="precioDigital" min="0" step="0.01" required placeholder="Ej: 1234.56" /> 
+        -->
         
         <label>Colores:</label>
         <div class="color-input-container">
@@ -256,16 +257,6 @@
                                         </span>
                                         <span class="format-text">Físico</span>
                                     </button>
-                                    <button class="format-option" data-format="digital">
-                                        <span class="format-icon">
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                                <circle cx="9" cy="9" r="2"/>
-                                                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-                                            </svg>
-                                        </span>
-                                        <span class="format-text">Digital</span>
-                                    </button>
                                 </div>
                             </div>
                             
@@ -296,7 +287,7 @@
                 <h2>Detalles del Producto</h2>
                 <div class="details-grid">
                     <div class="detail-item">
-                        <h3>Dimensiones</h3>
+                        <h3>Dimensiones(mm)</h3>
                         <p id="product-dimensions">-</p>
                     </div>
                     <div class="detail-item">
@@ -304,7 +295,7 @@
                         <p id="product-material">-</p>
                     </div>
                     <div class="detail-item">
-                        <h3>Peso</h3>
+                        <h3>Peso(g)</h3>
                         <p id="product-weight">-</p>
                     </div>
                     <div class="detail-item">

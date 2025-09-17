@@ -258,8 +258,20 @@ public class ProductoColaboradorServiceImpl implements ProductoColaboradorServic
         listaCache = new ArrayList<>();
 
         for (ProductoAprobacionEntity producto : productosList) {
+            // Mapear entidad a DTO del producto
             ProductoAprobacionResponseDTO responseDTO = ProductoAprobarMapper.toDTO(producto);
             ProductoAprobacioDTO productoDTO = ProductoAprobarDTOMapper.fromResponseDTO(responseDTO);
+
+            // Setear usuarioId y nombreUsuario en el productoDTO
+            if (producto.getUsuarioId() != null) {
+                productoDTO.setUsuarioId(producto.getUsuarioId().getId());
+                productoDTO.setNombreUsuario(
+                        producto.getUsuarioId().getNombre() + " " + producto.getUsuarioId().getApellido()
+                );
+            } else {
+                productoDTO.setUsuarioId(null);
+                productoDTO.setNombreUsuario("Desconocido");
+            }
 
             // Colores
             List<ColorRequest> colores = productoColorAprobacionRepository.findByProductoId(producto.getId())
@@ -286,6 +298,7 @@ public class ProductoColaboradorServiceImpl implements ProductoColaboradorServic
 
         return listaCache;
     }
+
 
     public ProductoAprobadoConArchivoPrincipalYColoresDTO convertirAProductoConArchivoYColores(ProductoAprobacionResponseDTO responseDTO) {
         ProductoAprobacioDTO producto = new ProductoAprobacioDTO();

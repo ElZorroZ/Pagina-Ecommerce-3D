@@ -12,6 +12,8 @@ public class ProductoAprobacionResponseDTO {
     private Integer id;
     private Integer idCreador;
     private String nombre;
+    private String nombreUsuario;
+
     private String codigo;
     private String descripcion;
     private float precio;
@@ -20,7 +22,7 @@ public class ProductoAprobacionResponseDTO {
     private List<String> colores;
     private List<ProductoAprobacionArchivoDTO> archivos;
     private byte[] archivo;
-    public ProductoAprobacionResponseDTO(Integer id, Integer idCreador,String nombre, String descripcion, float precio,float precioDigital,Integer categoriaId, List<String> colores, List<ProductoAprobacionArchivoDTO> archivos, String codigo, byte[] archivo) {
+    public ProductoAprobacionResponseDTO(Integer id, Integer idCreador,String nombre, String descripcion, float precio,float precioDigital,Integer categoriaId, List<String> colores, List<ProductoAprobacionArchivoDTO> archivos, String codigo, byte[] archivo, String nombreUsuario) {
         this.id=id;
         this.nombre=nombre;
         this.descripcion=descripcion;
@@ -32,5 +34,6 @@ public class ProductoAprobacionResponseDTO {
         this.categoriaId=categoriaId;
         this.codigo=codigo;
         this.archivo=archivo;
+        this.nombreUsuario = nombreUsuario;
     }
 }

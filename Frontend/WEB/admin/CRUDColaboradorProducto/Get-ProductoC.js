@@ -378,7 +378,6 @@ function cargarProductoEnFormulario(producto, colores, archivos) {
   document.getElementById("nombre").value = producto.nombre || "";
   document.getElementById("descripcion").value = producto.descripcion || "";
   document.getElementById("precio").value = producto.precio || "";
-  document.getElementById("precioDigital").value = producto.precioDigital || "";
 
   // Nuevos campos
   document.getElementById("codigo-inicial").value = producto.codigoInicial || "";
@@ -412,7 +411,6 @@ async function actualizarProducto() {
   const nombre = document.getElementById("nombre").value.trim();
   const descripcion = document.getElementById("descripcion").value.trim();
   const precio = parseFloat(document.getElementById("precio").value);
-  const precioDigital = parseFloat(document.getElementById("precioDigital").value);
   const categoriaId = parseInt(document.getElementById("categoria").value, 10);
 
   if (!nombre || isNaN(precio) || isNaN(categoriaId)) {
@@ -432,7 +430,7 @@ async function actualizarProducto() {
 
   // Archivos nuevos tipo File
   const archivosNuevos = window.productoState.archivosSeleccionados.filter(a => a instanceof File);
-
+  const precioDigital=0;
   // DTO del producto
   const productoCompletoDTO = {
     producto: {
@@ -600,43 +598,13 @@ function cargarProductoPreview(producto, colores = [], archivos = []) {
       colorDiv.appendChild(div);
     });
   }
+  // --- Precio (solo físico) ---
+  const precioElemento = document.getElementById("product-price");
+  if (precioElemento) precioElemento.textContent = `$${(producto.precio || 0).toFixed(2)}`;
 
-  // --- Formatos ---
-  const formatButtons = document.querySelectorAll(".format-option");
-
-  const actualizarColores = (mostrar) => {
-    if (colorSelectorDiv) colorSelectorDiv.style.display = mostrar ? "flex" : "none";
-  };
-
-  formatButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      formatButtons.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      const precioElemento = document.getElementById("product-price");
-
-      if (btn.dataset.format === "digital" && producto.precioDigital != null) {
-        if (precioElemento) precioElemento.textContent = `$${producto.precioDigital.toFixed(2)}`;
-        if (document.getElementById("precio")) document.getElementById("precio").value = producto.precioDigital;
-
-        actualizarColores(false); // ocultar colores
-      } else {
-        if (precioElemento) precioElemento.textContent = `$${(producto.precio || 0).toFixed(2)}`;
-        if (document.getElementById("precio")) document.getElementById("precio").value = producto.precio;
-
-        actualizarColores(true); // mostrar colores
-      }
-    });
-  });
-
-  // --- Si el producto ya es digital al cargar ---
-  if (producto.formato === "digital") {
-    actualizarColores(false);
-  } else {
-    actualizarColores(true);
-  }
+  // --- Colores siempre visibles ---
+  if (colorSelectorDiv) colorSelectorDiv.style.display = "flex";
 }
-
 
 async function eliminarProducto(id) {
   // Usar el modal de confirmación

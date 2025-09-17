@@ -201,7 +201,7 @@ if (form) {
       }
       try {
         const productoPayload = {
-          nombre, descripcion, categoriaId, precio, precioDigital,
+          nombre, descripcion, categoriaId, precio,
           colores: window.productoState.coloresSeleccionados,
           codigoInicial, version, seguimiento,
           dimensionAlto, dimensionAncho, dimensionProfundidad,
