@@ -38,7 +38,7 @@ public class MercadoPagoServiceImpl implements MercadoPagoService {
     @Value("${mercadopago.sandbox.enabled:true}")
     private boolean sandboxEnabled;
 
-    @Value("${mercadopago.base-url:https://forma-programada.onrender.com}")
+    @Value("${mercadopago.base-url:https://formaprogramada.com.ar}")
     private String baseUrl;
 
     // Clase interna para encapsular solo lo que necesita MercadoPago

@@ -1,5 +1,5 @@
 // auth-manager.js - Gestor optimizado para tokens de 15 minutos + OAuth2
-const API_BASE_URL = "https://forma-programada.onrender.com";
+const API_BASE_URL = "https://formaprogramada.com.ar";
 //const API_BASE_URL = "http://localhost:8080";
 
 class AuthManager {

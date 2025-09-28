@@ -10,7 +10,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableJpaRepositories(basePackages = "com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository")
 @EntityScan(basePackages = "com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity")
-@SpringBootApplication
+@SpringBootApplication(
+		exclude = {
+				org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration.class,
+				org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration.class
+		}
+)
 @EnableCaching
 @EnableScheduling
 public class EcommerceBackendApplication {
