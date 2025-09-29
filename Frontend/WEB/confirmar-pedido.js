@@ -582,7 +582,7 @@ async testConnectivity() {
     console.log("🔍 DIAGNÓSTICO DE CONECTIVIDAD");
     
     // Test 1: Verificar URL base
-    const API_BASE_URL = "https://formaprogramada.com.ar";
+    const API_BASE_URL = "https://forma-programada-production.up.railway.app";
     console.log("📍 API_BASE_URL:", API_BASE_URL);
     
     // Test 2: Ping básico al servidor

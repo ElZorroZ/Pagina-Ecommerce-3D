@@ -478,7 +478,7 @@ async confirmarPedido(pedido, quantity) {
                 throw new Error("Quantity inválida: " + quantity);
             }
 
-            const API_BASE_URL = "https://formaprogramada.com.ar";
+            const API_BASE_URL = "https://forma-programada-production.up.railway.app";
             const url = `${API_BASE_URL}/api/mp/confirmarPedido?quantity=${quantity}`;
             
             console.log("📍 URL completa:", url);

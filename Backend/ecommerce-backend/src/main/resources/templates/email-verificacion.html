@@ -71,7 +71,7 @@
       }
 
       try {
-        const res = await fetch(`https://formaprogramada.com.ar/api/auth/validate?token=${token}`);
+        const res = await fetch(`https://forma-programada-production.up.railway.app/api/auth/validate?token=${token}`);
 
         if (res.ok) {
           alert('Cuenta validada correctamente. Ya podés iniciar sesión.');
