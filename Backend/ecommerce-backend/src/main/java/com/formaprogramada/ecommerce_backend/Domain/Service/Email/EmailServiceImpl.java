@@ -7,8 +7,10 @@ import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Entity.U
 import com.formaprogramada.ecommerce_backend.Infrastructure.Persistence.Repository.Usuario.JpaUsuarioRepository;
 import com.formaprogramada.ecommerce_backend.Mapper.Usuario.UsuarioMapper;
 import com.formaprogramada.ecommerce_backend.Security.SecurityConfig.JWT.JwtSpecialTokenService;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.mailjet.client.ClientOptions;
+import com.mailjet.client.MailjetClient;
+import com.mailjet.client.MailjetRequest;
+import com.mailjet.client.resource.Emailv31;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,8 +21,15 @@ import lombok.RequiredArgsConstructor;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.util.HashMap;
+import com.mailjet.client.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.util.Map;
+
+import java.util.HashMap;
+
+import com.mailjet.client.MailjetResponse;
+
 
 @Service
 @RequiredArgsConstructor
@@ -47,15 +56,35 @@ public class EmailServiceImpl implements EmailService {
         Context context = new Context();
         context.setVariables(variables);
         String contenidoHtml = templateEngine.process(plantilla, context);
+
+        String apiKey = System.getenv("MAILJET_API_KEY");
+        String apiSecret = System.getenv("MAILJET_API_SECRET");
+
+        // ✅ Sin ClientOptions, usando versión directamente
+        ClientOptions options = ClientOptions.builder()
+                .apiKey(apiKey)
+                .apiSecretKey(apiSecret)
+                .build();
+        MailjetClient client = new MailjetClient(options);
+
+        MailjetRequest request = new MailjetRequest(Emailv31.resource)
+                .property(Emailv31.MESSAGES, new JSONArray()
+                        .put(new JSONObject()
+                                .put(Emailv31.Message.FROM, new JSONObject()
+                                        .put("Email", "formaprogramada@gmail.com")
+                                        .put("Name", "Forma Programada"))
+                                .put(Emailv31.Message.TO, new JSONArray()
+                                        .put(new JSONObject()
+                                                .put("Email", destinatario)))
+                                .put(Emailv31.Message.SUBJECT, asunto)
+                                .put(Emailv31.Message.HTMLPART, contenidoHtml)));
+
         try {
-            MimeMessage mensaje = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
-            helper.setTo(destinatario);
-            helper.setSubject(asunto);
-            helper.setText(contenidoHtml, true);
-            mailSender.send(mensaje);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Error al enviar correo", e);
+            MailjetResponse response = client.post(request);
+            System.out.println("Status: " + response.getStatus());
+            System.out.println("Response: " + response.getData());
+        } catch (Exception e) {
+            throw new RuntimeException("Error al enviar correo con Mailjet API", e);
         }
     }
 
