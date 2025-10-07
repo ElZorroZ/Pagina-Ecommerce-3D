@@ -114,6 +114,7 @@ public class SecurityConfig {
                 "http://localhost:*",
                 "http://127.0.0.1:*",
                 "https://forma-programada.netlify.app",
+                "https://formaprogramada.com.ar",
                 "https://www.mercadopago.com.ar",
                 "https://www.mercadopago.com"
         ));
