@@ -91,7 +91,7 @@ public class SecurityConfig {
                 )
                 // 🔥 CONFIGURACIÓN OAUTH2 ESPECÍFICA
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/auth/login")
+                        .loginPage("/login")
                         .defaultSuccessUrl("/api/auth/oauth2/success", true)
                         .failureUrl("/login?error")
                         .permitAll()
