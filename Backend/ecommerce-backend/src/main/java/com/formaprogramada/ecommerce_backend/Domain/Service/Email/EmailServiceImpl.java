@@ -11,6 +11,7 @@ import com.mailjet.client.ClientOptions;
 import com.mailjet.client.MailjetClient;
 import com.mailjet.client.MailjetRequest;
 import com.mailjet.client.resource.Emailv31;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,6 +19,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
@@ -42,51 +44,63 @@ public class EmailServiceImpl implements EmailService {
     private final UsuarioMapper usuarioMapper;
     private final UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JpaUsuarioRepository jpaUsuarioRepository;
+        @Autowired
+        private PasswordEncoder passwordEncoder;
 
-    @Value("${app.frontend.url}")
-    private String frontendUrl; // <-- URL del frontend desde application.properties
+        @Autowired
+        private JpaUsuarioRepository jpaUsuarioRepository;
 
-    @Override
-    public void enviarEmailHtml(String destinatario, String asunto, Map<String, Object> variables, String plantilla) {
-        Context context = new Context();
-        context.setVariables(variables);
-        String contenidoHtml = templateEngine.process(plantilla, context);
+        @Value("${app.frontend.url}")
+        private String frontendUrl;
 
-        String apiKey = System.getenv("MAILJET_API_KEY");
-        String apiSecret = System.getenv("MAILJET_API_SECRET");
+        @Value("${mailjet.api.key}")
+        private String apiKey;
 
-        // ✅ Sin ClientOptions, usando versión directamente
-        ClientOptions options = ClientOptions.builder()
-                .apiKey(apiKey)
-                .apiSecretKey(apiSecret)
-                .build();
-        MailjetClient client = new MailjetClient(options);
+        @Value("${mailjet.api.secret}")
+        private String apiSecret;
 
-        MailjetRequest request = new MailjetRequest(Emailv31.resource)
-                .property(Emailv31.MESSAGES, new JSONArray()
-                        .put(new JSONObject()
-                                .put(Emailv31.Message.FROM, new JSONObject()
-                                        .put("Email", "formaprogramada@gmail.com")
-                                        .put("Name", "Forma Programada"))
-                                .put(Emailv31.Message.TO, new JSONArray()
-                                        .put(new JSONObject()
-                                                .put("Email", destinatario)))
-                                .put(Emailv31.Message.SUBJECT, asunto)
-                                .put(Emailv31.Message.HTMLPART, contenidoHtml)));
+        private MailjetClient client;
 
-        try {
-            MailjetResponse response = client.post(request);
-            System.out.println("Status: " + response.getStatus());
-            System.out.println("Response: " + response.getData());
-        } catch (Exception e) {
-            throw new RuntimeException("Error al enviar correo con Mailjet API", e);
+        @PostConstruct
+        public void initClient() {
+            ClientOptions options = ClientOptions.builder()
+                    .apiKey(apiKey)
+                    .apiSecretKey(apiSecret)
+                    .build();
+            this.client = new MailjetClient(options);
         }
-    }
+
+        @Override
+        public void enviarEmailHtml(String destinatario, String asunto, Map<String, Object> variables, String plantilla) {
+            if (destinatario == null || destinatario.isBlank()) {
+                throw new IllegalArgumentException("El destinatario no puede estar vacío.");
+            }
+
+            Context context = new Context();
+            context.setVariables(variables);
+            String contenidoHtml = templateEngine.process(plantilla, context);
+
+            MailjetRequest request = new MailjetRequest(Emailv31.resource)
+                    .property(Emailv31.MESSAGES, new JSONArray()
+                            .put(new JSONObject()
+                                    .put(Emailv31.Message.FROM, new JSONObject()
+                                            .put("Email", "formaprogramada@gmail.com")
+                                            .put("Name", "Forma Programada"))
+                                    .put(Emailv31.Message.TO, new JSONArray()
+                                            .put(new JSONObject()
+                                                    .put("Email", destinatario)))
+                                    .put(Emailv31.Message.SUBJECT, asunto)
+                                    .put(Emailv31.Message.HTMLPART, contenidoHtml)));
+
+            try {
+                MailjetResponse response = client.post(request);
+                System.out.println("✅ Correo enviado a " + destinatario + " (status " + response.getStatus() + ")");
+            } catch (Exception e) {
+                throw new RuntimeException("❌ Error al enviar correo con Mailjet API", e);
+            }
+        }
+
 
     @Override
     public void enviarEmailVerificacion(Usuario usuario) {
