@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ColaboradorServiceImpl implements ColaboradorService {
-
     private final UsuarioRepository usuarioRepository;
     private final JpaUsuarioRepository jpaUsuarioRepository;
     private final UsuarioMapper usuarioMapper;
@@ -76,24 +75,18 @@ public class ColaboradorServiceImpl implements ColaboradorService {
                 cache.put("colaboradoresList", listaCacheada);
             }
             colaboradorCacheProxyService.precargarColaboradores();
-
         }
     }
-
-
     @Cacheable(value = "colaboradores", key = "'colaboradoresList'")
     @Override
     public List<ColaboradorDTO> obtenerColaboradores() {
         List<Object[]> resultados = jpaUsuarioRepository.obtenerColaboradoresSP();
         return resultados.stream()
                 .map(r -> new ColaboradorDTO(
-                        ((Number) r[0]).intValue(), // cast seguro para id
+                        ((Number) r[0]).intValue(),
                         (String) r[1],
                         (String) r[2]
                 ))
                 .collect(Collectors.toList());
     }
-
-
-
 }

@@ -15,7 +15,7 @@ public class ColaboradorCacheProxyService {
 
     // Cargar todos los colaboradores al caché
     public void precargarColaboradores() {
-        colaboradorService.obtenerColaboradores(); // ya cachea en el método
+        colaboradorService.obtenerColaboradores();
     }
 }
 

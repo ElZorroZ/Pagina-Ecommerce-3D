@@ -38,8 +38,6 @@ import java.util.List;
 
 @Component
 public class CacheInitializer {
-
-
     private final ProductoCacheService productoCacheService;
     @Autowired
     private PedidoServiceImpl pedidoService; // inyectamos tu service de pedidos
@@ -91,11 +89,9 @@ public class CacheInitializer {
                 .map(ReviewEntity::getProductId)
                 .distinct()
                 .toList();
-
         for (Integer productId : productIds) {
             reviewService.listarReviewsConRespuestas(productId); // esto llena el cache interno
         }
-
         System.out.println("[CACHE INIT] Precargadas " + productIds.size() + " listas de reviews en cache.");
         //Colaboradores
         colaboradorCacheProxyService.precargarColaboradores();
